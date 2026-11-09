@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% block title %}
+گزارش بر اساس وضعیت
+{% endblock %}
+{% block body_class %}
+page-report-status
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/status.css') }}">
+{% endblock %}
+{% block content %}
+<div class="report-main-container">
+    <div class="report-filter">
+        <div class="report-filter-left">
+            <div class="report-filter-item">
+                <label for="yearFilter">
+                    <i class="fa-solid fa-calendar"></i>
+                    سال دریافت
+                </label>
+                <select id="yearFilter">
+                    <option value="all" {% if selected_year|string=="all" %}selected{% endif %}>همه سال‌ها</option>
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year|string==year|string %}selected{% endif %}
+                        data-year="{{ year }}"></option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" id="clearFilters" class="btn-clear-top">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+                پاک کردن فیلترها
+            </button>
+        </div>
+    </div>
+    <div class="report-summary">
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">کل اسناد</span>
+                <strong>{{ total }}</strong>
+            </div>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-chart-pie"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">تعداد وضعیت‌ها</span>
+                <strong>{{ statuses|length }}</strong>
+            </div>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">سال انتخاب‌شده</span>
+                <strong id="selectedYearLabel">{% if selected_year=="all" %}همه{% else %}{{ selected_year }}{% endif
+                    %}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="status-report-layout">
+        <div class="status-report-cards">
+            {% for status in statuses %}
+            <a href="{{ url_for('reports.status_documents',status_code=status.code,year=selected_year) }}"
+                class="status-card" data-status="{{ status.code }}"
+                style="--status-color:{{ status.color }};text-decoration:none;color:inherit;">
+                <span class="bubble"></span>
+                <span class="bubble"></span>
+                <span class="bubble"></span>
+                <div class="status-card-icon">
+                    {% if status.code=="completed" %}
+                    <i class="fa-solid fa-circle-check"></i>
+                    {% elif status.code=="in_progress" %}
+                    <i class="fa-solid fa-spinner"></i>
+                    {% elif status.code=="informational" %}
+                    <i class="fa-solid fa-circle-info"></i>
+                    {% elif status.code=="stopped" %}
+                    <i class="fa-solid fa-circle-pause"></i>
+                    {% elif status.code=="deleted" %}
+                    <i class="fa-solid fa-trash"></i>
+                    {% else %}
+                    <i class="fa-solid fa-file-circle-question"></i>
+                    {% endif %}
+                </div>
+                <div class="status-card-content">
+                    <span class="status-card-number">{{ status.count }}</span>
+                    <span class="status-card-title">{{ status.title }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="report-chart-card">
+            <div class="report-chart-header">
+                <div class="report-chart-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    توزیع اسناد بر اساس وضعیت
+                </div>
+                <span class="chart-update">
+                    <i class="fa-regular fa-clock"></i>
+                    لحظه‌ای
+                </span>
+            </div>
+            <div class="report-chart">
+                <canvas id="statusReportChart"></canvas>
+                <div class="chart-percentage-label" id="chartCenterLabel">
+                    <div class="total-count" id="totalChartCount">0</div>
+                    <div class="total-label">مجموع اسناد</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    let statusChart = null;
+    let statusChartResizeObserver = null;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearFiltersBtn = document.getElementById("clearFilters");
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener("click", function () {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("year");
+                window.location.href = url.pathname;
+            });
+        }
+        const yearFilter = document.getElementById("yearFilter");
+        if (yearFilter) {
+            Array.from(yearFilter.options).forEach(function (option) {
+                if (option.dataset.year) {
+                    option.textContent = toPersianDigits(option.dataset.year);
+                }
+            });
+            yearFilter.addEventListener("change", function () {
+                const url = new URL(window.location.href);
+                url.searchParams.set("year", this.value);
+                window.location.href = url.toString();
+            });
+        }
+        initializeChart();
+    });
+
+    function toPersianDigits(value) {
+        const english = "0123456789";
+        const persian = "۰۱۲۳۴۵۶۷۸۹";
+        return String(value).replace(/[0-9]/g, function (digit) {
+            return persian[english.indexOf(digit)];
+        });
+    }
+
+    const selectedYearLabel = document.getElementById("selectedYearLabel");
+    if (selectedYearLabel) {
+        selectedYearLabel.textContent = toPersianDigits(selectedYearLabel.textContent);
+    }
+
+    function getViewMode() {
+        const w = window.innerWidth;
+        if (w <= 380) return "xxs";
+        if (w <= 576) return "xs";
+        if (w <= 768) return "sm";
+        if (w <= 992) return "md";
+        if (w <= 1200) return "lg";
+        return "xl";
+    }
+
+    function getDatalabelThreshold() {
+        const w = window.innerWidth;
+        if (w <= 380) return 12;
+        if (w <= 576) return 9;
+        if (w <= 768) return 7;
+        return 5;
+    }
+
+    function createGradient(ctx, chartArea, colorStart, colorEnd) {
+        if (!chartArea) return colorStart;
+        const gradient = ctx.createLinearGradient(
+            chartArea.left, chartArea.top,
+            chartArea.right, chartArea.bottom
+        );
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        return gradient;
+    }
+
+    function lightenColor(hex, amount = 0.28) {
+        if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
+            return hex || "#3D8499";
+        }
+        let c = hex.substring(1);
+        if (c.length === 3) {
+            c = c.split("").map(x => x + x).join("");
+        }
+        const num = parseInt(c, 16);
+        let r = (num >> 16) & 255;
+        let g = (num >> 8) & 255;
+        let b = num & 255;
+
+        r = Math.min(255, Math.round(r + (255 - r) * amount));
+        g = Math.min(255, Math.round(g + (255 - g) * amount));
+        b = Math.min(255, Math.round(b + (255 - b) * amount));
+
+        return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+    }
+
+    function initializeChart() {
+        const canvas = document.getElementById("statusReportChart");
+        const statusData = {{statuses | tojson
+    }};
+
+    if (!canvas || !statusData || statusData.length === 0) {
+        return;
+    }
+
+    const total = statusData.reduce((sum, item) => sum + Number(item.count || 0), 0);
+    const labels = statusData.map(item => item.title || "بدون عنوان");
+    const data = statusData.map(item => Number(item.count || 0));
+
+    const baseColors = statusData.map(item => item.color || "#3D8499");
+    const lightColors = baseColors.map(c => lightenColor(c, 0.28));
+
+    const percentages = statusData.map(item =>
+        total > 0 ? Math.round((Number(item.count || 0) / total) * 100) : 0
+    );
+
+    const totalCountEl = document.getElementById("totalChartCount");
+    if (totalCountEl) {
+        totalCountEl.textContent = total.toLocaleString("fa-IR");
+    }
+
+    if (typeof ChartDataLabels !== "undefined") {
+        Chart.register(ChartDataLabels);
+    }
+
+    statusChart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    const index = context.dataIndex;
+                    return createGradient(
+                        ctx, chartArea,
+                        baseColors[index],
+                        lightColors[index]
+                    );
+                },
+                borderColor: "#ffffff",
+                borderWidth: 2,
+                borderRadius: 6,
+                hoverOffset: 10,
+                hoverBorderWidth: 3,
+                hoverBorderColor: "#ffffff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "65%",
+            layout: {
+                padding: 8
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    rtl: true,
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 14,
+                        color: "#2d3436",
+                        font: {
+                            family: "Vazirmatn",
+                            size: 12,
+                            weight: "600"
+                        },
+                        generateLabels: function (chart) {
+                            const chartData = chart.data;
+                            return chartData.labels.map((label, index) => {
+                                const value = chartData.datasets[0].data[index];
+                                const percent = percentages[index];
+                                const color = baseColors[index];
+                                return {
+                                    text: `${label}  •  ${value} (${percent}%)`,
+                                    fillStyle: color,
+                                    strokeStyle: color,
+                                    lineWidth: 0,
+                                    pointStyle: "circle",
+                                    index: index
+                                };
+                            });
+                        }
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: "rgba(45, 52, 54, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    titleFont: {
+                        family: "Vazirmatn",
+                        size: 13,
+                        weight: "700"
+                    },
+                    bodyFont: {
+                        family: "Vazirmatn",
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxPadding: 6,
+                    callbacks: {
+                        label: function (context) {
+                            const value = Number(context.raw || 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `  ${value} سند  (${percentage}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: "#ffffff",
+                    font: {
+                        weight: "700",
+                        size: 13,
+                        family: "Vazirmatn"
+                    },
+                    textStrokeColor: "rgba(0, 0, 0, 0.35)",
+                    textStrokeWidth: 3,
+                    textShadowBlur: 4,
+                    textShadowColor: "rgba(0, 0, 0, 0.35)",
+                    formatter: function (value, context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold ? `${percentage}%` : "";
+                    },
+                    anchor: "center",
+                    align: "center",
+                    offset: 0,
+                    display: function (context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold;
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1200,
+                easing: "easeOutQuart"
+            }
+        },
+        plugins: typeof ChartDataLabels !== "undefined" ? [ChartDataLabels] : []
+    });
+
+    setupChartResizeObserver();
+    }
+
+    function setupChartResizeObserver() {
+        const container = document.querySelector(".page-report-status .report-chart");
+        if (!container || !statusChart) return;
+
+        if (statusChartResizeObserver) {
+            statusChartResizeObserver.disconnect();
+        }
+
+        let lastMode = getViewMode();
+
+        statusChartResizeObserver = new ResizeObserver(function () {
+            const currentMode = getViewMode();
+            if (currentMode !== lastMode) {
+                lastMode = currentMode;
+                updateChartOptionsForMode(currentMode);
+            }
+        });
+
+        statusChartResizeObserver.observe(container);
+    }
+
+    function updateChartOptionsForMode(mode) {
+        if (!statusChart) return;
+
+        const isSmall = mode === "xs" || mode === "xxs";
+
+        const legendLabels = statusChart.options.plugins.legend.labels;
+        legendLabels.font.size = isSmall ? 10 : 12;
+        legendLabels.padding = isSmall ? 8 : 14;
+        legendLabels.boxWidth = isSmall ? 8 : 10;
+        legendLabels.boxHeight = isSmall ? 8 : 10;
+
+        const dataset = statusChart.data.datasets[0];
+        dataset.borderWidth = 2;
+        dataset.borderRadius = isSmall ? 4 : 6;
+        dataset.hoverOffset = isSmall ? 6 : 10;
+        dataset.hoverBorderWidth = isSmall ? 2 : 3;
+
+        statusChart.options.cutout = isSmall ? "67%" : "65%";
+        statusChart.options.layout.padding = isSmall ? 4 : 8;
+
+        statusChart.options.plugins.datalabels.font.size = isSmall ? 11 : 13;
+        statusChart.options.plugins.datalabels.textStrokeWidth = isSmall ? 2 : 3;
+
+        statusChart.update("none");
+    }
+</script>
+{% endblock %}

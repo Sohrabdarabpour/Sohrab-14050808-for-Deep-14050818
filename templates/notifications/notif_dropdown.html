@@ -1,0 +1,406 @@
+{#
+    پنل نوتیفیکیشن + Backdrop
+    - دسکتاپ: Dropdown دقیقاً کنار دکمه زنگ
+    - موبایل: Modal وسط صفحه
+    - فقط نوتیف‌های نخوانده نمایش داده می‌شوند
+    - هر نوتیف: دکمه «خواندم» + دکمه «حذف»
+#}
+
+<!-- ★★★ Backdrop (فقط موبایل) ★★★ -->
+<div class="nfd-backdrop" id="notifBackdrop" onclick="closeNotifDropdown()"></div>
+
+<!-- ★★★ پنل نوتیفیکیشن ★★★ -->
+<div class="nfd-panel" id="notifPanel">
+    <div class="nfd-head">
+        <span>
+            <i class="fas fa-bell"></i>
+            نوتیفیکیشن‌ها
+            <span class="nfd-head-count" id="notifHeadCount"></span>
+        </span>
+        <button type="button" class="nfd-close" onclick="closeNotifDropdown()" aria-label="بستن">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>
+
+    <div class="nfd-list" id="notifList">
+        <div class="nfd-empty">در حال بارگذاری...</div>
+    </div>
+
+    <a href="{{ url_for('notifications.list_notifications') }}"
+       class="nfd-footer">
+        مشاهده همه نوتیفیکیشن‌ها
+        <i class="fas fa-arrow-left"></i>
+    </a>
+</div>
+
+
+<script>
+    (function () {
+        'use strict';
+
+        let isLoading = false;
+        let isOpen = false;
+
+        // ============================================================
+        // ★★★ تنظیم موقعیت پنل در دسکتاپ — دقیقاً کنار زنگوله
+        // ============================================================
+        function adjustPanelPositionDesktop() {
+            const panel = document.getElementById('notifPanel');
+            const bell = document.querySelector('.nfd-bell');
+
+            if (!panel || !bell) return;
+            if (window.innerWidth <= 768) return;
+
+            const bellRect = bell.getBoundingClientRect();
+            const panelWidth = 440;
+            const viewportWidth = window.innerWidth;
+            const padding = 12;
+
+            let right = viewportWidth - bellRect.right;
+
+            if (right + panelWidth > viewportWidth - padding) {
+                right = viewportWidth - panelWidth - padding;
+            }
+
+            if (right < padding) {
+                right = padding;
+            }
+
+            panel.style.top = (bellRect.bottom + 10) + 'px';
+            panel.style.right = right + 'px';
+            panel.style.left = 'auto';
+            panel.style.transform = 'none';
+        }
+
+        // ============================================================
+        // ★ باز/بسته کردن
+        // ============================================================
+        window.toggleNotifDropdown = function () {
+            const panel = document.getElementById('notifPanel');
+            const backdrop = document.getElementById('notifBackdrop');
+            if (!panel) return;
+
+            isOpen = !isOpen;
+
+            if (isOpen) {
+                panel.classList.add('show');
+                backdrop.classList.add('show');
+                document.body.style.overflow = 'hidden';
+
+                if (window.innerWidth > 768) {
+                    requestAnimationFrame(function () {
+                        adjustPanelPositionDesktop();
+                    });
+                }
+
+                // ★ هر بار باز شدن، دوباره از سرور لود کن
+                loadNotifications();
+            } else {
+                closeNotifDropdown();
+            }
+        };
+
+        window.closeNotifDropdown = function () {
+            const panel = document.getElementById('notifPanel');
+            const backdrop = document.getElementById('notifBackdrop');
+            if (!panel) return;
+
+            panel.classList.remove('show');
+            backdrop.classList.remove('show');
+            document.body.style.overflow = '';
+            isOpen = false;
+        };
+
+        // ============================================================
+        // ★★★ تشخیص لینک درست برای نوتیف ★★★
+        // ★ هرگز به assistant نرو
+        // ============================================================
+        function resolveNotifLink(n) {
+            if (n.link && !n.link.includes('/assistant')) {
+                return n.link;
+            }
+            if (n.note_id) {
+                return '/workflow/note/' + n.note_id;
+            }
+            if (n.document_id) {
+                return '/documents/view/' + n.document_id;
+            }
+            return '/notifications/';
+        }
+
+        // ============================================================
+        // ★★★ Escape کردن HTML برای جلوگیری از XSS ★★★
+        // ============================================================
+        function esc(str) {
+            if (str === null || str === undefined) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ============================================================
+        // ★ بارگذاری نوتیف‌ها (فقط نخوانده‌ها)
+        // ============================================================
+        async function loadNotifications() {
+            isLoading = true;
+            const list = document.getElementById('notifList');
+            if (!list) return;
+
+            try {
+                const res = await fetch('{{ url_for("notifications.dropdown") }}');
+                const data = await res.json();
+
+                updateBadge(data.unread_count);
+                updateHeadCount(data.unread_count);
+
+                if (!data.notifications || data.notifications.length === 0) {
+                    list.innerHTML =
+                        '<div class="nfd-empty">' +
+                        '<i class="fas fa-bell-slash"></i>' +
+                        'همه نوتیف‌ها را خوانده‌اید' +
+                        '</div>';
+                    return;
+                }
+
+                list.innerHTML = data.notifications.map(function (n) {
+                    const colors = {
+                        'info':    '#1b698b',
+                        'success': '#16a34a',
+                        'warning': '#f59e0b',
+                        'danger':  '#dc2626',
+                    };
+                    const icons = {
+                        'info':    'fa-circle-info',
+                        'success': 'fa-circle-check',
+                        'warning': 'fa-triangle-exclamation',
+                        'danger':  'fa-circle-xmark',
+                    };
+                    const color = colors[n.notification_type] || '#1b698b';
+                    const icon = icons[n.notification_type] || 'fa-bell';
+                    const link = resolveNotifLink(n);
+
+                    return `
+                        <div class="nfd-item unread"
+                             data-id="${n.id}"
+                             style="--ic: ${color};">
+                            <a href="${link}"
+                               class="nfd-item-link"
+                               data-action="open"
+                               data-id="${n.id}">
+                                <div class="nfd-item-icon">
+                                    <i class="fas ${icon}"></i>
+                                </div>
+                                <div class="nfd-item-body">
+                                    <div class="nfd-item-title">${esc(n.title)}</div>
+                                    ${n.message ? `<div class="nfd-item-msg">${esc(n.message)}</div>` : ''}
+                                    <div class="nfd-item-time">
+                                        <i class="far fa-clock"></i>
+                                        ${esc(n.created_at_jalali)}
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="nfd-item-actions">
+                                <button type="button"
+                                        class="nfd-act-btn read"
+                                        title="خواندم"
+                                        data-action="read"
+                                        data-id="${n.id}">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button type="button"
+                                        class="nfd-act-btn dismiss"
+                                        title="حذف"
+                                        data-action="dismiss"
+                                        data-id="${n.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Notif fetch error:', err);
+                list.innerHTML = '<div class="nfd-empty">خطا در دریافت</div>';
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // ============================================================
+        // ★★★ Event Delegation — هندل کلیک روی دکمه‌ها
+        // ============================================================
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+
+            const list = document.getElementById('notifList');
+            if (!list || !list.contains(btn)) return;
+
+            const action = btn.getAttribute('data-action');
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+
+            // ★ باز کردن لینک — فقط علامت خوانده بزن و اجازه بده بره
+            if (action === 'open') {
+                try {
+                    fetch('/notifications/' + id + '/read', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                } catch (err) {}
+                return;
+            }
+
+            if (action !== 'read' && action !== 'dismiss') return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (btn.classList.contains('loading')) return;
+            btn.classList.add('loading');
+
+            try {
+                const endpoint = '/notifications/' + id + '/' + action;
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const item = document.querySelector(
+                        '.nfd-item[data-id="' + id + '"]'
+                    );
+                    if (item) {
+                        item.classList.add('removing');
+                        setTimeout(function () {
+                            item.remove();
+
+                            const remaining = list.querySelectorAll('.nfd-item');
+                            if (remaining.length === 0) {
+                                list.innerHTML =
+                                    '<div class="nfd-empty">' +
+                                    '<i class="fas fa-bell-slash"></i>' +
+                                    'همه نوتیف‌ها را خوانده‌اید' +
+                                    '</div>';
+                            }
+                        }, 300);
+                    }
+
+                    // ★ badge و head-count رو کم کن
+                    const badge = document.getElementById('notifBadge');
+                    const headCount = document.getElementById('notifHeadCount');
+
+                    const currentBadge = parseInt(
+                        (badge && badge.textContent) || '0', 10
+                    ) || 0;
+                    const newCount = Math.max(0, currentBadge - 1);
+
+                    updateBadge(newCount);
+                    updateHeadCount(newCount);
+                }
+            } catch (err) {
+                console.error('Notif action error:', err);
+            } finally {
+                btn.classList.remove('loading');
+            }
+        });
+
+        // ============================================================
+        // ★ به‌روزرسانی badge و head-count
+        // ============================================================
+        function updateBadge(count) {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateHeadCount(count) {
+            const headCount = document.getElementById('notifHeadCount');
+            if (!headCount) return;
+
+            if (count > 0) {
+                headCount.textContent = count > 99 ? '99+' : count;
+            } else {
+                headCount.textContent = '';
+            }
+        }
+
+        // ============================================================
+        // ★ بستن با Escape
+        // ============================================================
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeNotifDropdown();
+            }
+        });
+
+        // ============================================================
+        // ★ بستن با کلیک بیرون (فقط دسکتاپ)
+        // ============================================================
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth <= 768) return;
+            if (!isOpen) return;
+
+            const panel = document.getElementById('notifPanel');
+            const wrapper = document.getElementById('notifDropdown');
+
+            if (!panel || !wrapper) return;
+            if (wrapper.contains(e.target)) return;
+            if (panel.contains(e.target)) return;
+
+            closeNotifDropdown();
+        });
+
+        // ============================================================
+        // ★ resize — بازمحاسبه موقعیت
+        // ============================================================
+        let resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                if (isOpen && window.innerWidth > 768) {
+                    adjustPanelPositionDesktop();
+                }
+            }, 100);
+        });
+
+        // ============================================================
+        // ★ بارگذاری اولیه badge
+        // ============================================================
+        fetch('{{ url_for("notifications.unread_count") }}')
+            .then(r => r.json())
+            .then(d => {
+                updateBadge(d.count);
+                updateHeadCount(d.count);
+            })
+            .catch(() => {});
+
+        setInterval(function () {
+            fetch('{{ url_for("notifications.unread_count") }}')
+                .then(r => r.json())
+                .then(d => {
+                    updateBadge(d.count);
+                    updateHeadCount(d.count);
+                })
+                .catch(() => {});
+        }, 60000);
+
+    })();
+</script>

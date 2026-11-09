@@ -1,0 +1,258 @@
+/* استایل صفحه: workflow/_note_modal.html */
+
+    .nm-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+        direction: rtl;
+    }
+
+    .nm-modal.show {
+        display: flex;
+    }
+
+    .nm-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(15, 23, 42, .55);
+        backdrop-filter: blur(4px);
+    }
+
+    .nm-box {
+        position: relative;
+        background: #fff;
+        border-radius: 18px;
+        width: 100%;
+        max-width: 540px;
+        max-height: 90vh;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: nmIn .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    @keyframes nmIn {
+        from { opacity: 0; transform: translateY(20px) scale(.97); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .nm-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px 22px;
+        background: linear-gradient(135deg, #f0f7fa, #eaf5f0);
+        border-bottom: 1.5px solid #e2e8f0;
+        position: relative;
+    }
+
+    .nm-header-icon {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1b698b, #167a5c);
+        color: #fff;
+        font-size: 1.2rem;
+        box-shadow: 0 6px 16px rgba(27, 105, 139, .28);
+    }
+
+    .nm-header-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .nm-header-text h3 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .nm-header-text p {
+        margin: 4px 0 0;
+        font-size: .78rem;
+        color: #64748b;
+    }
+
+    .nm-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        border: none;
+        background: rgba(0, 0, 0, 0.05);
+        color: #64748b;
+        cursor: pointer;
+        font-size: .9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+        flex-shrink: 0;
+    }
+
+    .nm-close:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .nm-body {
+        padding: 20px 22px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .nm-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .82rem;
+        font-weight: 700;
+        color: #475569;
+        margin-bottom: 10px;
+    }
+
+    .nm-label i {
+        color: #1b698b;
+        font-size: .8rem;
+    }
+
+    .nm-required {
+        color: #dc2626;
+        font-weight: 800;
+    }
+
+    .nm-textarea {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: .9rem;
+        line-height: 1.7;
+        resize: vertical;
+        outline: none;
+        box-sizing: border-box;
+        min-height: 140px;
+        background: #f8fafc;
+        transition: all .2s;
+    }
+
+    .nm-textarea:focus {
+        background: #fff;
+        border-color: #1b698b;
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .12);
+    }
+
+    .nm-info {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 10px 14px;
+        background: #f0f9ff;
+        border: 1px solid #bae6fd;
+        border-radius: 10px;
+        font-size: .76rem;
+        color: #0369a1;
+        line-height: 1.6;
+    }
+
+    .nm-info i {
+        color: #0284c7;
+        margin-top: 2px;
+        flex-shrink: 0;
+        font-size: .8rem;
+    }
+
+    .nm-footer {
+        display: flex;
+        gap: 10px;
+        padding: 16px 22px;
+        border-top: 1.5px solid #e2e8f0;
+        background: #f8fafc;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
+    .nm-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 22px;
+        border-radius: 11px;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .25s;
+        border: none;
+        white-space: nowrap;
+    }
+
+    .nm-btn:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+
+    .nm-btn-cancel {
+        background: #fff;
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+    }
+
+    .nm-btn-cancel:hover {
+        color: #1b698b;
+        border-color: #1b698b;
+    }
+
+    .nm-btn-submit {
+        background: linear-gradient(135deg, #1b698b, #14506a);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .35);
+    }
+
+    .nm-btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .45);
+    }
+
+    @media (max-width: 600px) {
+        .nm-header {
+            padding: 16px 18px;
+            gap: 12px;
+        }
+
+        .nm-header-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            font-size: 1rem;
+        }
+
+        .nm-header-text h3 { font-size: .92rem; }
+        .nm-header-text p { font-size: .72rem; }
+
+        .nm-body { padding: 16px 18px; }
+
+        .nm-footer {
+            padding: 14px 18px;
+            gap: 8px;
+        }
+
+        .nm-btn {
+            flex: 1;
+            padding: 11px 16px;
+            font-size: .8rem;
+        }
+    }

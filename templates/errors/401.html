@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}احراز هویت نشده{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/errors/401.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="ep-card">
+        <div class="ep-icon">
+            <i class="fa-solid fa-user-lock"></i>
+        </div>
+
+        <div class="ep-code">401</div>
+
+        <h1 class="ep-title">احراز هویت نشده</h1>
+
+        <p class="ep-text">
+            برای دسترسی به این بخش باید وارد حساب کاربری خود شوید.<br>
+            لطفاً وارد شوید و دوباره تلاش کنید.
+        </p>
+
+        <div class="ep-actions">
+            <a href="{{ url_for('auth.login') }}" class="ep-btn ep-btn-primary">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>ورود به سیستم</span>
+            </a>
+            <a href="{{ url_for('main.index') }}" class="ep-btn ep-btn-secondary">
+                <i class="fa-solid fa-house"></i>
+                <span>صفحه اصلی</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

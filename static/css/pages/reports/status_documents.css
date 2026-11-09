@@ -1,0 +1,736 @@
+/* استایل صفحه: reports/status_documents.html */
+
+    .page-report-status-documents {
+        --page-primary: #1b698b;
+        --page-primary-light: #167a5c;
+        --page-primary-dark: #14506a;
+        --page-bg: #f0f4f8;
+        --card-shadow: 0 8px 30px rgba(65, 151, 201, .20);
+        --radius-lg: 20px;
+        --radius-md: 14px;
+        --radius-sm: 10px;
+        --transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-report-status-documents .status-documents-container {
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--card-shadow);
+        padding: clamp(12px, 2.2vw, 28px);
+        margin-bottom: 28px;
+        overflow: hidden;
+    }
+
+    /* ===== هدر صفحه ===== */
+    .page-report-status-documents .page-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 22px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid #f0f2f5;
+        flex-wrap: wrap;
+    }
+
+    .page-report-status-documents .page-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: clamp(1rem, 1.5vw, 1.2rem);
+        font-weight: 800;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    .page-report-status-documents .page-title i {
+        color: #fff;
+        background: linear-gradient(135deg,
+                var(--status-color, var(--page-primary)) 0%,
+                color-mix(in srgb, var(--status-color, var(--page-primary)) 65%, #000) 100%);
+        width: clamp(34px, 3.4vw, 44px);
+        height: clamp(34px, 3.4vw, 44px);
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: clamp(.9rem, 1.2vw, 1.1rem);
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--status-color, var(--page-primary)) 35%, transparent);
+    }
+
+    .page-report-status-documents .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        border: 1px solid #dfe6e9;
+        border-radius: 30px;
+        background: #f8fafc;
+        color: #636e72;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 500;
+        transition: all var(--transition);
+        white-space: nowrap;
+    }
+
+    .page-report-status-documents .back-button:hover {
+        border-color: var(--page-primary);
+        color: var(--page-primary);
+        background: #fff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .15);
+    }
+
+    /* ===== فیلترها ===== */
+    .page-report-status-documents .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+    .page-report-status-documents .filter-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .page-report-status-documents .filter-item label {
+        font-size: .85rem;
+        font-weight: 600;
+        color: #2d3436;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-report-status-documents .filter-item label i {
+        color: var(--page-primary);
+    }
+
+    .page-report-status-documents .filter-item select {
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
+        border: 1px solid #dfe6e9;
+        background: #f8f9fa;
+        font-family: "Vazirmatn", sans-serif;
+        font-size: .85rem;
+        color: #2d3436;
+        min-width: 160px;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+
+    .page-report-status-documents .filter-item select:hover,
+    .page-report-status-documents .filter-item select:focus {
+        border-color: var(--page-primary);
+        box-shadow: 0 0 0 3px rgba(27, 105, 139, .12);
+        outline: none;
+    }
+
+    .page-report-status-documents .clear-filter {
+        padding: 8px 18px;
+        border: 1px solid #dfe6e9;
+        border-radius: 30px;
+        background: transparent;
+        color: #636e72;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .page-report-status-documents .clear-filter:hover {
+        border-color: #e17055;
+        color: #e17055;
+        background: rgba(225, 112, 85, .06);
+        transform: translateY(-1px);
+    }
+
+    /* ===== جستجو ===== */
+    .page-report-status-documents .search-wrapper {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 2px solid #eef1f5;
+        border-radius: var(--radius-lg);
+        padding: 4px 18px;
+        margin-bottom: 24px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, .05);
+        transition: all var(--transition);
+    }
+
+    .page-report-status-documents .search-wrapper:focus-within {
+        border-color: var(--page-primary);
+        box-shadow: 0 8px 28px rgba(27, 105, 139, .12);
+    }
+
+    .page-report-status-documents .search-icon {
+        color: #94a3b8;
+        margin-left: 10px;
+        font-size: 15px;
+    }
+
+    .page-report-status-documents .search-wrapper input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 14px 0;
+        font-family: inherit;
+        font-size: 15px;
+        color: #1e293b;
+    }
+
+    .page-report-status-documents .search-wrapper input::placeholder {
+        color: #94a3b8;
+    }
+
+    .page-report-status-documents .search-clear {
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+        transition: all var(--transition);
+        font-size: 18px;
+    }
+
+    .page-report-status-documents .search-clear.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .page-report-status-documents .search-clear:hover {
+        background: #f1f5f9;
+        color: #ef4444;
+    }
+
+    /* ===== نتایج ===== */
+    .page-report-status-documents .results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-status-documents .results-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: clamp(.95rem, 1.2vw, 1.15rem);
+        font-weight: 700;
+        color: #2d3436;
+        margin: 0;
+    }
+
+    .page-report-status-documents .results-title i {
+        color: #fff;
+        background: linear-gradient(135deg,
+                var(--status-color, var(--page-primary)) 0%,
+                color-mix(in srgb, var(--status-color, var(--page-primary)) 65%, #000) 100%);
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .85rem;
+        box-shadow: 0 4px 10px color-mix(in srgb, var(--status-color, var(--page-primary)) 30%, transparent);
+    }
+
+    .page-report-status-documents .results-count {
+        font-size: .8rem;
+        font-weight: 600;
+        color: #fff;
+        background: linear-gradient(135deg,
+                var(--status-color, var(--page-primary)) 0%,
+                color-mix(in srgb, var(--status-color, var(--page-primary)) 70%, #000) 100%);
+        padding: 6px 16px;
+        border-radius: 20px;
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--status-color, var(--page-primary)) 30%, transparent);
+    }
+
+    /* ===== کارت‌های اسناد: تک‌ستونه ===== */
+    .page-report-status-documents .document-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .page-report-status-documents .document-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        padding: clamp(16px, 1.8vw, 24px);
+        box-shadow: 0 4px 20px rgba(65, 151, 201, .08);
+        border-right: 5px solid var(--status-color, #3D8499);
+        transition: all .35s cubic-bezier(.25, .46, .45, .94);
+        position: relative;
+        overflow: hidden;
+        min-width: 0;
+    }
+
+    .page-report-status-documents .document-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at top right, var(--status-color, #3D8499), transparent 70%);
+        opacity: .04;
+        pointer-events: none;
+    }
+
+    .page-report-status-documents .document-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, .12);
+        background: #fff;
+    }
+
+    .page-report-status-documents .doc-header {
+        padding-bottom: 14px;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-status-documents .doc-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-report-status-documents .doc-subject {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        font-size: clamp(.85rem, 1.05vw, 1.05rem);
+        color: #d13375;
+        line-height: 1.5;
+        flex-wrap: wrap;
+    }
+
+    .page-report-status-documents .doc-subject i {
+        color: #fff;
+        font-size: .8rem;
+        background: linear-gradient(135deg,
+                var(--status-color, #3D8499) 0%,
+                color-mix(in srgb, var(--status-color, #3D8499) 65%, #000) 100%);
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px color-mix(in srgb, var(--status-color, #3D8499) 30%, transparent);
+        flex-shrink: 0;
+    }
+
+    .page-report-status-documents .doc-project {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f4f6 100%);
+        border-radius: 10px;
+        border: 1px solid #edf1f3;
+        border-right: 3px solid var(--status-color, var(--page-primary));
+    }
+
+    .page-report-status-documents .doc-project>i {
+        color: var(--status-color, var(--page-primary));
+        margin-top: 3px;
+    }
+
+    .page-report-status-documents .doc-project-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .page-report-status-documents .doc-project-label {
+        font-size: .67rem;
+        font-weight: 600;
+        color: #9aa5aa;
+    }
+
+    .page-report-status-documents .doc-project-name {
+        font-size: clamp(.78rem, .92vw, .9rem);
+        font-weight: 700;
+        color: #34434b;
+        line-height: 1.5;
+        word-break: break-word;
+    }
+
+    .page-report-status-documents .doc-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 14px;
+        font-size: clamp(.68rem, .85vw, .78rem);
+        color: #636e72;
+    }
+
+    .page-report-status-documents .doc-meta span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        background: rgba(0, 0, 0, .025);
+        border-radius: 20px;
+        font-weight: 500;
+    }
+
+    .page-report-status-documents .doc-meta i {
+        color: var(--status-color, var(--page-primary));
+        font-size: .72rem;
+    }
+
+    .page-report-status-documents .doc-status-badge {
+        font-size: clamp(.68rem, .82vw, .78rem);
+        font-weight: 700;
+        padding: 6px 18px;
+        border-radius: 20px;
+        background: linear-gradient(135deg,
+                var(--status-color, #3D8499) 0%,
+                color-mix(in srgb, var(--status-color, #3D8499) 70%, #000) 100%);
+        color: #fff;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-width: 80px;
+        justify-content: center;
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--status-color, #3D8499) 40%, transparent);
+    }
+
+    .page-report-status-documents .doc-status-badge i {
+        font-size: .5rem;
+    }
+
+    .page-report-status-documents .doc-body {
+        padding-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .page-report-status-documents .doc-body-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 6px 24px;
+    }
+
+    .page-report-status-documents .doc-field {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+        padding: 8px 0;
+        font-size: clamp(.72rem, .88vw, .85rem);
+        border-bottom: 1px dashed #f0f2f5;
+        min-width: 0;
+    }
+
+    .page-report-status-documents .field-label {
+        color: #636e72;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .page-report-status-documents .field-label i {
+        color: var(--status-color, var(--page-primary));
+        font-size: .82rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .page-report-status-documents .field-value {
+        color: #2d3436;
+        font-weight: 600;
+        text-align: left;
+        direction: rtl;
+        font-size: clamp(.72rem, .88vw, .85rem);
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .page-report-status-documents .field-value.ltr {
+        direction: ltr;
+        text-align: left;
+    }
+
+    /* ===== بخش جزئیات ===== */
+    .page-report-status-documents .doc-expandable-wrapper {
+        margin-top: 16px;
+        border-top: 1px solid #f1f5f9;
+        padding-top: 12px;
+    }
+
+    .page-report-status-documents .doc-expand-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #f8fafc;
+        border: 1px solid #eef1f5;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 7px 16px;
+        border-radius: 30px;
+        transition: all .3s ease;
+        font-family: inherit;
+    }
+
+    .page-report-status-documents .doc-expand-btn:hover {
+        color: var(--status-color, var(--page-primary));
+        background: color-mix(in srgb, var(--status-color, var(--page-primary)) 6%, transparent);
+        border-color: color-mix(in srgb, var(--status-color, var(--page-primary)) 25%, transparent);
+    }
+
+    .page-report-status-documents .doc-expand-btn i {
+        font-size: 16px;
+        transition: transform .6s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-report-status-documents .doc-expand-btn.expanded i {
+        transform: rotate(45deg);
+    }
+
+    .page-report-status-documents .doc-expand-content {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        margin-top: 0;
+        transition: max-height .7s cubic-bezier(.25, .46, .45, .94), opacity .5s ease, margin .3s ease;
+    }
+
+    .page-report-status-documents .doc-expand-content-inner {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        border-radius: 16px;
+        padding: 18px 20px;
+        margin-top: 16px;
+        border: 1px solid #eef1f5;
+    }
+
+    /* ===== حالت خالی ===== */
+    .page-report-status-documents .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: linear-gradient(180deg, #fafbfc 0%, #f8fafc 100%);
+        border-radius: 16px;
+        border: 2px dashed #dfe6e9;
+    }
+
+    .page-report-status-documents .empty-state i {
+        font-size: 3rem;
+        color: #b2bec3;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .page-report-status-documents .empty-state p {
+        color: #636e72;
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* ===== پجینیشن ===== */
+    .page-report-status-documents .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 6px;
+        margin-top: 28px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-status-documents .pagination-pages {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .page-report-status-documents .pagination-button,
+    .page-report-status-documents .pagination-page {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        min-width: 38px;
+        padding: 0 12px;
+        border: 1px solid #e2e8eb;
+        border-radius: 10px;
+        background: #fff;
+        color: #617077;
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--transition);
+        gap: 6px;
+    }
+
+    .page-report-status-documents .pagination-button:hover,
+    .page-report-status-documents .pagination-page:hover {
+        border-color: var(--page-primary);
+        color: var(--page-primary);
+        background: #f6f9fa;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .10);
+    }
+
+    .page-report-status-documents .pagination-page.active {
+        background: linear-gradient(135deg, var(--page-primary) 0%, var(--page-primary-light) 100%);
+        border-color: transparent;
+        color: #fff;
+        font-weight: 700;
+        box-shadow: 0 6px 16px rgba(27, 105, 139, .30);
+    }
+
+    .page-report-status-documents .pagination-dots {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        min-width: 24px;
+        color: #9aa5aa;
+    }
+
+    /* ============ ریسپانسیو ============ */
+
+    @media(max-width:768px) {
+        .page-report-status-documents .status-documents-container {
+            padding: 16px;
+            border-radius: 16px;
+        }
+
+        .page-report-status-documents .page-top {
+            align-items: stretch;
+        }
+
+        .page-report-status-documents .back-button {
+            justify-content: center;
+        }
+
+        .page-report-status-documents .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-report-status-documents .filter-item {
+            width: 100%;
+            flex-wrap: wrap;
+        }
+
+        .page-report-status-documents .filter-item select {
+            width: 100%;
+            min-width: unset;
+        }
+
+        .page-report-status-documents .clear-filter {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-report-status-documents .document-card {
+            padding: 16px 18px;
+            border-radius: 16px;
+            border-right-width: 4px;
+        }
+
+        .page-report-status-documents .doc-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-report-status-documents .doc-status-badge {
+            align-self: flex-start;
+        }
+
+        .page-report-status-documents .doc-body-row {
+            grid-template-columns: 1fr;
+        }
+
+        .page-report-status-documents .doc-expand-content-inner {
+            padding: 14px 14px;
+            border-radius: 12px;
+        }
+    }
+
+    @media(max-width:576px) {
+        .page-report-status-documents .status-documents-container {
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .page-report-status-documents .document-card {
+            padding: 14px;
+            border-radius: 14px;
+        }
+
+        .page-report-status-documents .doc-subject i {
+            width: 22px;
+            height: 22px;
+            font-size: .7rem;
+        }
+
+        .page-report-status-documents .doc-status-badge {
+            min-width: auto;
+            padding: 5px 12px;
+        }
+
+        .page-report-status-documents .pagination-button,
+        .page-report-status-documents .pagination-page {
+            height: 34px;
+            min-width: 34px;
+            padding: 0 8px;
+            font-size: .75rem;
+        }
+    }
+
+    @media(max-width:380px) {
+        .page-report-status-documents .status-documents-container {
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .page-report-status-documents .document-card {
+            padding: 12px;
+        }
+
+        .page-report-status-documents .doc-meta {
+            gap: 4px 8px;
+        }
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+        .page-report-status-documents * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

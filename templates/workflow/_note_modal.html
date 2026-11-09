@@ -1,0 +1,140 @@
+{#
+    Modal ثبت یادداشت جدید
+    متغیرها:
+        document_id (اجباری — شناسه سند)
+#}
+
+{% if document_id %}
+<div class="nm-modal" id="noteModal">
+    <div class="nm-backdrop" onclick="closeNoteModal()"></div>
+
+    <div class="nm-box">
+
+        <div class="nm-header">
+            <div class="nm-header-icon">
+                <i class="fa-solid fa-note-sticky"></i>
+            </div>
+            <div class="nm-header-text">
+                <h3>ثبت یادداشت جدید</h3>
+                <p>یادداشت شما به سرپرست دپارتمان ارسال می‌شود</p>
+            </div>
+            <button type="button"
+                    class="nm-close"
+                    onclick="closeNoteModal()"
+                    aria-label="بستن">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="nm-body">
+
+            <label class="nm-label">
+                <i class="fa-solid fa-align-right"></i>
+                متن یادداشت
+                <span class="nm-required">*</span>
+            </label>
+
+            <textarea class="nm-textarea"
+                      id="noteContent"
+                      placeholder="متن یادداشت خود را اینجا بنویسید..."
+                      rows="6"></textarea>
+
+            <div class="nm-info">
+                <i class="fa-solid fa-circle-info"></i>
+                یادداشت شما پس از ثبت، در کارتابل سرپرست قرار می‌گیرد.
+            </div>
+
+        </div>
+
+        <div class="nm-footer">
+            <button type="button"
+                    class="nm-btn nm-btn-cancel"
+                    onclick="closeNoteModal()">
+                انصراف
+            </button>
+            <button type="button"
+                    class="nm-btn nm-btn-submit"
+                    id="noteSubmitBtn"
+                    onclick="submitNote()">
+                <i class="fa-solid fa-paper-plane"></i>
+                ثبت یادداشت
+            </button>
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    function openNoteModal() {
+        const modal = document.getElementById('noteModal');
+        if (!modal) return;
+        modal.classList.add('show');
+        const ta = document.getElementById('noteContent');
+        if (ta) {
+            ta.value = '';
+            setTimeout(() => ta.focus(), 100);
+        }
+    }
+
+    function closeNoteModal() {
+        const modal = document.getElementById('noteModal');
+        if (!modal) return;
+        modal.classList.remove('show');
+    }
+
+    async function submitNote() {
+        const btn = document.getElementById('noteSubmitBtn');
+        const ta = document.getElementById('noteContent');
+        const content = (ta.value || '').trim();
+
+        if (!content) {
+            ta.focus();
+            ta.style.borderColor = '#dc2626';
+            setTimeout(() => { ta.style.borderColor = ''; }, 2000);
+            return;
+        }
+
+        btn.disabled = true;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+
+        try {
+            const res = await fetch('{{ url_for("workflow.add_note_ajax") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    document_id: {{ document_id }},
+                    content: content
+                })
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                closeNoteModal();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 400);
+            } else {
+                alert(data.message || 'خطا در ثبت یادداشت');
+            }
+        } catch (err) {
+            console.error('Submit note error:', err);
+            alert('خطا در ارتباط با سرور');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalHTML;
+        }
+    }
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeNoteModal();
+        }
+    });
+</script>
+{% endif %}

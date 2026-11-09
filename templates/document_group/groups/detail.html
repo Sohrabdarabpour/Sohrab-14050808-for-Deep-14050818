@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}جزئیات گروه: {{ group.title }}{% endblock %}
+
+{% block body_class %}page-document-group-detail{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/groups/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="gd-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="gd-header">
+        <div class="gd-header-title">
+            <div class="gd-header-icon"
+                 style="background: linear-gradient(135deg, {{ group.color or '#1b698b' }}, {{ group.color or '#167a5c' }});">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <div class="gd-header-text">
+                <h1>{{ group.title }}</h1>
+                <p>
+                    {% if group.code %}
+                    <span class="gd-header-code">
+                        <i class="fa-solid fa-hashtag"></i>
+                        {{ group.code }}
+                    </span>
+                    {% endif %}
+
+                    {% if group.is_active %}
+                    <span class="gd-header-status active">
+                        <i class="fa-solid fa-circle"></i>
+                        فعال
+                    </span>
+                    {% else %}
+                    <span class="gd-header-status inactive">
+                        <i class="fa-solid fa-circle"></i>
+                        غیرفعال
+                    </span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="gd-header-actions">
+            <a href="{{ url_for('document_group.group_list') }}"
+               class="gd-btn gd-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت
+            </a>
+
+            <a href="{{ url_for('document_group.group_edit', group_id=group.id) }}"
+               class="gd-btn gd-btn-primary">
+                <i class="fa-solid fa-pen"></i>
+                ویرایش
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== اطلاعات — 4 کارت اصلی ===== -->
+    <section class="gd-info-grid">
+
+        <!-- کد گروه -->
+        <div class="gd-info-card" style="--info-color: #805ad5;">
+            <div class="gd-info-icon purple">
+                <i class="fa-solid fa-hashtag"></i>
+            </div>
+            <div class="gd-info-text">
+                <span class="gd-info-label">کد گروه</span>
+                <span class="gd-info-value" style="direction:ltr;">
+                    {{ group.code or '—' }}
+                </span>
+            </div>
+        </div>
+
+        <!-- ترتیب نمایش -->
+        <!-- <div class="gd-info-card" style="--info-color: #d69e2e;">
+            <div class="gd-info-icon orange">
+                <i class="fa-solid fa-sort"></i>
+            </div>
+            <div class="gd-info-text">
+                <span class="gd-info-label">ترتیب نمایش</span>
+                <span class="gd-info-value">{{ group.sort_order }}</span>
+            </div>
+        </div> -->
+
+        <!-- تعداد زیرگروه‌ها -->
+        <div class="gd-info-card" style="--info-color: #167a5c;">
+            <div class="gd-info-icon green">
+                <i class="fa-solid fa-sitemap"></i>
+            </div>
+            <div class="gd-info-text">
+                <span class="gd-info-label">تعداد زیرگروه‌ها</span>
+                <span class="gd-info-value">{{ group.subgroups_count }}</span>
+            </div>
+        </div>
+
+        <!-- تاریخ ایجاد -->
+        <!-- <div class="gd-info-card" style="--info-color: #319795;">
+            <div class="gd-info-icon teal">
+                <i class="fa-solid fa-calendar-plus"></i>
+            </div>
+            <div class="gd-info-text">
+                <span class="gd-info-label">تاریخ ایجاد</span>
+                <span class="gd-info-value" style="font-size:.85rem;">
+                    {{ group.created_at or '—' }}
+                </span>
+            </div>
+        </div> -->
+
+    </section>
+
+    <!-- ===== توضیحات ===== -->
+    {% if group.description %}
+    <section class="gd-description-card">
+        <div class="gd-description-icon">
+            <i class="fa-solid fa-align-right"></i>
+        </div>
+        <div class="gd-description-text">
+            <span class="gd-description-label">توضیحات</span>
+            <p class="gd-description-value">{{ group.description }}</p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- ===== زیرگروه‌ها ===== -->
+    <section class="gd-section">
+        <div class="gd-section-header">
+            <div class="gd-section-title">
+                <i class="fa-solid fa-diagram-project"></i>
+                زیرگروه‌های مرتبط
+                <span class="gd-count-badge">{{ subgroups|length }}</span>
+            </div>
+            <!-- ★ دکمه «افزودن زیرگروه» حذف شد -->
+        </div>
+
+        <div class="gd-section-body">
+            {% if subgroups %}
+            <div class="gd-subgroups-grid">
+                {% for sg in subgroups %}
+                <a href="{{ url_for('document_group.subgroup_detail', subgroup_id=sg.id) }}"
+                   class="gd-subgroup-card"
+                   style="--sg-color: {{ sg.color or '#1b698b' }};">
+                    <div class="gd-subgroup-icon">
+                        <i class="fa-solid fa-tag"></i>
+                    </div>
+                    <div class="gd-subgroup-info">
+                        <div class="gd-subgroup-name" title="{{ sg.title }}">
+                            {{ sg.title }}
+                        </div>
+                        <div class="gd-subgroup-meta">
+                            {% if sg.code %}
+                            <span class="gd-subgroup-badge code">
+                                <i class="fa-solid fa-hashtag"></i>
+                                {{ sg.code }}
+                            </span>
+                            {% endif %}
+
+                            {% if sg.department_title %}
+                            <span class="gd-subgroup-badge dept">
+                                <i class="fa-solid fa-building"></i>
+                                {{ sg.department_title }}
+                            </span>
+                            {% endif %}
+
+                            {% if sg.days_review %}
+                            <span class="gd-subgroup-badge days">
+                                <i class="fa-solid fa-clock"></i>
+                                {{ sg.days_review }} روز
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-arrow-left gd-subgroup-arrow"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="gd-empty">
+                <i class="fa-solid fa-inbox"></i>
+                هیچ زیرگروهی به این گروه متصل نشده است.
+                <br>
+                <a href="{{ url_for('document_group.group_edit', group_id=group.id) }}">
+                    <i class="fa-solid fa-plus"></i>
+                    اتصال زیرگروه
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

@@ -1,0 +1,300 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت اسناد | سامانه مدیریت اسناد{% endblock %}
+{% block body_class %}page-documents{% endblock %}
+
+{% block content %}
+{# ============================================================
+   نوار ابزار: عنوان، شمارش و فیلتر سال
+   ============================================================ #}
+<section class="documents-toolbar">
+    <div class="documents-toolbar-content">
+        <div class="documents-toolbar-info">
+            <div class="documents-toolbar-icon">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <div>
+                <h2 class="documents-toolbar-title">مدیریت اسناد</h2>
+                <div class="documents-toolbar-count">
+                    {% if total %}
+                        {{ total|fa_digits }} سند
+                        {% if selected_year != 'all' %}در سال {{ selected_year|fa_digits }}{% endif %}
+                    {% else %}
+                        سندی برای نمایش وجود ندارد
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <form class="documents-filter" method="get" action="{{ url_for('documents.documents') }}">
+            <div class="documents-filter-item">
+                <label for="yearFilter">
+                    <i class="fa-regular fa-calendar"></i>
+                    سال
+                </label>
+                <select id="yearFilter" name="year" onchange="this.form.submit()">
+                    <option value="all" {% if selected_year == 'all' %}selected{% endif %}>همه سال‌ها</option>
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year == year %}selected{% endif %}>{{ year|fa_digits }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <a class="documents-search-link" href="{{ url_for('search.index') }}">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                جستجوی پیشرفته
+            </a>
+        </form>
+    </div>
+</section>
+
+{# ============================================================
+   آمار — وضعیت، دپارتمان، ناحیه
+   ============================================================ #}
+<section class="documents-statistics">
+    <div class="statistics-panel">
+        <div class="statistics-panel-header">
+            <div class="statistics-panel-title">
+                <i class="fa-solid fa-circle-half-stroke"></i>
+                وضعیت اسناد
+            </div>
+            <span class="statistics-panel-total">{{ statistics.total|fa_digits }}</span>
+        </div>
+        <div class="statistics-panel-body">
+            <div class="statistics-cards">
+                {% for item in statistics.statuses %}
+                <a class="statistics-card"
+                   style="--stat-color: {{ item.color }}"
+                   href="{{ url_for('search.index', status=item.code) if item.id else '#' }}">
+                    <span class="statistics-card-icon" style="--stat-color: {{ item.color }}">
+                        <i class="fa-solid fa-circle"></i>
+                    </span>
+                    <span class="statistics-card-content">
+                        <span class="statistics-card-number">{{ item.count|fa_digits }}</span>
+                        <span class="statistics-card-title">{{ item.title }}</span>
+                    </span>
+                </a>
+                {% else %}
+                <div class="statistics-empty">داده‌ای نیست</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="statistics-panel">
+        <div class="statistics-panel-header">
+            <div class="statistics-panel-title">
+                <i class="fa-solid fa-building-user"></i>
+                دپارتمان‌ها
+            </div>
+            <span class="statistics-panel-total">{{ statistics.total|fa_digits }}</span>
+        </div>
+        <div class="statistics-panel-body">
+            <div class="statistics-cards">
+                {% for item in statistics.departments %}
+                <a class="statistics-card statistics-card-neutral"
+                   href="{{ url_for('search.index', department=item.id) if item.id else '#' }}">
+                    <span class="statistics-card-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </span>
+                    <span class="statistics-card-content">
+                        <span class="statistics-card-number">{{ item.count|fa_digits }}</span>
+                        <span class="statistics-card-title">{{ item.title }}</span>
+                    </span>
+                </a>
+                {% else %}
+                <div class="statistics-empty">داده‌ای نیست</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="statistics-panel">
+        <div class="statistics-panel-header">
+            <div class="statistics-panel-title">
+                <i class="fa-solid fa-map-location-dot"></i>
+                نواحی
+            </div>
+            <span class="statistics-panel-total">{{ statistics.total|fa_digits }}</span>
+        </div>
+        <div class="statistics-panel-body">
+            <div class="statistics-cards">
+                {% for item in statistics.areas %}
+                <a class="statistics-card statistics-card-area"
+                   href="{{ url_for('search.index', area=item.id) if item.id else '#' }}">
+                    <span class="statistics-card-icon">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </span>
+                    <span class="statistics-card-content">
+                        <span class="statistics-card-number">{{ item.count|fa_digits }}</span>
+                        <span class="statistics-card-title">{{ item.title }}</span>
+                    </span>
+                </a>
+                {% else %}
+                <div class="statistics-empty">داده‌ای نیست</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ============================================================
+   نتایج
+   ============================================================ #}
+<div class="documents-results-header">
+    <div>
+        <h3 class="documents-results-title">
+            <i class="fa-solid fa-file-lines"></i>
+            فهرست اسناد
+        </h3>
+        <span>
+            صفحه {{ page|fa_digits }} از {{ pages|fa_digits }}
+            {% if total %}— {{ total|fa_digits }} سند{% endif %}
+        </span>
+    </div>
+</div>
+
+<section class="document-grid">
+    {% for record in records %}
+    <article class="document-card">
+        <header class="doc-header">
+            <div class="doc-title-group">
+                <div class="doc-subject">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span>{{ record.subject or 'بدون موضوع' }}</span>
+                </div>
+
+                {% if record.project_name %}
+                <div class="doc-project">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    <div class="doc-project-content">
+                        <span class="doc-project-label">پروژه</span>
+                        <span class="doc-project-name">{{ record.project_name }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="doc-meta">
+                    <span>
+                        <i class="fa-solid fa-hashtag"></i>
+                        {{ record.code_dfc or '—' }}
+                    </span>
+                    {% if record.contractor %}
+                    <span>
+                        <i class="fa-solid fa-helmet-safety"></i>
+                        {{ record.contractor }}
+                    </span>
+                    {% endif %}
+                    {% if record.date_received %}
+                    <span>
+                        <i class="fa-regular fa-calendar-check"></i>
+                        {{ record.date_received|jalali_date }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <span class="doc-status-badge"
+                  style="--status-color: {{ record.status_color or '#95a5a6' }}">
+                <i class="fa-solid fa-circle"></i>
+                {{ record.status_title or 'بدون وضعیت' }}
+            </span>
+        </header>
+
+        <div class="doc-body">
+            <div class="doc-body-row">
+                <div class="doc-field">
+                    <span class="field-label">
+                        <i class="fa-regular fa-clock"></i>
+                        مهلت پاسخ
+                    </span>
+                    <span class="field-value">{{ record.deadline|jalali_date or '—' }}</span>
+                </div>
+                <div class="doc-field">
+                    <span class="field-label">
+                        <i class="fa-solid fa-building"></i>
+                        دپارتمان
+                    </span>
+                    <span class="field-value">{{ record.department_title or '—' }}</span>
+                </div>
+            </div>
+
+            <div class="doc-body-row">
+                <div class="doc-field">
+                    <span class="field-label">
+                        <i class="fa-solid fa-location-dot"></i>
+                        ناحیه
+                    </span>
+                    <span class="field-value">{{ record.area_title or record.area or '—' }}</span>
+                </div>
+                <div class="doc-field">
+                    <span class="field-label">
+                        <i class="fa-solid fa-user"></i>
+                        کارشناس
+                    </span>
+                    <span class="field-value">{{ record.user_full_name or '—' }}</span>
+                </div>
+            </div>
+
+            <a class="doc-card-link" href="{{ url_for('documents.view_document', doc_id=record.id) }}">
+                <i class="fa-solid fa-arrow-left"></i>
+                مشاهده سند
+            </a>
+        </div>
+    </article>
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>سندی با این فیلتر پیدا نشد.</p>
+    </div>
+    {% endfor %}
+</section>
+
+{# ============================================================
+   صفحه‌بندی
+   ============================================================ #}
+{% if pages > 1 %}
+{% set window_start = [1, page - 2]|max %}
+{% set window_end = [pages, page + 2]|min %}
+<nav class="documents-pagination" aria-label="صفحه‌بندی اسناد">
+    {% if page > 1 %}
+    <a class="page-btn" href="{{ url_for('documents.documents', year=selected_year, page=page-1) }}">
+        <i class="fa-solid fa-angle-right"></i>
+        قبلی
+    </a>
+    {% else %}
+    <span class="page-btn disabled">
+        <i class="fa-solid fa-angle-right"></i>
+        قبلی
+    </span>
+    {% endif %}
+
+    {% if window_start > 1 %}
+    <a class="page-btn" href="{{ url_for('documents.documents', year=selected_year, page=1) }}">۱</a>
+    {% if window_start > 2 %}<span class="page-ellipsis">…</span>{% endif %}
+    {% endif %}
+
+    {% for number in range(window_start, window_end + 1) %}
+    <a class="page-btn {% if number == page %}active{% endif %}"
+       href="{{ url_for('documents.documents', year=selected_year, page=number) }}">{{ number|fa_digits }}</a>
+    {% endfor %}
+
+    {% if window_end < pages %}
+    {% if window_end < pages - 1 %}<span class="page-ellipsis">…</span>{% endif %}
+    <a class="page-btn" href="{{ url_for('documents.documents', year=selected_year, page=pages) }}">{{ pages|fa_digits }}</a>
+    {% endif %}
+
+    {% if page < pages %}
+    <a class="page-btn" href="{{ url_for('documents.documents', year=selected_year, page=page+1) }}">
+        بعدی
+        <i class="fa-solid fa-angle-left"></i>
+    </a>
+    {% else %}
+    <span class="page-btn disabled">
+        بعدی
+        <i class="fa-solid fa-angle-left"></i>
+    </span>
+    {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

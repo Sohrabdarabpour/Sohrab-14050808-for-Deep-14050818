@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}تقویم کاری | سامانه مدیریت اسناد{% endblock %}
+{% block body_class %}page-calendar{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages/calendar.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set prev_month = 12 if month == 1 else month - 1 %}
+{% set prev_year = year - 1 if month == 1 else year %}
+{% set next_month = 1 if month == 12 else month + 1 %}
+{% set next_year = year + 1 if month == 12 else year %}
+{% set is_current_month = (year == today_year and month == today_month) %}
+
+<section class="calendar-toolbar">
+    <div class="calendar-toolbar-info">
+        <span class="calendar-toolbar-icon"><i class="fa-regular fa-calendar-days"></i></span>
+        <div>
+            <h2 class="calendar-toolbar-title">تقویم کاری</h2>
+            <p class="calendar-toolbar-sub">مدیریت روزهای کاری و ثبت علت تعطیلی</p>
+        </div>
+    </div>
+
+    <div class="calendar-toolbar-actions">
+        <a class="calendar-nav" href="{{ url_for('calendar.index', year=prev_year, month=prev_month) }}"
+           title="ماه قبل"><i class="fa-solid fa-angle-right"></i></a>
+
+        <form class="calendar-selects" method="get" action="{{ url_for('calendar.index') }}">
+            <select name="month" onchange="this.form.submit()" aria-label="ماه">
+                {% for number in range(1, 13) %}
+                <option value="{{ number }}" {% if number == month %}selected{% endif %}>
+                    {{ month_names[number - 1] }}
+                </option>
+                {% endfor %}
+            </select>
+            <select name="year" onchange="this.form.submit()" aria-label="سال">
+                {% for option in years %}
+                <option value="{{ option }}" {% if option == year %}selected{% endif %}>{{ option|fa_digits }}</option>
+                {% endfor %}
+            </select>
+        </form>
+
+        <a class="calendar-nav" href="{{ url_for('calendar.index', year=next_year, month=next_month) }}"
+           title="ماه بعد"><i class="fa-solid fa-angle-left"></i></a>
+
+        {% if not is_current_month %}
+        <a class="calendar-today-link"
+           href="{{ url_for('calendar.index', year=today_year, month=today_month) }}">
+            امروز
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<div class="calendar-stats">
+    <div class="calendar-stat calendar-stat-working">
+        <span class="calendar-stat-icon"><i class="fa-solid fa-briefcase"></i></span>
+        <div>
+            <strong>{{ stats.working|fa_digits }}</strong>
+            <span>روز کاری</span>
+        </div>
+    </div>
+    <div class="calendar-stat calendar-stat-holiday">
+        <span class="calendar-stat-icon"><i class="fa-solid fa-star"></i></span>
+        <div>
+            <strong>{{ stats.holiday|fa_digits }}</strong>
+            <span>تعطیل رسمی</span>
+        </div>
+    </div>
+    <div class="calendar-stat calendar-stat-weekend">
+        <span class="calendar-stat-icon"><i class="fa-solid fa-mug-hot"></i></span>
+        <div>
+            <strong>{{ stats.weekend|fa_digits }}</strong>
+            <span>آخر هفته ({{ weekend_label }})</span>
+        </div>
+    </div>
+</div>
+
+<div class="calendar-layout">
+    {# ================= تقویم ماه ================= #}
+    <section class="calendar-card">
+        <header class="calendar-card-header">
+            <h3>{{ month_name }} {{ year|fa_digits }}</h3>
+            <div class="calendar-legend">
+                <span><i class="dot dot-working"></i> کاری</span>
+                <span><i class="dot dot-holiday"></i> تعطیل</span>
+                <span><i class="dot dot-weekend"></i> {{ weekend_label }}</span>
+            </div>
+        </header>
+
+        <p class="calendar-hint">
+            <i class="fa-solid fa-hand-pointer"></i>
+            برای ثبت تعطیلی روی روز کلیک کنید؛ علت آن پرسیده می‌شود. برای برداشتن تعطیلی، روز تعطیل را انتخاب کنید.
+        </p>
+
+        <table class="calendar-grid">
+            <thead>
+                <tr>
+                    {% for label in weekday_labels %}
+                    <th{% if loop.index0 in weekend_indexes %} class="th-weekend"{% endif %}>{{ label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for week in weeks %}
+                <tr>
+                    {% for day in week %}
+                    {% if day %}
+                    <td class="calendar-cell">
+                        <form method="POST" action="{{ url_for('calendar.toggle_holiday') }}"
+                              class="day-toggle-form"
+                              data-has-holiday="{{ 'true' if holiday_titles.get(day.gregorian) else 'false' }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="date" value="{{ day.jalali }}">
+                            <button type="submit"
+                                    class="calendar-day day-{{ day.state }}
+                                           {% if day.jalali == today %}day-today{% endif %}"
+                                    title="{% if holiday_titles.get(day.gregorian) %}{{ holiday_titles.get(day.gregorian) }} — کلیک برای غیرتعطیل‌کردن{% else %}کلیک برای تعطیل‌کردن{% endif %}">
+                                <span class="day-number">{{ day.day|fa_digits }}</span>
+                                {% if day.jalali == today %}
+                                <span class="day-today-label">امروز</span>
+                                {% endif %}
+                                {% if holiday_titles.get(day.gregorian) %}
+                                <span class="day-note">{{ holiday_titles.get(day.gregorian) }}</span>
+                                {% if holiday_reasons.get(day.gregorian) %}
+                                <span class="day-note">{{ holiday_reasons.get(day.gregorian) }}</span>
+                                {% endif %}
+                                {% endif %}
+                            </button>
+                        </form>
+                    </td>
+                    {% else %}
+                    <td class="calendar-cell calendar-cell-empty"></td>
+                    {% endif %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <div class="calendar-side">
+        {# ================= فهرست تعطیلات ================= #}
+        <section class="calendar-card">
+            <header class="calendar-card-header">
+                <h3><i class="fa-solid fa-star"></i> تعطیلات {{ year|fa_digits }}</h3>
+                <span class="calendar-count">{{ holidays|length|fa_digits }}</span>
+            </header>
+
+            <div class="holiday-list">
+                {% for holiday in holidays %}
+                {% set holiday_parts = holiday.jalali_date.split('/') %}
+                {% set holiday_month = holiday_parts[1]|int if holiday_parts|length == 3 else month %}
+                <div class="holiday-item {% if holiday_month == month %}is-current{% endif %}">
+                    <a class="holiday-link"
+                       href="{{ url_for('calendar.index', year=year, month=holiday_month) }}">
+                        <strong>{{ holiday.jalali_date|fa_digits }}</strong>
+                        <span class="holiday-title">{{ holiday.title }}</span>
+                        <span class="holiday-kind kind-{{ holiday.kind }}">
+                            {{ kind_labels.get(holiday.kind, holiday.kind) }}
+                        </span>
+                        {% if holiday.reason %}
+                        <span class="holiday-reason">{{ holiday.reason }}</span>
+                        {% endif %}
+                    </a>
+                    <form method="POST"
+                          class="holiday-delete-form"
+                          data-confirm="این تعطیلی حذف شود؟"
+                          action="{{ url_for('calendar.delete_holiday', holiday_id=holiday.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="holiday-delete" title="حذف">
+                            <i class="fa-regular fa-trash-can"></i>
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <p class="holiday-empty">برای این سال تعطیلی ثبت نشده است.</p>
+                {% endfor %}
+            </div>
+
+            <form method="POST" action="{{ url_for('calendar.add_holiday') }}" class="holiday-form"
+                  novalidate>
+                {{ form.hidden_tag() }}
+                <label class="holiday-field">
+                    <span>تاریخ شمسی</span>
+                    {{ form.holiday_date(placeholder="۱۴۰۵/۰۱/۰۱", inputmode="numeric", autocomplete="off") }}
+                </label>
+                <label class="holiday-field holiday-field-title">
+                    <span>عنوان</span>
+                    {{ form.title(placeholder="عنوان تعطیلی") }}
+                </label>
+                <label class="holiday-field holiday-field-kind">
+                    <span>نوع</span>
+                    {{ form.kind() }}
+                </label>
+                <button type="submit"><i class="fa-solid fa-plus"></i> افزودن</button>
+            </form>
+        </section>
+    </div>
+</div>
+
+<dialog class="holiday-reason-dialog" id="holidayReasonDialog" aria-labelledby="holidayReasonTitle">
+    <form method="POST" action="{{ url_for('calendar.toggle_holiday') }}" id="holidayReasonForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="date" id="holidayReasonDate">
+        <h3 id="holidayReasonTitle">علت تعطیلی</h3>
+        <p id="holidayReasonDateLabel"></p>
+        <label for="holidayReasonInput">علت را وارد کنید</label>
+        <textarea id="holidayReasonInput" name="reason" maxlength="500" required
+                  rows="4" autofocus></textarea>
+        <div class="holiday-reason-actions">
+            <button type="button" class="holiday-reason-cancel" id="holidayReasonCancel">انصراف</button>
+            <button type="submit" class="holiday-reason-submit">ثبت تعطیلی</button>
+        </div>
+    </form>
+</dialog>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/calendar/index.js') }}"></script>
+{% endblock %}

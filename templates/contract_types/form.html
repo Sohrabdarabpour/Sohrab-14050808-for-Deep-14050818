@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'add' %}افزودن نوع قرارداد{% else %}ویرایش نوع قرارداد{% endif %}{% endblock %}
+{% block body_class %}page-contract-type-form{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contract_types/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="cf-wrap">
+    <div class="cf-card">
+
+        <!-- هدر -->
+        <div class="cf-header">
+            <div class="cf-header-info">
+                <div class="cf-header-icon">
+                    <i class="fa-solid {% if mode == 'add' %}fa-plus{% else %}fa-pen{% endif %}"></i>
+                </div>
+                <h1 class="cf-title">
+                    {% if mode == 'add' %}افزودن نوع قرارداد{% else %}ویرایش نوع قرارداد{% endif %}
+                </h1>
+            </div>
+            <a href="{{ url_for('contract_types.list_types') }}" class="cf-back-btn">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت
+            </a>
+        </div>
+
+        <!-- فرم -->
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="cf-body">
+                <div class="cf-grid">
+
+                    <div class="cf-field cf-col-8">
+                        <label class="cf-label">
+                            <span class="req">*</span>
+                            <i class="fa-solid fa-file-contract"></i>
+                            عنوان
+                        </label>
+                        <input type="text" name="title" class="cf-input"
+                               value="{{ contract_type.get('title', '') or '' }}"
+                               placeholder="مثال: EPC" required>
+                    </div>
+
+                    <div class="cf-field cf-col-4">
+                        <label class="cf-label">
+                            <i class="fa-solid fa-barcode"></i>
+                            کد
+                        </label>
+                        <input type="text" name="code" class="cf-input ltr"
+                               value="{{ contract_type.get('code', '') or '' }}"
+                               placeholder="EPC">
+                    </div>
+
+                    <div class="cf-field cf-col-6">
+                        <label class="cf-label">
+                            <i class="fa-solid fa-palette"></i>
+                            رنگ
+                        </label>
+                        <input type="color" name="color" class="cf-input"
+                               value="{{ contract_type.get('color', '#1b698b') or '#1b698b' }}"
+                               style="height:44px; cursor:pointer;">
+                    </div>
+
+                    <div class="cf-field cf-col-6">
+                        <label class="cf-label">
+                            <i class="fa-solid fa-sort-numeric-down"></i>
+                            ترتیب نمایش
+                        </label>
+                        <input type="number" name="sort_order" class="cf-input ltr"
+                               value="{{ contract_type.get('sort_order', 0) or 0 }}">
+                    </div>
+
+                    <div class="cf-field cf-col-12">
+                        <label class="cf-label">
+                            <i class="fa-solid fa-align-right"></i>
+                            توضیحات
+                        </label>
+                        <textarea name="description" class="cf-textarea" rows="3"
+                                  placeholder="توضیحات اختیاری...">{{ contract_type.get('description', '') or '' }}</textarea>
+                    </div>
+
+                    <div class="cf-field cf-col-12">
+                        <label class="cf-switch-wrap">
+                            <div>
+                                <strong>وضعیت فعال</strong>
+                                <small>در صورت فعال بودن، در فرم‌های پروژه نمایش داده می‌شود</small>
+                            </div>
+                            <div class="cf-switch">
+                                <input type="checkbox" name="is_active" value="1"
+                                       {% if contract_type.get('is_active') %}checked{% endif %}>
+                                <span class="cf-switch-slider"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="cf-actions">
+                <a href="{{ url_for('contract_types.list_types') }}" class="cf-btn cf-btn-cancel">
+                    <i class="fa-solid fa-xmark"></i>
+                    انصراف
+                </a>
+                <button type="submit" class="cf-btn cf-btn-save">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    ذخیره
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

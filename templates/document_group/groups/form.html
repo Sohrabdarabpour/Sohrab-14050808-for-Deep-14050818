@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if mode == 'add' %}افزودن گروه سند{% else %}ویرایش گروه سند{% endif %}
+{% endblock %}
+
+{% block body_class %}page-document-group-form{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/groups/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="df-wrap">
+
+    <div class="df-card">
+
+        <!-- ===== هدر ===== -->
+        <div class="df-header">
+            <div class="df-header-icon">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div class="df-header-text">
+                <h1>
+                    {% if mode == 'add' %}
+                    ایجاد گروه سند جدید
+                    {% else %}
+                    ویرایش: {{ group.title }}
+                    {% endif %}
+                </h1>
+                <p>
+                    {% if mode == 'add' %}
+                    اطلاعات گروه سند را وارد کنید
+                    {% else %}
+                    اطلاعات گروه را ویرایش کنید
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== فرم ===== -->
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="df-body">
+
+                <!-- عنوان -->
+                <div class="df-field">
+                    <label class="df-label" for="{{ form.title.id }}">
+                        <i class="fa-solid fa-tag"></i>
+                        <span>{{ form.title.label.text }}</span>
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.title(class="df-input", placeholder="مثال: روش اجرایی") }}
+                    {% for error in form.title.errors %}
+                    <div class="df-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- کد -->
+                <div class="df-field">
+                    <label class="df-label" for="{{ form.code.id }}">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span>{{ form.code.label.text }}</span>
+                    </label>
+                    {{ form.code(class="df-input", placeholder="مثال: PR", style="direction:ltr;") }}
+                    {% for error in form.code.errors %}
+                    <div class="df-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- ترتیب -->
+                <div class="df-field">
+                    <label class="df-label" for="{{ form.sort_order.id }}">
+                        <i class="fa-solid fa-sort"></i>
+                        <span>{{ form.sort_order.label.text }}</span>
+                    </label>
+                    {{ form.sort_order(class="df-input", type="number") }}
+                    {% for error in form.sort_order.errors %}
+                    <div class="df-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- رنگ -->
+                <div class="df-field">
+                    <label class="df-label" for="{{ form.color.id }}">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>{{ form.color.label.text }}</span>
+                    </label>
+                    <div class="df-color-wrapper">
+                        <input type="color" class="df-color-input"
+                               value="{{ form.color.data or '#3D8499' }}"
+                               onchange="document.getElementById('{{ form.color.id }}').value = this.value;">
+                        {{ form.color(class="df-input df-color-text",
+                                      placeholder="#3D8499",
+                                      style="direction:ltr;") }}
+                    </div>
+                    {% for error in form.color.errors %}
+                    <div class="df-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- توضیحات (تمام‌عرض) -->
+                <div class="df-field df-full">
+                    <label class="df-label" for="{{ form.description.id }}">
+                        <i class="fa-solid fa-align-right"></i>
+                        <span>{{ form.description.label.text }}</span>
+                    </label>
+                    {{ form.description(class="df-textarea", placeholder="توضیحات اختیاری...") }}
+                    {% for error in form.description.errors %}
+                    <div class="df-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- ★ زیرگروه‌های مرتبط (M:N) — تمام‌عرض، بدون اسکرول -->
+                <div class="df-subgroups-section">
+                    <div class="df-subgroups-header">
+                        <div class="df-subgroups-header-title">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            زیرگروه‌های مرتبط
+                            <span class="df-subgroups-counter" id="selectedCounter">
+                                {{ form.subgroup_ids.data|length if form.subgroup_ids.data else 0 }}
+                            </span>
+                        </div>
+                        <div class="df-subgroups-header-hint">
+                            می‌توانید چند زیرگروه انتخاب کنید
+                        </div>
+                    </div>
+
+                    <div class="df-subgroups-search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text"
+                               class="df-subgroups-search"
+                               id="subgroupsSearch"
+                               placeholder="جستجوی زیرگروه...">
+                    </div>
+
+                    {% if form.subgroup_ids.choices %}
+                    <div class="df-subgroups-list" id="subgroupsList">
+                        {% for sg_id, sg_title in form.subgroup_ids.choices %}
+                        <label class="df-subgroup-item {% if form.subgroup_ids.data and sg_id in form.subgroup_ids.data %}selected{% endif %}"
+                               data-title="{{ sg_title|lower }}">
+                            <input type="checkbox"
+                                   name="{{ form.subgroup_ids.name }}"
+                                   value="{{ sg_id }}"
+                                   {% if form.subgroup_ids.data and sg_id in form.subgroup_ids.data %}checked{% endif %}
+                                   onchange="updateSelectedCounter(this)">
+                            <span class="df-subgroup-item-text">
+                                <span class="df-subgroup-item-title">{{ sg_title }}</span>
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="df-subgroups-empty">
+                        <i class="fa-solid fa-inbox"></i>
+                        هنوز زیرگروهی در سیستم ثبت نشده است.
+                        <br>
+                        ابتدا از بخش
+                        <a href="{{ url_for('document_group.subgroup_add') }}">مدیریت زیرگروه‌ها</a>
+                        زیرگروه ایجاد کنید.
+                    </div>
+                    {% endif %}
+
+                    {{ form.subgroup_sort_orders(id="subgroupSortOrders") }}
+                </div>
+
+                <!-- فعال -->
+                <div class="df-field df-full">
+                    <label class="df-checkbox-wrap">
+                        {{ form.is_active() }}
+                        <span class="df-checkbox-text">گروه فعال باشد</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- ===== دکمه‌ها ===== -->
+            <div class="df-actions">
+                <a href="{{ url_for('document_group.group_list') }}" class="df-btn df-btn-secondary">
+                    <i class="fa-solid fa-xmark"></i>
+                    انصراف
+                </a>
+
+                <button type="submit" class="df-btn df-btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    {% if mode == 'add' %}ایجاد گروه{% else %}ذخیره تغییرات{% endif %}
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/pages/document_group/groups/form.js') }}"></script>{% endblock %}

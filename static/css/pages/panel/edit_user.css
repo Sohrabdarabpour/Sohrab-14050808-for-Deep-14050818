@@ -1,0 +1,501 @@
+/* استایل صفحه: panel/edit_user.html */
+
+    /* ============================================
+       SCOPE: .page-edit-user
+       ============================================ */
+
+    .page-edit-user {
+        --eu-primary: #5b9bb5;
+        --eu-primary-light: #7ab5a0;
+        --eu-primary-dark: #4a7f94;
+        --eu-text-primary: #2d3e4a;
+        --eu-text-secondary: #6b7d8a;
+        --eu-text-muted: #a0aeb8;
+        --eu-border-soft: #d8e6ed;
+        --eu-bg-soft: #f7fafc;
+        --eu-radius-lg: 18px;
+        --eu-radius-md: 12px;
+        --eu-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --eu-shadow-md: 0 8px 24px rgba(91, 155, 181, .12);
+        --eu-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-edit-user .eu-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 11px 15px;
+        border: 1.5px solid var(--eu-border-soft);
+        border-radius: 12px;
+        background: #ffffff;
+        transition: all var(--eu-transition);
+    }
+
+    .page-edit-user .eu-checkbox-wrapper:hover {
+        border-color: #b8d4e0;
+    }
+
+    .page-edit-user .eu-checkbox-wrapper:focus-within {
+        border-color: var(--eu-primary);
+        box-shadow: 0 0 0 4px rgba(91, 155, 181, .12);
+    }
+
+    .page-edit-user .eu-checkbox {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        accent-color: var(--eu-primary);
+        cursor: pointer;
+    }
+
+    .page-edit-user .eu-checkbox-text {
+        color: var(--eu-text-secondary);
+        font-size: clamp(.75rem, .88vw, .82rem);
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .page-edit-user .eu-wrap {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+    }
+
+    .page-edit-user .eu-wrap *,
+    .page-edit-user .eu-wrap *::before,
+    .page-edit-user .eu-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       کارت اصلی فرم
+       ============================================ */
+    .page-edit-user .eu-card {
+        position: relative;
+        background: #ffffff;
+        border: 1.5px solid var(--eu-border-soft);
+        border-radius: var(--eu-radius-lg);
+        box-shadow: var(--eu-shadow-sm);
+        overflow: hidden;
+        transition: all var(--eu-transition);
+    }
+
+    .page-edit-user .eu-card:hover {
+        box-shadow: var(--eu-shadow-md);
+        border-color: #b8d4e0;
+    }
+
+    /* ============================================
+       هدر کارت: آواتار + نام کاربر
+       ============================================ */
+    .page-edit-user .eu-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        border-bottom: 1px solid #eaf0f4;
+        min-width: 0;
+    }
+
+    /* ============================================
+       ★ آواتار کاربر با عکس و حلقه‌های چرخان
+       ============================================ */
+    .page-edit-user .eu-avatar {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #ffffff;
+        color: var(--eu-primary);
+        font-size: 1.5rem;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 12px rgba(91, 155, 181, .15);
+        flex-shrink: 0;
+        overflow: visible;
+        transition: transform var(--eu-transition), box-shadow var(--eu-transition);
+        z-index: 2;
+    }
+
+    .page-edit-user .eu-card:hover .eu-avatar {
+        transform: scale(1.06);
+        box-shadow: 0 6px 18px rgba(91, 155, 181, .25);
+    }
+
+    /* ----- تصویر آواتار ----- */
+    .page-edit-user .eu-avatar img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 50%;
+        display: block;
+        z-index: 1;
+    }
+
+    .page-edit-user .eu-avatar>i {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ----- حلقه اول (نقطه‌چین) ----- */
+    .page-edit-user .eu-avatar .eu-avatar-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: calc(100% + 10px);
+        height: calc(100% + 10px);
+        margin-top: calc((100% + 10px) / -2);
+        margin-left: calc((100% + 10px) / -2);
+        border-radius: 50%;
+        border: 1.5px dashed var(--eu-primary);
+        opacity: 0.55;
+        animation: euAvatarRingRotate 12s linear infinite;
+        pointer-events: none;
+        z-index: 3;
+        transition: opacity .3s ease, border-color .3s ease;
+    }
+
+    /* ----- حلقه دوم (نقطه‌ای، جهت مخالف) ----- */
+    .page-edit-user .eu-avatar .eu-avatar-ring.ring-2 {
+        width: calc(100% + 20px);
+        height: calc(100% + 20px);
+        margin-top: calc((100% + 20px) / -2);
+        margin-left: calc((100% + 20px) / -2);
+        border: 1.5px dotted var(--eu-primary-light);
+        opacity: 0.45;
+        animation: euAvatarRingRotateReverse 18s linear infinite;
+    }
+
+    /* ----- انیمیشن‌ها ----- */
+    @keyframes euAvatarRingRotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes euAvatarRingRotateReverse {
+        from {
+            transform: rotate(360deg);
+        }
+
+        to {
+            transform: rotate(0deg);
+        }
+    }
+
+    /* ----- با hover، حلقه‌ها پررنگ‌تر بشن ----- */
+    .page-edit-user .eu-card:hover .eu-avatar-ring {
+        opacity: 0.85;
+        border-color: var(--eu-primary-dark);
+    }
+
+    .page-edit-user .eu-card:hover .eu-avatar-ring.ring-2 {
+        opacity: 0.65;
+    }
+
+    .page-edit-user .eu-header-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-edit-user .eu-header-title {
+        display: block;
+        margin: 0 0 6px;
+        color: var(--eu-text-primary);
+        font-size: clamp(.95rem, 1.15vw, 1.1rem);
+        font-weight: 800;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .page-edit-user .eu-header-username {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        background: #ffffff;
+        color: var(--eu-text-secondary);
+        font-size: clamp(.7rem, .82vw, .78rem);
+        font-weight: 600;
+        border-radius: 20px;
+        border: 1px solid #e8eef2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .page-edit-user .eu-header-username i {
+        color: var(--eu-primary);
+        font-size: .75rem;
+    }
+
+    /* ============================================
+       بدنه فرم
+       ============================================ */
+    .page-edit-user .eu-card-body {
+        padding: 26px;
+    }
+
+    .page-edit-user .eu-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .page-edit-user .eu-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    /* ============================================
+       برچسب فیلد
+       ============================================ */
+    .page-edit-user .eu-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #3d484b;
+        font-size: clamp(.75rem, .88vw, .82rem);
+        font-weight: 700;
+    }
+
+    .page-edit-user .eu-label i {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--eu-primary);
+        font-size: .82rem;
+        flex-shrink: 0;
+    }
+
+    /* ============================================
+       ورودی‌ها
+       ============================================ */
+    .page-edit-user .eu-input,
+    .page-edit-user .eu-select {
+        width: 100%;
+        min-height: 48px;
+        padding: 11px 15px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 12px;
+        outline: none;
+        background: #ffffff;
+        color: var(--eu-text-primary);
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .9vw, .85rem);
+        transition: all var(--eu-transition);
+    }
+
+    .page-edit-user .eu-input::placeholder {
+        color: var(--eu-text-muted);
+    }
+
+    .page-edit-user .eu-input:hover,
+    .page-edit-user .eu-select:hover {
+        border-color: #b8ccd2;
+    }
+
+    .page-edit-user .eu-input:focus,
+    .page-edit-user .eu-select:focus {
+        border-color: var(--eu-primary);
+        box-shadow: 0 0 0 4px rgba(91, 155, 181, .12);
+    }
+
+    .page-edit-user .eu-select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b9bb5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        background-size: 16px;
+        padding-left: 40px;
+    }
+
+    /* ============================================
+       خطاها
+       ============================================ */
+    .page-edit-user .eu-error {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+        color: #e17055;
+        font-size: clamp(.65rem, .78vw, .74rem);
+        font-weight: 600;
+    }
+
+    .page-edit-user .eu-error::before {
+        content: "\f06a";
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro";
+        font-weight: 900;
+        font-size: .72rem;
+        flex-shrink: 0;
+    }
+
+    /* ============================================
+       دکمه‌ها
+       ============================================ */
+    .page-edit-user .eu-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #eef3f6;
+        flex-wrap: wrap;
+    }
+
+    .page-edit-user .eu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 10px 22px;
+        border-radius: 12px;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .9vw, .86rem);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--eu-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-edit-user .eu-btn i {
+        font-size: .95rem;
+    }
+
+    /* دکمه ذخیره (اصلی) */
+    .page-edit-user .eu-btn-primary {
+        background: linear-gradient(135deg, #5b9bb5 0%, #7ab5a0 100%);
+        color: #ffffff;
+        box-shadow: 0 3px 12px rgba(91, 155, 181, .25);
+        border-color: transparent;
+    }
+
+    .page-edit-user .eu-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(91, 155, 181, .35);
+        color: #ffffff;
+    }
+
+    .page-edit-user .eu-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    /* دکمه انصراف (ثانویه) */
+    .page-edit-user .eu-btn-secondary {
+        background: #ffffff;
+        border-color: var(--eu-border-soft);
+        color: var(--eu-text-secondary);
+    }
+
+    .page-edit-user .eu-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--eu-primary-dark);
+        transform: translateY(-2px);
+    }
+
+    .page-edit-user .eu-btn-secondary:active {
+        transform: translateY(0);
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .page-edit-user .eu-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .page-edit-user .eu-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-edit-user .eu-card-header {
+            padding: 18px;
+            gap: 12px;
+        }
+
+        .page-edit-user .eu-card-body {
+            padding: 20px;
+        }
+
+        .page-edit-user .eu-avatar {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.25rem;
+        }
+
+        .page-edit-user .eu-avatar .eu-avatar-ring {
+            width: calc(100% + 8px);
+            height: calc(100% + 8px);
+            margin-top: calc((100% + 8px) / -2);
+            margin-left: calc((100% + 8px) / -2);
+        }
+
+        .page-edit-user .eu-avatar .eu-avatar-ring.ring-2 {
+            width: calc(100% + 16px);
+            height: calc(100% + 16px);
+            margin-top: calc((100% + 16px) / -2);
+            margin-left: calc((100% + 16px) / -2);
+        }
+    }
+
+    @media (max-width: 380px) {
+        .page-edit-user .eu-wrap {
+            padding: 8px;
+        }
+
+        .page-edit-user .eu-card-header,
+        .page-edit-user .eu-card-body {
+            padding: 16px;
+        }
+
+        .page-edit-user .eu-avatar {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .page-edit-user .eu-wrap *,
+        .page-edit-user .eu-wrap *::before,
+        .page-edit-user .eu-wrap *::after,
+        .page-edit-user .eu-avatar-ring {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

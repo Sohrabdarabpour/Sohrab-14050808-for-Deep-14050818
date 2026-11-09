@@ -1,0 +1,351 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت زیرگروه‌های سند{% endblock %}
+
+{% block body_class %}page-document-subgroups{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/subgroups/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="sg-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="sg-header">
+        <div class="sg-header-title">
+            <div class="sg-header-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="sg-header-text">
+                <h1>مدیریت زیرگروه‌های سند</h1>
+                <p>ایجاد، ویرایش و مدیریت زیرگروه‌ها و ارتباط آن‌ها با گروه‌ها و دپارتمان‌ها</p>
+            </div>
+        </div>
+
+        <div class="sg-header-actions">
+
+            <!-- ★ کانتینر جدا برای ایمپورت/اکسپورت -->
+            <div class="sg-io-container">
+                <a href="{{ url_for('document_group.subgroup_export_excel', group_id=selected_group_id, department_id=selected_department_id) }}"
+                   class="sg-btn sg-btn-export"
+                   title="خروجی اکسل از لیست زیرگروه‌ها">
+                    <i class="fa-solid fa-file-excel"></i>
+                    خروجی اکسل
+                </a>
+
+                <!-- ★ خروجی Flat (هر ترکیب یک ردیف) -->
+                <a href="{{ url_for('document_group.subgroup_export_excel_flat',
+                                    group_id=selected_group_id,
+                                    department_id=selected_department_id) }}"
+                class="sg-btn sg-btn-export"
+                title="خروجی Flat — هر ترکیب گروه/دپارتمان یک ردیف">
+                    <i class="fa-solid fa-table-list"></i>
+                    خروجی Flat
+                </a>
+
+                <a href="{{ url_for('document_group.subgroup_import') }}"
+                   class="sg-btn sg-btn-import"
+                   title="ایمپورت زیرگروه‌ها از فایل اکسل">
+                    <i class="fa-solid fa-file-import"></i>
+                    ایمپورت از اکسل
+                </a>
+            </div>
+
+            <!-- دکمه‌های اصلی -->
+            <a href="{{ url_for('document_group.group_list') }}"
+               class="sg-btn sg-btn-secondary">
+                <i class="fa-solid fa-layer-group"></i>
+                مدیریت گروه‌ها
+            </a>
+
+            <a href="{{ url_for('document_group.subgroup_add', group_id=selected_group_id) }}"
+               class="sg-btn sg-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                زیرگروه جدید
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== آمار ===== -->
+    <section class="sg-stats-grid">
+        <div class="sg-stat-card" style="--stat-color: #167a5c;">
+            <div class="sg-stat-icon green">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div>
+                <span class="sg-stat-label">کل زیرگروه‌ها</span>
+                <span class="sg-stat-value">{{ subgroups|length }}</span>
+            </div>
+        </div>
+
+        <div class="sg-stat-card" style="--stat-color: #2b6cb0;">
+            <div class="sg-stat-icon blue">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span class="sg-stat-label">فعال</span>
+                <span class="sg-stat-value">
+                    {{ subgroups | selectattr('is_active') | list | length }}
+                </span>
+            </div>
+        </div>
+
+        <div class="sg-stat-card" style="--stat-color: #d69e2e;">
+            <div class="sg-stat-icon orange">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div>
+                <span class="sg-stat-label">غیرفعال</span>
+                <span class="sg-stat-value">
+                    {{ subgroups | rejectattr('is_active') | list | length }}
+                </span>
+            </div>
+        </div>
+
+        <div class="sg-stat-card" style="--stat-color: #805ad5;">
+            <div class="sg-stat-icon purple">
+                <i class="fa-solid fa-link"></i>
+            </div>
+            <div>
+                <span class="sg-stat-label">کل ارتباطات گروهی</span>
+                <span class="sg-stat-value">
+                    {{ subgroups | sum(attribute='groups_count') }}
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== فیلتر ===== -->
+    <section class="sg-filter-panel">
+        <form method="GET" class="sg-filter-form">
+            <div class="sg-search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" name="search" value="{{ search }}"
+                       placeholder="جستجو در عنوان یا کد زیرگروه...">
+            </div>
+
+            <select name="group_id" class="sg-select">
+                <option value="">— همه گروه‌ها —</option>
+                {% for g in groups %}
+                <option value="{{ g.id }}"
+                        {% if selected_group_id == g.id %}selected{% endif %}>
+                    {{ g.title }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <select name="department_id" class="sg-select">
+                <option value="">— همه دپارتمان‌ها —</option>
+                {% for d in departments %}
+                <option value="{{ d.id }}"
+                        {% if selected_department_id == d.id %}selected{% endif %}>
+                    {{ d.title }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label class="sg-checkbox-wrap">
+                <input type="checkbox" name="active" value="1"
+                       {% if active_only %}checked{% endif %}>
+                فقط فعال‌ها
+            </label>
+
+            <button type="submit" class="sg-btn sg-btn-primary">
+                <i class="fa-solid fa-filter"></i>
+                اعمال
+            </button>
+        </form>
+    </section>
+
+    <!-- ===== لیست زیرگروه‌ها به صورت کارت ===== -->
+    {% if subgroups %}
+    <section class="sg-cards-grid">
+
+        {% for sg in subgroups %}
+        <article class="sg-card" style="--card-color: {{ sg.color or '#167a5c' }};">
+
+            <!-- هدر کارت -->
+            <div class="sg-card-header">
+                <div class="sg-card-icon">
+                    <i class="fa-solid fa-tag"></i>
+                </div>
+
+                <div class="sg-card-info">
+                    <h3 class="sg-card-title" title="{{ sg.title }}">
+                        {{ sg.title }}
+                    </h3>
+                    <div class="sg-card-meta">
+                        {% if sg.code %}
+                        <span class="sg-card-code">
+                            <i class="fa-solid fa-hashtag"></i>
+                            {{ sg.code }}
+                        </span>
+                        {% endif %}
+
+                        {% if sg.is_active %}
+                        <span class="sg-badge sg-badge-active">
+                            <i class="fa-solid fa-circle"></i>
+                            فعال
+                        </span>
+                        {% else %}
+                        <span class="sg-badge sg-badge-inactive">
+                            <i class="fa-solid fa-circle"></i>
+                            غیرفعال
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- دکمه toggle سریع -->
+                <form method="POST"
+                      action="{{ url_for('document_group.subgroup_toggle', subgroup_id=sg.id) }}"
+                      class="sg-toggle-form"
+                      title="{% if sg.is_active %}غیرفعال کردن{% else %}فعال کردن{% endif %}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="sg-toggle-btn">
+                        <i class="fa-solid {% if sg.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- بدنه کارت — چیدمان 3 ستونی -->
+            <div class="sg-card-body">
+
+                <!-- ستون ۱: آمار -->
+                <div class="sg-card-stats">
+                    <div class="sg-card-stat">
+                        <i class="fa-solid fa-clock"></i>
+                        بازه بررسی
+                        <strong>{{ sg.days_review }} روز</strong>
+                    </div>
+                    <div class="sg-card-stat">
+                        <i class="fa-solid fa-file-lines"></i>
+                        اسناد
+                        <strong>{{ sg.documents_count }}</strong>
+                    </div>
+                    <div class="sg-card-stat">
+                        <i class="fa-solid fa-sort"></i>
+                        ترتیب
+                        <strong>{{ sg.sort_order }}</strong>
+                    </div>
+                </div>
+
+                <!-- ستون ۲: گروه‌های مرتبط -->
+                <div class="sg-card-section">
+                    <div class="sg-card-section-title">
+                        <i class="fa-solid fa-layer-group"></i>
+                        گروه‌های مرتبط
+                        {% if sg.groups %}
+                        <span class="sg-section-count">{{ sg.groups|length }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if sg.groups %}
+                    <div class="sg-chips-wrap">
+                        {% for g in sg.groups[:4] %}
+                        <a href="{{ url_for('document_group.group_detail', group_id=g.id) }}"
+                           class="sg-chip sg-chip-group"
+                           title="{{ g.title }}">
+                            <i class="fa-solid fa-layer-group"></i>
+                            {{ g.title }}
+                        </a>
+                        {% endfor %}
+                        {% if sg.groups|length > 4 %}
+                        <a href="{{ url_for('document_group.subgroup_detail', subgroup_id=sg.id) }}"
+                           class="sg-chip sg-chip-more">
+                            +{{ sg.groups|length - 4 }} مورد دیگر
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="sg-chips-empty">
+                        <i class="fa-solid fa-circle-info"></i>
+                        بدون گروه
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- ستون ۳: دپارتمان‌های متولی -->
+                <div class="sg-card-section">
+                    <div class="sg-card-section-title">
+                        <i class="fa-solid fa-building"></i>
+                        دپارتمان‌های متولی
+                        {% if sg.departments %}
+                        <span class="sg-section-count">{{ sg.departments|length }}</span>
+                        {% endif %}
+                    </div>
+
+                    {% if sg.departments %}
+                    <div class="sg-chips-wrap">
+                        {% for d in sg.departments[:4] %}
+                        <span class="sg-chip sg-chip-dept"
+                              title="{{ d.title }}">
+                            <i class="fa-solid fa-building"></i>
+                            {{ d.title }}
+                        </span>
+                        {% endfor %}
+                        {% if sg.departments|length > 4 %}
+                        <a href="{{ url_for('document_group.subgroup_detail', subgroup_id=sg.id) }}"
+                           class="sg-chip sg-chip-more">
+                            +{{ sg.departments|length - 4 }} مورد دیگر
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <span class="sg-chips-empty">
+                        <i class="fa-solid fa-circle-info"></i>
+                        بدون دپارتمان
+                    </span>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- اکشن‌ها — سمت راست -->
+            <div class="sg-card-actions">
+                <a href="{{ url_for('document_group.subgroup_detail', subgroup_id=sg.id) }}"
+                   class="sg-action-btn sg-action-view">
+                    <i class="fa-solid fa-eye"></i>
+                    مشاهده
+                </a>
+
+                <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=sg.id) }}"
+                   class="sg-action-btn sg-action-edit">
+                    <i class="fa-solid fa-pen"></i>
+                    ویرایش
+                </a>
+
+                <form method="POST"
+                      action="{{ url_for('document_group.subgroup_delete', subgroup_id=sg.id) }}"
+                      onsubmit="return confirm('حذف زیرگروه «{{ sg.title }}»؟\n\nارتباط با گروه‌ها و دپارتمان‌ها قطع می‌شود.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit"
+                            class="sg-action-btn sg-action-delete">
+                        <i class="fa-solid fa-trash"></i>
+                        حذف
+                    </button>
+                </form>
+            </div>
+
+        </article>
+        {% endfor %}
+
+    </section>
+
+    {% else %}
+    <div class="sg-empty">
+        <i class="fa-solid fa-diagram-project"></i>
+        <h3>هیچ زیرگروهی یافت نشد</h3>
+        <p>هنوز زیرگروهی ایجاد نکرده‌اید یا نتیجه‌ای برای فیلتر فعلی وجود ندارد.</p>
+        <a href="{{ url_for('document_group.subgroup_add') }}"
+           class="sg-btn sg-btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            ایجاد اولین زیرگروه
+        </a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

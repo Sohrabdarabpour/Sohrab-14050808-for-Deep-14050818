@@ -1,0 +1,1030 @@
+/* استایل صفحه: notifications/list.html */
+
+    /* ============================================================
+       متغیرهای اصلی
+       ============================================================ */
+    .page-notifications {
+        --nf-primary: #1b698b;
+        --nf-primary-2: #167a5c;
+        --nf-primary-dark: #14556f;
+        --nf-accent: #7c3aed;
+        --nf-text: #0f172a;
+        --nf-text-2: #64748b;
+        --nf-text-3: #94a3b8;
+        --nf-border: #e2e8f0;
+        --nf-border-soft: #eef2f6;
+        --nf-bg: #f4f7fa;
+        --nf-bg-card: #ffffff;
+        --nf-radius-xl: 24px;
+        --nf-radius-lg: 20px;
+        --nf-radius-md: 16px;
+        --nf-radius-sm: 12px;
+        --nf-shadow-xs: 0 1px 2px rgba(15, 23, 42, .04);
+        --nf-shadow-sm: 0 2px 8px rgba(15, 23, 42, .05);
+        --nf-shadow-md: 0 8px 24px rgba(15, 23, 42, .08);
+        --nf-shadow-lg: 0 16px 48px rgba(15, 23, 42, .12);
+        --nf-transition: .3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* ============================================================
+       کانتینر اصلی — استفاده حداکثری از عرض
+       ============================================================ */
+    .page-notifications .nf-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: clamp(16px, 2.5vw, 40px);
+        direction: rtl;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    @media (min-width: 1600px) {
+        .page-notifications .nf-wrap {
+            max-width: 1600px;
+        }
+    }
+
+    /* ============================================================
+       هدر
+       ============================================================ */
+    .page-notifications .nf-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: clamp(18px, 2vw, 26px) clamp(20px, 2.5vw, 32px);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #ecfdf5 100%);
+        border: 1.5px solid #e0f2fe;
+        border-radius: var(--nf-radius-lg);
+        margin-bottom: clamp(18px, 2vw, 28px);
+        overflow: hidden;
+        box-shadow: var(--nf-shadow-sm);
+    }
+
+    .page-notifications .nf-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 340px;
+        height: 340px;
+        background: radial-gradient(circle, rgba(27, 105, 139, .08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-notifications .nf-header::after {
+        content: '';
+        position: absolute;
+        bottom: -60%;
+        left: -5%;
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(circle, rgba(22, 122, 92, .08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-notifications .nf-header-info {
+        display: flex;
+        align-items: center;
+        gap: clamp(12px, 1.5vw, 16px);
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-notifications .nf-header-icon {
+        width: clamp(52px, 6vw, 62px);
+        height: clamp(52px, 6vw, 62px);
+        min-width: clamp(52px, 6vw, 62px);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--nf-primary) 0%, var(--nf-primary-2) 100%);
+        color: #fff;
+        font-size: clamp(1.25rem, 1.7vw, 1.55rem);
+        box-shadow:
+            0 8px 20px rgba(27, 105, 139, .35),
+            inset 0 1px 0 rgba(255, 255, 255, .25);
+        position: relative;
+        flex-shrink: 0;
+        animation: nfFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes nfFloat {
+
+        0%,
+        100% {
+            transform: translateY(0);
+        }
+
+        50% {
+            transform: translateY(-4px);
+        }
+    }
+
+    .page-notifications .nf-header-icon>i {
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .2));
+    }
+
+    .page-notifications .nf-header-icon:hover>i {
+        animation: nfRing .6s ease-in-out;
+    }
+
+    @keyframes nfRing {
+
+        0%,
+        100% {
+            transform: rotate(0);
+        }
+
+        25% {
+            transform: rotate(-15deg);
+        }
+
+        50% {
+            transform: rotate(15deg);
+        }
+
+        75% {
+            transform: rotate(-10deg);
+        }
+    }
+
+    .page-notifications .nf-header-badge {
+        position: absolute;
+        top: -8px;
+        left: -8px;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 7px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+        font-size: .72rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow:
+            0 4px 12px rgba(220, 38, 38, .5),
+            0 0 0 3px #fff;
+        animation: nfPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes nfPulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, .5), 0 0 0 3px #fff;
+        }
+
+        50% {
+            transform: scale(1.1);
+            box-shadow: 0 6px 16px rgba(220, 38, 38, .7), 0 0 0 3px #fff;
+        }
+    }
+
+    .page-notifications .nf-header-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-notifications .nf-header-text h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.5vw, 1.4rem);
+        font-weight: 900;
+        color: var(--nf-text);
+        letter-spacing: -.01em;
+        line-height: 1.4;
+        background: linear-gradient(135deg, #0f172a, #1b698b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-notifications .nf-header-text p {
+        margin: 6px 0 0;
+        font-size: clamp(0.74rem, 0.88vw, 0.86rem);
+        color: var(--nf-text-2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .page-notifications .nf-header-text p::before {
+        content: '\f017';
+        font-family: "Font Awesome 6 Free";
+        font-weight: 400;
+        font-size: .78rem;
+        color: var(--nf-text-3);
+    }
+
+    /* ============================================================
+       دکمه‌های فیلتر
+       ============================================================ */
+    .page-notifications .nf-filter {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-notifications .nf-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 18px;
+        border-radius: var(--nf-radius-sm);
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--nf-transition);
+        border: 1.5px solid;
+        position: relative;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .page-notifications .nf-btn i {
+        font-size: .9rem;
+        transition: transform var(--nf-transition);
+    }
+
+    .page-notifications .nf-btn:hover i {
+        transform: scale(1.15);
+    }
+
+    .page-notifications .nf-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(255, 255, 255, .3) 0%, transparent 70%);
+        opacity: 0;
+        transition: opacity var(--nf-transition);
+    }
+
+    .page-notifications .nf-btn:hover::before {
+        opacity: 1;
+    }
+
+    .page-notifications .nf-btn-primary {
+        background: linear-gradient(135deg, var(--nf-primary) 0%, var(--nf-primary-2) 100%);
+        color: #fff;
+        border-color: transparent;
+        box-shadow:
+            0 4px 14px rgba(27, 105, 139, .35),
+            inset 0 1px 0 rgba(255, 255, 255, .2);
+    }
+
+    .page-notifications .nf-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow:
+            0 8px 22px rgba(27, 105, 139, .45),
+            inset 0 1px 0 rgba(255, 255, 255, .2);
+        color: #fff;
+    }
+
+    .page-notifications .nf-btn-primary:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .page-notifications .nf-btn-outline {
+        background: #fff;
+        color: var(--nf-text-2);
+        border-color: var(--nf-border);
+        box-shadow: var(--nf-shadow-xs);
+    }
+
+    .page-notifications .nf-btn-outline:hover {
+        color: var(--nf-primary);
+        border-color: var(--nf-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 105, 139, .15);
+    }
+
+    .page-notifications .nf-btn-experts {
+        background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+        color: var(--nf-accent);
+        border-color: #ddd6fe;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, .12);
+    }
+
+    .page-notifications .nf-btn-experts:hover {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, .4);
+    }
+
+    /* ============================================================
+       لیست نوتیف‌ها
+       ============================================================ */
+    .page-notifications .nf-list {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(12px, 1.4vw, 16px);
+    }
+
+    /* ============================================================
+       آیتم نوتیف — طراحی جدید
+       ============================================================ */
+    .page-notifications .nf-item {
+        display: flex;
+        align-items: center;
+        gap: clamp(14px, 1.6vw, 20px);
+        padding: clamp(16px, 1.6vw, 20px) clamp(20px, 2vw, 28px);
+        background: #fff;
+        border: 1px solid var(--nf-border);
+        border-radius: var(--nf-radius-md);
+        transition: all var(--nf-transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--nf-shadow-xs);
+    }
+
+    /* ★ نوار رنگی سمت راست — نازک‌تر (3px) */
+    .page-notifications .nf-item::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        right: 0;
+        width: 3px;
+        border-radius: 3px 0 0 3px;
+        background: linear-gradient(180deg,
+                var(--nf-color, #1b698b),
+                color-mix(in srgb, var(--nf-color, #1b698b) 60%, #fff));
+        box-shadow: -1px 0 8px color-mix(in srgb, var(--nf-color, #1b698b) 30%, transparent);
+    }
+
+    /* ★ درخشش داخلی — ملایم */
+    .page-notifications .nf-item::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 120px;
+        height: 100%;
+        background: radial-gradient(circle at right center,
+                color-mix(in srgb, var(--nf-color, #1b698b) 4%, transparent) 0%,
+                transparent 70%);
+        pointer-events: none;
+        opacity: 0.6;
+    }
+
+    .page-notifications .nf-item.unread {
+        background: linear-gradient(90deg,
+                color-mix(in srgb, var(--nf-color, #1b698b) 4%, #fff) 0%,
+                #fff 25%);
+    }
+
+    .page-notifications .nf-item:hover {
+        transform: translateX(-3px);
+        box-shadow: 0 8px 24px color-mix(in srgb, var(--nf-color, #1b698b) 14%, transparent);
+        border-color: color-mix(in srgb, var(--nf-color, #1b698b) 25%, var(--nf-border));
+    }
+
+    /* ★ انیمیشن بازگشت به نخوانده */
+    .page-notifications .nf-item.just-unread {
+        animation: nfJustUnread .8s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    @keyframes nfJustUnread {
+        0% {
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, .5);
+        }
+
+        50% {
+            box-shadow: 0 0 0 8px rgba(99, 102, 241, .15);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+        }
+    }
+
+    /* ============================================================
+       لینک آیتم
+       ============================================================ */
+    .page-notifications .nf-item-link {
+        display: flex;
+        align-items: center;
+        gap: clamp(14px, 1.6vw, 20px);
+        flex: 1;
+        min-width: 0;
+        text-decoration: none;
+        color: inherit;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================================
+       آیکون نوتیف
+       ============================================================ */
+    .page-notifications .nf-icon {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--nf-color, #1b698b) 15%, #fff) 0%,
+                color-mix(in srgb, var(--nf-color, #1b698b) 6%, #fff) 100%);
+        color: var(--nf-color, #1b698b);
+        font-size: 1rem;
+        flex-shrink: 0;
+        position: relative;
+        box-shadow:
+            0 2px 8px color-mix(in srgb, var(--nf-color, #1b698b) 12%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, .6);
+        transition: all var(--nf-transition);
+    }
+
+    .page-notifications .nf-item:hover .nf-icon {
+        transform: scale(1.06) rotate(-3deg);
+        background: linear-gradient(135deg,
+                var(--nf-color, #1b698b),
+                color-mix(in srgb, var(--nf-color, #1b698b) 70%, #000));
+        color: #fff;
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--nf-color, #1b698b) 35%, transparent);
+    }
+
+    .page-notifications .nf-icon i {
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, .08));
+    }
+
+    /* ============================================================
+       محتوا
+       ============================================================ */
+    .page-notifications .nf-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .page-notifications .nf-title {
+        font-size: clamp(0.88rem, 1vw, 0.96rem);
+        font-weight: 800;
+        color: var(--nf-text);
+        line-height: 1.5;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-notifications .nf-item.unread .nf-title::after {
+        content: 'جدید';
+        display: inline-block;
+        padding: 2px 8px;
+        font-size: 0.62rem;
+        font-weight: 800;
+        color: #fff;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, .4);
+        animation: nfPulseSmall 2s ease-in-out infinite;
+    }
+
+    @keyframes nfPulseSmall {
+
+        0%,
+        100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .7;
+        }
+    }
+
+    .page-notifications .nf-message {
+        font-size: clamp(0.76rem, 0.9vw, 0.84rem);
+        color: var(--nf-text-2);
+        line-height: 1.7;
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    .page-notifications .nf-time {
+        font-size: clamp(0.68rem, 0.8vw, 0.74rem);
+        color: var(--nf-text-3);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        background: #f1f5f9;
+        border-radius: 20px;
+        font-weight: 500;
+        width: fit-content;
+    }
+
+    .page-notifications .nf-time i {
+        font-size: 0.68rem;
+        color: var(--nf-text-2);
+    }
+
+    /* ============================================================
+       دکمه‌های عملیات — افقی و کنار هم
+       ============================================================ */
+    .page-notifications .nf-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 1;
+        padding-right: 16px;
+        border-right: 1px solid var(--nf-border-soft);
+        margin-right: 4px;
+    }
+
+    .page-notifications .nf-act-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1.5px solid var(--nf-border);
+        background: #fff;
+        color: var(--nf-text-2);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all .25s cubic-bezier(.4, 0, .2, 1);
+        padding: 0;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-notifications .nf-act-btn i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-notifications .nf-act-btn:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 14px rgba(15, 23, 42, .12);
+    }
+
+    /* ★ دکمه خواندن (سبز) */
+    .page-notifications .nf-act-btn.read:hover {
+        background: linear-gradient(135deg, #22c55e, #16a34a);
+        border-color: #16a34a;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(22, 163, 74, .4);
+    }
+
+    /* ★★★ دکمه تبدیل به نخوانده (بنفش) ★★★ */
+    .page-notifications .nf-act-btn.unread {
+        color: #6366f1;
+        border-color: #c7d2fe;
+    }
+
+    .page-notifications .nf-act-btn.unread:hover {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        border-color: #4f46e5;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(99, 102, 241, .4);
+    }
+
+    /* ★ دکمه حذف (قرمز) */
+    .page-notifications .nf-act-btn.dismiss:hover {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        border-color: #dc2626;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(220, 38, 38, .4);
+    }
+
+    .page-notifications .nf-act-btn.loading {
+        opacity: .5;
+        pointer-events: none;
+    }
+
+    .page-notifications .nf-act-btn.loading i {
+        animation: nfSpin .8s linear infinite;
+    }
+
+    @keyframes nfSpin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ============================================================
+       انیمیشن حذف
+       ============================================================ */
+    .page-notifications .nf-item.removing {
+        animation: nfRemove .4s cubic-bezier(.4, 0, .2, 1) forwards;
+        overflow: hidden;
+    }
+
+    @keyframes nfRemove {
+        from {
+            opacity: 1;
+            max-height: 400px;
+            padding-top: 16px;
+            padding-bottom: 16px;
+            transform: scale(1);
+        }
+
+        to {
+            opacity: 0;
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            margin: 0;
+            border-width: 0;
+            transform: scale(.95);
+        }
+    }
+
+    /* ============================================================
+       حالت خالی
+       ============================================================ */
+    .page-notifications .nf-empty {
+        text-align: center;
+        padding: clamp(50px, 8vw, 80px) clamp(20px, 4vw, 40px);
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border: 2px dashed var(--nf-border);
+        border-radius: var(--nf-radius-lg);
+        color: var(--nf-text-2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-notifications .nf-empty::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(27, 105, 139, .06) 0%, transparent 70%);
+    }
+
+    .page-notifications .nf-empty i {
+        font-size: clamp(3rem, 6vw, 4rem);
+        color: #cbd5e0;
+        display: block;
+        margin-bottom: 18px;
+        animation: nfFloat 3s ease-in-out infinite;
+    }
+
+    .page-notifications .nf-empty h3 {
+        margin: 0 0 10px;
+        color: var(--nf-text);
+        font-weight: 800;
+        font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    }
+
+    .page-notifications .nf-empty p {
+        margin: 0;
+        font-size: clamp(0.8rem, 0.92vw, 0.88rem);
+    }
+
+    /* ============================================================
+       Toast
+       ============================================================ */
+    .page-notifications .nf-toast {
+        position: fixed;
+        bottom: clamp(16px, 2vw, 24px);
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background: #1e293b;
+        color: #fff;
+        padding: clamp(10px, 1.3vw, 13px) clamp(18px, 2.2vw, 24px);
+        border-radius: 12px;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+        font-size: clamp(0.78rem, 0.9vw, 0.87rem);
+        font-weight: 700;
+        box-shadow: 0 12px 32px rgba(15, 23, 42, .3);
+        z-index: 99999;
+        opacity: 0;
+        transition: all .3s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: calc(100% - 32px);
+    }
+
+    .page-notifications .nf-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .page-notifications .nf-toast.success {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+    }
+
+    .page-notifications .nf-toast.danger {
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+    }
+
+    /* ============================================================
+       Responsive Breakpoints
+       ============================================================ */
+    @media (max-width: 767px) {
+        .page-notifications .nf-header {
+            padding: 18px 20px;
+            gap: 14px;
+        }
+
+        .page-notifications .nf-header-info {
+            gap: 12px;
+        }
+
+        .page-notifications .nf-header-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.3rem;
+            border-radius: 16px;
+        }
+
+        .page-notifications .nf-filter {
+            justify-content: stretch;
+            width: 100%;
+        }
+
+        .page-notifications .nf-filter .nf-btn {
+            flex: 1 1 auto;
+            padding: 9px 12px;
+            font-size: .78rem;
+        }
+
+        .page-notifications .nf-item {
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .page-notifications .nf-item::before {
+            top: 10px;
+            bottom: 10px;
+        }
+
+        .page-notifications .nf-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            font-size: 0.92rem;
+            border-radius: 11px;
+        }
+
+        .page-notifications .nf-actions {
+            padding-right: 12px;
+            gap: 6px;
+        }
+
+        .page-notifications .nf-act-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 0.8rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-notifications .nf-wrap {
+            padding: 0 clamp(8px, 2vw, 12px);
+        }
+
+        .page-notifications .nf-header {
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border-radius: var(--nf-radius-md);
+        }
+
+        .page-notifications .nf-header-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.15rem;
+            border-radius: 14px;
+        }
+
+        .page-notifications .nf-header-badge {
+            min-width: 22px;
+            height: 22px;
+            padding: 0 6px;
+            font-size: .66rem;
+            top: -6px;
+            left: -6px;
+        }
+
+        .page-notifications .nf-header-text h1 {
+            font-size: 1rem;
+        }
+
+        .page-notifications .nf-header-text p {
+            font-size: .72rem;
+        }
+
+        .page-notifications .nf-filter {
+            flex-direction: column;
+        }
+
+        .page-notifications .nf-filter .nf-btn {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: .8rem;
+        }
+
+        .page-notifications .nf-item {
+            padding: 12px 14px;
+            gap: 10px;
+            border-radius: var(--nf-radius-sm);
+        }
+
+        .page-notifications .nf-item-link {
+            gap: 10px;
+        }
+
+        .page-notifications .nf-icon {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: 0.85rem;
+            border-radius: 10px;
+        }
+
+        .page-notifications .nf-title {
+            font-size: 0.84rem;
+        }
+
+        .page-notifications .nf-message {
+            font-size: 0.74rem;
+            line-height: 1.7;
+        }
+
+        .page-notifications .nf-time {
+            font-size: 0.66rem;
+            padding: 3px 8px;
+        }
+
+        .page-notifications .nf-actions {
+            flex-direction: column;
+            padding-right: 10px;
+            gap: 4px;
+        }
+
+        .page-notifications .nf-act-btn {
+            width: 30px;
+            height: 30px;
+            font-size: 0.72rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .page-notifications .nf-header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 1.05rem;
+        }
+
+        .page-notifications .nf-header-text h1 {
+            font-size: .92rem;
+        }
+
+        .page-notifications .nf-item {
+            padding: 10px 12px;
+        }
+
+        .page-notifications .nf-icon {
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            font-size: 0.78rem;
+        }
+
+        .page-notifications .nf-act-btn {
+            width: 28px;
+            height: 28px;
+        }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+        .page-notifications .nf-header {
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+
+        .page-notifications .nf-item {
+            padding: 10px 12px;
+        }
+
+        .page-notifications .nf-message {
+            -webkit-line-clamp: 1;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-notifications * {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+
+    /* ============================================================
+       دارک مود
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+        .page-notifications {
+            --nf-text: #f1f5f9;
+            --nf-text-2: #94a3b8;
+            --nf-text-3: #64748b;
+            --nf-border: #334155;
+            --nf-border-soft: #1e293b;
+            --nf-bg: #0f172a;
+            --nf-bg-card: #1e293b;
+        }
+
+        .page-notifications .nf-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+
+        .page-notifications .nf-header-text h1 {
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-notifications .nf-btn-outline {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        .page-notifications .nf-btn-experts {
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%);
+            color: #d8b4fe;
+            border-color: #4c1d95;
+        }
+
+        .page-notifications .nf-item {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .page-notifications .nf-item.unread {
+            background: linear-gradient(90deg,
+                    color-mix(in srgb, var(--nf-color, #1b698b) 10%, #1e293b) 0%,
+                    #1e293b 25%);
+        }
+
+        .page-notifications .nf-title {
+            color: #f1f5f9;
+        }
+
+        .page-notifications .nf-time {
+            background: #0f172a;
+            color: #94a3b8;
+        }
+
+        .page-notifications .nf-act-btn {
+            background: #0f172a;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        .page-notifications .nf-act-btn.unread {
+            color: #a5b4fc;
+            border-color: #4338ca;
+        }
+
+        .page-notifications .nf-empty {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+
+        .page-notifications .nf-empty h3 {
+            color: #f1f5f9;
+        }
+    }

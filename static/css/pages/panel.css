@@ -1,0 +1,621 @@
+/* ============================================
+   PANEL PAGE - MANAGEMENT PANEL
+   استایل اختصاصی پنل مدیریت
+   ============================================ */
+.panel-page {
+    --panel-primary: #5b6f82;
+    --panel-primary-light: #7890a4;
+    --panel-primary-dark: #435565;
+    --panel-secondary: #00a896;
+    --panel-success: #00B894;
+    --panel-warning: #FDCB6E;
+    --panel-danger: #E17055;
+    --panel-info: #0984E3;
+    --panel-dark: #2D3436;
+    --panel-gray: #636E72;
+    --panel-light-gray: #DFE6E9;
+    --panel-bg: #f4f7f9;
+    --panel-white: #ffffff;
+    --panel-shadow: 0 8px 30px rgba(45, 52, 54, 0.08);
+    --panel-hover-shadow: 0 14px 40px rgba(45, 52, 54, 0.13);
+    --panel-radius: 18px;
+    --panel-transition: all 0.3s ease;
+    --panel-gradient: linear-gradient(135deg, #5b6f82 0%, #7890a4 100%);
+}
+
+/* ============================================
+   PANEL HEADER
+   ============================================ */
+.panel-page .panel-header {
+    background: var(--panel-gradient);
+    color: var(--panel-white);
+    border-radius: var(--panel-radius);
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    box-shadow: var(--panel-shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-page .panel-header::before {
+    content: '';
+    position: absolute;
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    top: -90px;
+    left: -50px;
+}
+
+.panel-page .panel-header::after {
+    content: '';
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    bottom: -60px;
+    right: 10%;
+}
+
+.panel-page .panel-header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.panel-page .panel-header-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin: 0;
+}
+
+.panel-page .panel-header-title i {
+    margin-left: 10px;
+}
+
+.panel-page .panel-header-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-top: 6px;
+    margin-bottom: 0;
+}
+
+/* ============================================
+   PANEL CARDS
+   ============================================ */
+.panel-page .panel-card {
+    background: var(--panel-white);
+    border: none;
+    border-radius: var(--panel-radius);
+    box-shadow: var(--panel-shadow);
+    overflow: hidden;
+    transition: var(--panel-transition);
+}
+
+.panel-page .panel-card:hover {
+    box-shadow: var(--panel-hover-shadow);
+    transform: translateY(-2px);
+}
+
+.panel-page .panel-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 18px 22px;
+    background: #ffffff;
+    border-bottom: 1px solid #eef1f3;
+    color: var(--panel-dark);
+    font-weight: 700;
+}
+
+.panel-page .panel-card-header i {
+    color: var(--panel-primary);
+    font-size: 1.2rem;
+}
+
+.panel-page .panel-card-body {
+    padding: 22px;
+}
+
+/* ============================================
+   QUICK ACTIONS
+   ============================================ */
+.panel-page .panel-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.panel-page .panel-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 150px;
+    padding: 20px 14px;
+    background: var(--panel-white);
+    border: 1px solid #edf0f2;
+    border-radius: 16px;
+    text-decoration: none;
+    color: var(--panel-dark);
+    transition: var(--panel-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.panel-page .panel-action-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    height: 3px;
+    background: var(--panel-gradient);
+    transform: scaleX(0);
+    transition: var(--panel-transition);
+}
+
+.panel-page .panel-action-card:hover {
+    color: var(--panel-dark);
+    text-decoration: none;
+    transform: translateY(-5px);
+    box-shadow: var(--panel-hover-shadow);
+    border-color: rgba(91, 111, 130, 0.2);
+}
+
+.panel-page .panel-action-card:hover::after {
+    transform: scaleX(1);
+}
+
+.panel-page .panel-action-icon {
+    width: 58px;
+    height: 58px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    background: rgba(91, 111, 130, 0.1);
+    color: var(--panel-primary);
+    font-size: 1.6rem;
+    transition: var(--panel-transition);
+}
+
+.panel-page .panel-action-card:hover .panel-action-icon {
+    transform: scale(1.08);
+}
+
+.panel-page .panel-action-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.panel-page .panel-action-description {
+    font-size: 0.7rem;
+    color: var(--panel-gray);
+    text-align: center;
+    margin-top: 4px;
+}
+
+/* ============================================
+   USER MANAGEMENT
+   ============================================ */
+.panel-page .users-table-wrapper {
+    overflow-x: auto;
+}
+
+.panel-page .users-table {
+    width: 100%;
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.panel-page .users-table thead th {
+    background: #f6f8fa;
+    color: var(--panel-dark);
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 13px 15px;
+    border-bottom: 1px solid #e9ecef;
+    white-space: nowrap;
+}
+
+.panel-page .users-table tbody td {
+    padding: 14px 15px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f0f2f4;
+    font-size: 0.82rem;
+}
+
+.panel-page .users-table tbody tr {
+    transition: background 0.2s ease;
+}
+
+.panel-page .users-table tbody tr:hover {
+    background: #f8fafb;
+}
+
+.panel-page .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(91, 111, 130, 0.12);
+    color: var(--panel-primary);
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.panel-page .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.panel-page .user-name {
+    font-weight: 700;
+    color: var(--panel-dark);
+}
+
+.panel-page .user-username {
+    font-size: 0.7rem;
+    color: var(--panel-gray);
+    direction: ltr;
+    text-align: right;
+}
+
+/* ============================================
+   ROLE BADGES
+   ============================================ */
+.panel-page .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.panel-page .role-badge.expert {
+    background: rgba(9, 132, 227, 0.1);
+    color: #0984E3;
+}
+
+.panel-page .role-badge.supervisor {
+    background: rgba(253, 203, 110, 0.18);
+    color: #9a7410;
+}
+
+.panel-page .role-badge.manager {
+    background: rgba(0, 184, 148, 0.1);
+    color: #008f73;
+}
+
+.panel-page .role-badge.admin {
+    background: rgba(91, 111, 130, 0.14);
+    color: var(--panel-primary-dark);
+}
+
+/* ============================================
+   PANEL BUTTONS
+   ============================================ */
+.panel-page .panel-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 15px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--panel-transition);
+    cursor: pointer;
+}
+
+.panel-page .panel-btn:hover {
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.panel-page .panel-btn-primary {
+    background: var(--panel-gradient);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(91, 111, 130, 0.25);
+}
+
+.panel-page .panel-btn-primary:hover {
+    color: #ffffff;
+    box-shadow: 0 7px 20px rgba(91, 111, 130, 0.3);
+}
+
+.panel-page .panel-btn-success {
+    background: var(--panel-success);
+    color: #ffffff;
+}
+
+.panel-page .panel-btn-success:hover {
+    color: #ffffff;
+}
+
+.panel-page .panel-btn-danger {
+    background: var(--panel-danger);
+    color: #ffffff;
+}
+
+.panel-page .panel-btn-danger:hover {
+    color: #ffffff;
+}
+
+.panel-page .panel-btn-light {
+    background: #f1f3f5;
+    color: var(--panel-dark);
+}
+
+.panel-page .panel-btn-light:hover {
+    color: var(--panel-dark);
+    background: #e6e9ec;
+}
+
+/* ============================================
+   FORM SECTION
+   ============================================ */
+.panel-page .panel-form-card {
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.panel-page .panel-form-group {
+    margin-bottom: 18px;
+}
+
+.panel-page .panel-form-label {
+    display: block;
+    margin-bottom: 7px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--panel-dark);
+}
+
+.panel-page .panel-form-label i {
+    color: var(--panel-primary);
+    margin-left: 5px;
+}
+
+.panel-page .panel-form-control {
+    width: 100%;
+    min-height: 44px;
+    border: 1px solid #dfe4e8;
+    border-radius: 10px;
+    padding: 9px 13px;
+    background: #ffffff;
+    color: var(--panel-dark);
+    font-size: 0.85rem;
+    transition: var(--panel-transition);
+}
+
+.panel-page .panel-form-control:focus {
+    outline: none;
+    border-color: var(--panel-primary);
+    box-shadow: 0 0 0 4px rgba(91, 111, 130, 0.1);
+}
+
+.panel-page textarea.panel-form-control {
+    min-height: 110px;
+    resize: vertical;
+}
+
+/* ============================================
+   PROFILE CARD
+   ============================================ */
+.panel-page .profile-card {
+    text-align: center;
+    padding: 30px 20px;
+}
+
+.panel-page .profile-avatar {
+    width: 88px;
+    height: 88px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel-gradient);
+    color: #ffffff;
+    font-size: 2.2rem;
+    box-shadow: 0 8px 25px rgba(91, 111, 130, 0.25);
+}
+
+.panel-page .profile-name {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--panel-dark);
+    margin-bottom: 4px;
+}
+
+.panel-page .profile-username {
+    direction: ltr;
+    color: var(--panel-gray);
+    font-size: 0.78rem;
+}
+
+.panel-page .profile-role {
+    margin-top: 12px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+.panel-page .panel-empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--panel-gray);
+}
+
+.panel-page .panel-empty-state i {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 14px;
+    opacity: 0.45;
+}
+
+.panel-page .panel-empty-state-title {
+    color: var(--panel-dark);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.panel-page .panel-empty-state-text {
+    font-size: 0.8rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 992px) {
+    .panel-page .panel-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .panel-page .panel-header {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .panel-page .panel-header-title {
+        font-size: 1.15rem;
+    }
+
+    .panel-page .panel-card-body {
+        padding: 16px;
+    }
+
+    .panel-page .panel-actions-grid {
+        gap: 12px;
+    }
+
+    .panel-page .panel-action-card {
+        min-height: 130px;
+        padding: 15px 10px;
+    }
+
+    .panel-page .panel-action-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 1.3rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .panel-page .panel-actions-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .panel-page .panel-action-card {
+        min-height: 115px;
+        border-radius: 12px;
+    }
+
+    .panel-page .panel-action-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        margin-bottom: 8px;
+    }
+
+    .panel-page .panel-action-title {
+        font-size: 0.72rem;
+    }
+
+    .panel-page .panel-action-description {
+        display: none;
+    }
+
+    .panel-page .panel-header-subtitle {
+        font-size: 0.75rem;
+    }
+
+    .panel-page .users-table thead th,
+    .panel-page .users-table tbody td {
+        padding: 10px 8px;
+        font-size: 0.7rem;
+    }
+}
+
+/* ============================================
+   DARK MODE
+   ============================================ */
+@media (prefers-color-scheme: dark) {
+    .panel-page {
+        --panel-bg: #16191c;
+        --panel-white: #1e2327;
+        --panel-dark: #e8ecef;
+        --panel-gray: #9aa4ab;
+        --panel-light-gray: #343b40;
+        --panel-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .panel-page .panel-card {
+        background: var(--panel-white);
+    }
+
+    .panel-page .panel-card-header {
+        background: var(--panel-white);
+        border-bottom-color: #343b40;
+        color: var(--panel-dark);
+    }
+
+    .panel-page .panel-action-card {
+        background: var(--panel-white);
+        border-color: #343b40;
+        color: var(--panel-dark);
+    }
+
+    .panel-page .panel-action-card:hover {
+        color: var(--panel-dark);
+    }
+
+    .panel-page .users-table thead th {
+        background: #272d31;
+        color: var(--panel-dark);
+    }
+
+    .panel-page .users-table tbody td {
+        border-bottom-color: #343b40;
+    }
+
+    .panel-page .users-table tbody tr:hover {
+        background: #252b2f;
+    }
+
+    .panel-page .user-name,
+    .panel-page .panel-form-label,
+    .panel-page .profile-name,
+    .panel-page .panel-empty-state-title {
+        color: var(--panel-dark);
+    }
+
+    .panel-page .panel-form-control {
+        background: #272d31;
+        border-color: #3a4248;
+        color: var(--panel-dark);
+    }
+
+    .panel-page .panel-btn-light {
+        background: #343b40;
+        color: var(--panel-dark);
+    }
+}

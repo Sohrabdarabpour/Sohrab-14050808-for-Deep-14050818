@@ -1,0 +1,569 @@
+/* استایل صفحه: document_group/groups/import.html */
+
+    .page-document-group-import {
+        --im-primary: #1b698b;
+        --im-primary-light: #167a5c;
+        --im-text: #2d3e4a;
+        --im-text-secondary: #6b7d8a;
+        --im-text-muted: #a0aeb8;
+        --im-border: #d8e6ed;
+        --im-radius-lg: 18px;
+        --im-radius-md: 12px;
+        --im-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --im-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-document-group-import .im-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+    }
+
+    /* هدر */
+    .page-document-group-import .im-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: clamp(18px, 2.2vw, 26px);
+        background: linear-gradient(135deg, #eef4fb 0%, #e8f2f7 100%);
+        border: 1.5px solid #cce2f3;
+        border-radius: var(--im-radius-lg);
+        box-shadow: var(--im-shadow-sm);
+        margin-bottom: 22px;
+    }
+
+    .page-document-group-import .im-header-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .page-document-group-import .im-header-icon {
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+        color: #fff;
+        font-size: 1.4rem;
+        box-shadow: 0 8px 20px rgba(43, 108, 176, .28);
+        flex-shrink: 0;
+    }
+
+    .page-document-group-import .im-header-text h1 {
+        margin: 0;
+        color: var(--im-text);
+        font-size: 1.3rem;
+        font-weight: 900;
+    }
+
+    .page-document-group-import .im-header-text p {
+        margin: 5px 0 0;
+        color: var(--im-text-secondary);
+        font-size: .82rem;
+    }
+
+    .page-document-group-import .im-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 18px;
+        border-radius: 11px;
+        background: #fff;
+        border: 1.5px solid var(--im-border);
+        color: var(--im-text-secondary);
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        transition: all var(--im-transition);
+    }
+
+    .page-document-group-import .im-back-btn:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--im-primary);
+        transform: translateY(-2px);
+    }
+
+    /* کارت اصلی */
+    .page-document-group-import .im-card {
+        background: #fff;
+        border: 1.5px solid var(--im-border);
+        border-radius: var(--im-radius-lg);
+        box-shadow: var(--im-shadow-sm);
+        padding: clamp(20px, 2.4vw, 30px);
+        margin-bottom: 22px;
+    }
+
+    .page-document-group-import .im-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 18px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #eef3f6;
+        color: var(--im-text);
+        font-size: 1rem;
+        font-weight: 800;
+    }
+
+    .page-document-group-import .im-section-title i {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--im-primary), var(--im-primary-light));
+        color: #fff;
+        border-radius: 9px;
+        font-size: .85rem;
+    }
+
+    /* دکمه دانلود قالب */
+    .page-document-group-import .im-template-box {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 18px;
+        background: linear-gradient(135deg, #eaf6f1 0%, #f0f9f4 100%);
+        border: 1.5px solid #c8e6d8;
+        border-radius: var(--im-radius-md);
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .page-document-group-import .im-template-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #1d6f42, #2e8b57);
+        color: #fff;
+        font-size: 1.2rem;
+        box-shadow: 0 6px 16px rgba(29, 111, 66, .25);
+        flex-shrink: 0;
+    }
+
+    .page-document-group-import .im-template-text {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .page-document-group-import .im-template-text h3 {
+        margin: 0 0 4px;
+        color: #276749;
+        font-size: .95rem;
+        font-weight: 800;
+    }
+
+    .page-document-group-import .im-template-text p {
+        margin: 0;
+        color: #4a5568;
+        font-size: .78rem;
+        line-height: 1.5;
+    }
+
+    .page-document-group-import .im-template-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: linear-gradient(135deg, #1d6f42, #2e8b57);
+        color: #fff;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        border-radius: 10px;
+        box-shadow: 0 4px 14px rgba(29, 111, 66, .25);
+        transition: all var(--im-transition);
+        white-space: nowrap;
+    }
+
+    .page-document-group-import .im-template-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(29, 111, 66, .38);
+        color: #fff;
+    }
+
+    /* فرم آپلود */
+    .page-document-group-import .im-form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .page-document-group-import .im-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #3d484b;
+        font-size: .84rem;
+        font-weight: 700;
+    }
+
+    .page-document-group-import .im-label i {
+        color: var(--im-primary);
+    }
+
+    .page-document-group-import .im-label .required {
+        color: #e17055;
+        font-weight: 900;
+    }
+
+    /* آپلود فایل */
+    .page-document-group-import .im-file-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 2px dashed #cbd5e0;
+        border-radius: var(--im-radius-md);
+        cursor: pointer;
+        transition: all var(--im-transition);
+    }
+
+    .page-document-group-import .im-file-wrapper:hover {
+        border-color: var(--im-primary);
+        background: #f0f7fa;
+    }
+
+    .page-document-group-import .im-file-wrapper input[type="file"] {
+        display: none;
+    }
+
+    .page-document-group-import .im-file-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--im-primary), var(--im-primary-light));
+        color: #fff;
+        font-size: 1rem;
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .20);
+    }
+
+    .page-document-group-import .im-file-text {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-document-group-import .im-file-title {
+        display: block;
+        color: var(--im-text);
+        font-size: .85rem;
+        font-weight: 700;
+        margin-bottom: 3px;
+    }
+
+    .page-document-group-import .im-file-hint {
+        display: block;
+        color: var(--im-text-muted);
+        font-size: .72rem;
+    }
+
+    .page-document-group-import .im-file-browse {
+        padding: 7px 14px;
+        background: #fff;
+        border: 1.5px solid var(--im-border);
+        border-radius: 8px;
+        color: var(--im-primary);
+        font-size: .78rem;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: all var(--im-transition);
+    }
+
+    .page-document-group-import .im-file-wrapper:hover .im-file-browse {
+        background: var(--im-primary);
+        color: #fff;
+        border-color: var(--im-primary);
+    }
+
+    /* نمایش فایل انتخاب‌شده */
+    .page-document-group-import .im-file-info {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #eaf6f1;
+        border: 1px solid #c8e6d8;
+        border-radius: var(--im-radius-md);
+        margin-top: 10px;
+        color: #276749;
+        font-size: .82rem;
+        font-weight: 600;
+    }
+
+    .page-document-group-import .im-file-info.visible {
+        display: flex;
+    }
+
+    .page-document-group-import .im-file-info i {
+        color: #38a169;
+    }
+
+    .page-document-group-import .im-file-info button {
+        background: transparent;
+        border: none;
+        color: #c53030;
+        cursor: pointer;
+        font-size: .9rem;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all var(--im-transition);
+        margin-right: auto;
+    }
+
+    .page-document-group-import .im-file-info button:hover {
+        background: #fdecea;
+    }
+
+    /* حالت ایمپورت */
+    .page-document-group-import .im-modes {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .page-document-group-import .im-mode-card {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: var(--im-radius-md);
+        cursor: pointer;
+        transition: all var(--im-transition);
+        user-select: none;
+    }
+
+    .page-document-group-import .im-mode-card:hover {
+        border-color: #b8d4e0;
+        background: #f0f7fa;
+    }
+
+    .page-document-group-import .im-mode-card input[type="radio"] {
+        accent-color: var(--im-primary);
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .page-document-group-import .im-mode-card:has(input:checked) {
+        border-color: var(--im-primary);
+        background: linear-gradient(135deg, #e8f2f7, #f0f7fa);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .12);
+    }
+
+    .page-document-group-import .im-mode-content {
+        flex: 1;
+    }
+
+    .page-document-group-import .im-mode-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--im-text);
+        font-size: .86rem;
+        font-weight: 800;
+        margin-bottom: 5px;
+    }
+
+    .page-document-group-import .im-mode-title i {
+        font-size: .8rem;
+    }
+
+    .page-document-group-import .im-mode-desc {
+        display: block;
+        color: var(--im-text-secondary);
+        font-size: .74rem;
+        line-height: 1.5;
+    }
+
+    /* دکمه‌ها */
+    .page-document-group-import .im-actions {
+        display: flex;
+        gap: 12px;
+        padding-top: 20px;
+        border-top: 1px solid #eef3f6;
+        flex-wrap: wrap;
+    }
+
+    .page-document-group-import .im-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 11px 24px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--im-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-document-group-import .im-btn i {
+        font-size: .9rem;
+    }
+
+    .page-document-group-import .im-btn-primary {
+        background: linear-gradient(135deg, #2b6cb0, #4299e1);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(43, 108, 176, .25);
+    }
+
+    .page-document-group-import .im-btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(43, 108, 176, .38);
+        color: #fff;
+    }
+
+    .page-document-group-import .im-btn-primary:disabled {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    .page-document-group-import .im-btn-secondary {
+        background: #fff;
+        border-color: var(--im-border);
+        color: var(--im-text-secondary);
+    }
+
+    .page-document-group-import .im-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--im-primary);
+        transform: translateY(-2px);
+    }
+
+    /* راهنما */
+    .page-document-group-import .im-help {
+        background: linear-gradient(135deg, #fff8e6 0%, #fef3d7 100%);
+        border: 1.5px solid #f4e4b8;
+        border-radius: var(--im-radius-md);
+        padding: 18px 20px;
+    }
+
+    .page-document-group-import .im-help-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #b7791f;
+        font-size: .9rem;
+        font-weight: 800;
+        margin: 0 0 12px;
+    }
+
+    .page-document-group-import .im-help-title i {
+        font-size: 1rem;
+    }
+
+    .page-document-group-import .im-help-list {
+        margin: 0;
+        padding: 0 18px 0 0;
+        list-style: none;
+        color: #6b5a1f;
+        font-size: .8rem;
+        line-height: 1.9;
+    }
+
+    .page-document-group-import .im-help-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .page-document-group-import .im-help-list li i {
+        color: #d69e2e;
+        font-size: .75rem;
+        margin-top: 6px;
+        flex-shrink: 0;
+    }
+
+    .page-document-group-import .im-help-list code {
+        background: #fff;
+        border: 1px solid #f4e4b8;
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: monospace;
+        color: #b7791f;
+        font-weight: 700;
+        direction: ltr;
+        display: inline-block;
+    }
+
+    /* ★ نکته M:N */
+    .page-document-group-import .im-help-list .im-hint-multi {
+        display: block;
+        margin-top: 4px;
+        color: #92400e;
+        font-size: .74rem;
+        font-style: italic;
+    }
+
+    @media (max-width: 640px) {
+        .page-document-group-import .im-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-document-group-import .im-back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-document-group-import .im-modes {
+            grid-template-columns: 1fr;
+        }
+
+        .page-document-group-import .im-actions {
+            flex-direction: column-reverse;
+        }
+
+        .page-document-group-import .im-btn {
+            width: 100%;
+        }
+
+        .page-document-group-import .im-file-wrapper {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .page-document-group-import .im-template-box {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .page-document-group-import .im-template-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }

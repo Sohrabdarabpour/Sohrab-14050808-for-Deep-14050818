@@ -1,0 +1,785 @@
+{% extends "base.html" %}
+
+{% block title %}یادداشت #{{ note.id }}{% endblock %}
+{% block body_class %}page-workflow-note{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/workflow/note_view.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="wn-wrap">
+
+    <!-- Breadcrumb -->
+    <nav class="wn-breadcrumb">
+        <a href="{{ url_for('main.index') }}">
+            <i class="fa-solid fa-house"></i> خانه
+        </a>
+        <i class="fa-solid fa-angle-left"></i>
+        <a href="{{ url_for('workflow.inbox') }}">
+            <i class="fa-solid fa-inbox"></i> کارتابل
+        </a>
+        <i class="fa-solid fa-angle-left"></i>
+        <span>یادداشت #{{ note.id }}</span>
+    </nav>
+
+    <!-- Main Card -->
+    <div class="wn-card">
+
+        <!-- Header -->
+        <div class="wn-header">
+            <div class="wn-header-info">
+                <div class="wn-header-icon">
+                    <i class="fa-solid fa-note-sticky"></i>
+                </div>
+                <div class="wn-header-text">
+                    <h1>یادداشت #{{ note.id }}</h1>
+                    <p>
+                        {% if note.status == 'in_review' %}
+                            <span class="wn-status-badge wn-badge-review">
+                                در حال بررسی — مرحله: {{ note.step_title or '—' }}
+                            </span>
+                        {% elif note.status == 'approved' %}
+                            <span class="wn-status-badge wn-badge-approved">
+                                تایید شده و خاتمه یافته
+                            </span>
+                        {% elif note.status == 'rejected' %}
+                            <span class="wn-status-badge wn-badge-rejected">
+                                رد شده
+                            </span>
+                        {% else %}
+                            <span class="wn-status-badge wn-badge-review">
+                                {{ note.status }}
+                            </span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <a href="{{ url_for('workflow.inbox') }}" class="wn-btn wn-btn-back">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت
+            </a>
+        </div>
+
+        <!-- Document -->
+        {% if document %}
+        <div class="wn-document-box">
+            <i class="fa-solid fa-file-lines"></i>
+            <span>
+                {% if document.code_dfc %}
+                    <strong style="color:var(--wn-primary);">{{ document.code_dfc }}</strong> —
+                {% endif %}
+                {{ document.subject or 'بدون موضوع' }}
+            </span>
+        </div>
+        {% endif %}
+
+        <!-- Author & Date -->
+        <div class="wn-block">
+            <div class="wn-block-title">
+                <i class="fa-solid fa-user"></i>
+                نویسنده و اطلاعات
+            </div>
+            <div class="wn-meta-grid">
+                <div class="wn-meta-item">
+                    <span class="wn-meta-label">نویسنده</span>
+                    <span class="wn-meta-value">{{ note.user_full_name or '—' }}</span>
+                </div>
+                <div class="wn-meta-item">
+                    <span class="wn-meta-label">تاریخ ثبت</span>
+                    <span class="wn-meta-value">{{ note.created_at_jalali or '—' }}</span>
+                </div>
+                {% if note.assigned_to_name %}
+                <div class="wn-meta-item">
+                    <span class="wn-meta-label">تخصیص یافته به</span>
+                    <span class="wn-meta-value">{{ note.assigned_to_name }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Note content -->
+        <div class="wn-block">
+            <div class="wn-block-title">
+                <i class="fa-solid fa-align-right"></i>
+                متن یادداشت
+            </div>
+            <div class="wn-content">{{ note.content }}</div>
+        </div>
+
+        <!-- Comment section -->
+        {% if note.status == 'in_review' %}
+        <div class="wn-comment-section">
+            <div class="wn-block-title">
+                <i class="fa-solid fa-pen"></i>
+                ثبت کامنت (بدون تغییر مرحله)
+            </div>
+            <textarea class="wn-textarea"
+                      id="commentInput"
+                      placeholder="نظر، توضیح یا کامنت خود را اینجا بنویسید..."></textarea>
+            <div class="wn-comment-actions">
+                <button type="button"
+                        class="wn-btn wn-btn-comment"
+                        id="commentSubmitBtn"
+                        onclick="submitComment()">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    ثبت کامنت
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        {% if note.status == 'in_review' %}
+        <div class="wn-actions-title">
+            <i class="fa-solid fa-bolt"></i>
+            اقدامات قابل انجام
+        </div>
+
+        <div class="wn-actions">
+
+            {% if can_finalize_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-finalize"
+                    onclick="finalizeNote()">
+                <i class="fa-solid fa-flag-checkered"></i>
+                خاتمه و تایید نهایی
+            </button>
+            {% endif %}
+
+            {# ★★★ دکمه «تایید و ارسال به مرحله بعد» فقط برای غیر-کارشناس ★★★ #}
+            {% if can_approve_note(note.id) and not is_final_step(note.id) and current_user.role != 'expert' %}
+            <button type="button"
+                    class="wn-btn wn-btn-approve"
+                    onclick="approveWithAssignee()">
+                <i class="fa-solid fa-circle-check"></i>
+                تایید و ارسال به مرحله بعد
+            </button>
+            {% endif %}
+
+            {% if can_approve_note(note.id) and is_final_step(note.id) and not can_finalize_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-approve"
+                    onclick="simpleApprove()">
+                <i class="fa-solid fa-circle-check"></i>
+                تایید
+            </button>
+            {% endif %}
+
+            {% if can_approve_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-forward"
+                    onclick="openForwardModal()">
+                <i class="fa-solid fa-share"></i>
+                ارجاع به کاربر دیگر
+            </button>
+            {% endif %}
+
+            {% if can_reject_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-reject"
+                    onclick="rejectNote()">
+                <i class="fa-solid fa-circle-xmark"></i>
+                رد یادداشت
+            </button>
+            {% endif %}
+
+            {% if can_return_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-return"
+                    onclick="returnNote()">
+                <i class="fa-solid fa-rotate-left"></i>
+                برگشت به مرحله قبلی
+            </button>
+            {% endif %}
+
+        </div>
+        {% endif %}
+
+        <!-- Reopen section -->
+        {% if note.status != 'in_review' %}
+        <div class="wn-reopen-section">
+            <div class="wn-reopen-notice">
+                <i class="fa-solid fa-lock"></i>
+                <div>
+                    <strong>این یادداشت قفل شده است</strong>
+                    <p>
+                        وضعیت فعلی:
+                        {% if note.status == 'approved' %}تایید شده
+                        {% elif note.status == 'rejected' %}رد شده
+                        {% else %}{{ note.status }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            {% if can_reopen_note(note.id) %}
+            <button type="button"
+                    class="wn-btn wn-btn-reopen"
+                    onclick="openReopenModal()">
+                <i class="fa-solid fa-lock-open"></i>
+                بازگشایی برای اصلاح
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Timeline -->
+    {% if events and events|length > 0 %}
+    <div class="wn-card">
+        <h2 class="wn-history-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            تاریخچه یادداشت
+            <span class="wn-history-count">{{ events|length }} رخداد</span>
+        </h2>
+
+        {% include "workflow/_timeline.html" %}
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Modal دلیل -->
+<div class="wn-modal" id="reasonModal">
+    <div class="wn-modal-backdrop" onclick="closeReasonModal()"></div>
+    <div class="wn-modal-box">
+        <h3 id="reasonModalTitle">دلیل</h3>
+        <textarea id="reasonInput" rows="4" placeholder="دلیل..."></textarea>
+        <div class="wn-modal-actions">
+            <button type="button" class="wn-btn wn-btn-back" onclick="closeReasonModal()">انصراف</button>
+            <button type="button" class="wn-btn wn-btn-approve" id="reasonSubmitBtn">تایید</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal انتخاب کاربر مرحله بعد -->
+<div class="wn-modal" id="assigneeModal">
+    <div class="wn-modal-backdrop" onclick="closeAssigneeModal()"></div>
+    <div class="wn-modal-box">
+        <h3>
+            <i class="fa-solid fa-user-check" style="color:var(--wn-primary);"></i>
+            <span id="assigneeModalTitle">انتخاب کاربر مرحله بعد</span>
+        </h3>
+
+        <p id="assigneeModalSubtitle" style="font-size:.82rem;color:#64748b;margin:0 0 14px;">
+            کاربر مرحله بعد را انتخاب کنید:
+        </p>
+
+        <textarea id="approveComment" rows="3"
+                  placeholder="کامنت همراه با تایید (اختیاری)..."
+                  style="margin-bottom:14px;"></textarea>
+
+        <div class="wn-controller-list" id="controllerList">
+            <div class="wn-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                در حال بارگذاری...
+            </div>
+        </div>
+
+        <div class="wn-modal-actions">
+            <button type="button" class="wn-btn wn-btn-back" onclick="closeAssigneeModal()">انصراف</button>
+            <button type="button" class="wn-btn wn-btn-approve"
+                    id="assigneeSubmitBtn"
+                    onclick="submitApproveWithAssignee()"
+                    disabled style="opacity:.5;cursor:not-allowed;">
+                <i class="fa-solid fa-paper-plane"></i>
+                تایید و ارسال
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal ارجاع -->
+<div class="wn-modal" id="forwardModal">
+    <div class="wn-modal-backdrop" onclick="closeForwardModal()"></div>
+    <div class="wn-modal-box wn-modal-lg">
+        <h3>
+            <i class="fa-solid fa-share" style="color:#6366f1;"></i>
+            ارجاع یادداشت
+        </h3>
+
+        <p style="font-size:.82rem;color:#64748b;margin:0 0 14px;">
+            به هر کاربر فعال سیستم می‌توانید ارجاع دهید:
+        </p>
+
+        <div class="wn-search-input">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="forwardSearch"
+                   placeholder="جستجو..."
+                   oninput="filterForwardList(this.value)">
+        </div>
+
+        <div class="wn-controller-list" id="forwardList">
+            <div class="wn-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                در حال بارگذاری...
+            </div>
+        </div>
+
+        <textarea id="forwardReason" rows="3"
+                  placeholder="کامنت همراه با ارجاع (اختیاری)..."
+                  style="margin-top:8px;"></textarea>
+
+        <div class="wn-modal-actions">
+            <button type="button" class="wn-btn wn-btn-back" onclick="closeForwardModal()">انصراف</button>
+            <button type="button" class="wn-btn wn-btn-forward"
+                    id="forwardSubmitBtn"
+                    onclick="submitForward()"
+                    disabled style="opacity:.5;cursor:not-allowed;">
+                <i class="fa-solid fa-paper-plane"></i>
+                ارجاع
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal بازگشایی -->
+<div class="wn-modal" id="reopenModal">
+    <div class="wn-modal-backdrop" onclick="closeReopenModal()"></div>
+    <div class="wn-modal-box">
+        <h3>
+            <i class="fa-solid fa-lock-open" style="color:#f59e0b;"></i>
+            بازگشایی یادداشت
+        </h3>
+
+        <p style="font-size:.82rem;color:#64748b;margin:0 0 14px;">
+            یادداشت بازگشایی می‌شود و به مرحله انتخابی برمی‌گردد.
+        </p>
+
+        <label class="wn-modal-label">مرحله هدف:</label>
+        <select id="reopenTargetStep" style="margin-bottom:14px;">
+            <option value="">در حال بارگذاری...</option>
+        </select>
+
+        <label class="wn-modal-label">دلیل بازگشایی:</label>
+        <textarea id="reopenReason" rows="3" placeholder="مثلاً: اشتباها تایید شده..."></textarea>
+
+        <div class="wn-modal-actions">
+            <button type="button" class="wn-btn wn-btn-back" onclick="closeReopenModal()">انصراف</button>
+            <button type="button" class="wn-btn wn-btn-reopen" onclick="submitReopen()">
+                <i class="fa-solid fa-lock-open"></i>
+                بازگشایی
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="wn-toast" id="wnToast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="wnToastText">عملیات انجام شد</span>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let currentAction = null;
+    let selectedAssigneeId = null;
+    let forwardSelectedUserId = null;
+    let allForwardUsers = [];
+    let isReopenStepsLoaded = false;
+
+    function showToast(message, type) {
+        const toast = document.getElementById('wnToast');
+        const text = document.getElementById('wnToastText');
+        const icon = toast.querySelector('i');
+        if (!toast || !text) return;
+        text.textContent = message;
+        toast.className = 'wn-toast show ' + (type || 'success');
+        icon.className = type === 'danger'
+            ? 'fa-solid fa-circle-xmark'
+            : 'fa-solid fa-circle-check';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // ============================================================
+    // ★ کامنت
+    // ============================================================
+    function submitComment() {
+        const btn = document.getElementById('commentSubmitBtn');
+        const input = document.getElementById('commentInput');
+        const content = input.value.trim();
+
+        if (!content) {
+            showToast('متن کامنت الزامی است', 'danger');
+            input.focus();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+
+        const fd = new FormData();
+        fd.append('content', content);
+
+        fetch('{{ url_for("workflow.add_comment", note_id=note.id) }}', {
+            method: 'POST',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            body: fd
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                showToast('کامنت ثبت شد', 'success');
+                input.value = '';
+                setTimeout(() => window.location.reload(), 800);
+            } else {
+                showToast(data.message || 'خطا', 'danger');
+            }
+        })
+        .catch(() => showToast('خطا در ارتباط', 'danger'))
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> ثبت کامنت';
+        });
+    }
+
+    // ============================================================
+    // ★ Modal دلیل (رد / برگشت)
+    // ============================================================
+    function rejectNote() {
+        currentAction = 'reject';
+        document.getElementById('reasonModalTitle').textContent = 'دلیل رد';
+        document.getElementById('reasonInput').value = '';
+        document.getElementById('reasonInput').placeholder = 'دلیل رد را وارد کنید...';
+        document.getElementById('reasonModal').classList.add('show');
+        setTimeout(() => document.getElementById('reasonInput').focus(), 100);
+    }
+
+    function returnNote() {
+        currentAction = 'return';
+        document.getElementById('reasonModalTitle').textContent = 'دلیل برگشت';
+        document.getElementById('reasonInput').value = '';
+        document.getElementById('reasonInput').placeholder = 'دلیل برگشت را وارد کنید...';
+        document.getElementById('reasonModal').classList.add('show');
+        setTimeout(() => document.getElementById('reasonInput').focus(), 100);
+    }
+
+    function closeReasonModal() {
+        document.getElementById('reasonModal').classList.remove('show');
+        currentAction = null;
+    }
+
+    document.getElementById('reasonSubmitBtn').addEventListener('click', function () {
+        const reason = document.getElementById('reasonInput').value.trim();
+        if (!reason) { alert('وارد کردن دلیل الزامی است'); return; }
+
+        const url = currentAction === 'reject'
+            ? '{{ url_for("workflow.reject_note", note_id=note.id) }}'
+            : '{{ url_for("workflow.return_note", note_id=note.id) }}';
+
+        submitForm(url, {reason});
+    });
+
+    // ============================================================
+    // ★ تایید ساده / خاتمه
+    // ============================================================
+    function simpleApprove() {
+        const c = document.getElementById('commentInput');
+        const commentValue = c ? c.value.trim() : '';
+        if (!confirm('از تایید این یادداشت مطمئن هستید؟')) return;
+        submitForm('{{ url_for("workflow.approve_note", note_id=note.id) }}', {comment: commentValue});
+    }
+
+    function finalizeNote() {
+        const c = document.getElementById('commentInput');
+        const commentValue = c ? c.value.trim() : '';
+        if (!confirm('از خاتمه و تایید نهایی مطمئن هستید؟')) return;
+        submitForm('{{ url_for("workflow.finalize_note", note_id=note.id) }}', {comment: commentValue});
+    }
+
+    // ============================================================
+    // ★★★ تایید با انتخاب کاربر — نسخه اصلاح‌شده ★★★
+    // ============================================================
+    async function approveWithAssignee() {
+        selectedAssigneeId = null;
+        resetBtn('assigneeSubmitBtn');
+        document.getElementById('assigneeModal').classList.add('show');
+        document.getElementById('approveComment').value = '';
+
+        const list = document.getElementById('controllerList');
+        list.innerHTML = '<div class="wn-loading"><i class="fa-solid fa-spinner fa-spin"></i>در حال بارگذاری...</div>';
+
+        document.getElementById('assigneeModalTitle').textContent = 'انتخاب کاربر مرحله بعد';
+        document.getElementById('assigneeModalSubtitle').textContent = 'کاربر مرحله بعد را انتخاب کنید:';
+
+        try {
+            const res = await fetch('/workflow/note/{{ note.id }}/candidates');
+            const data = await res.json();
+
+            // ★ دیباگ در کنسول (فقط در حالت development)
+            console.log('🔍 candidates response:', data);
+
+            if (!data.success) {
+                list.innerHTML = `<div class="wn-empty-state"><i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;"></i>${data.error || 'خطا'}</div>`;
+                return;
+            }
+
+            if (data.is_final) {
+                closeAssigneeModal();
+                if (confirm('آخرین مرحله است. خاتمه می‌دهید؟')) {
+                    submitForm('{{ url_for("workflow.finalize_note", note_id=note.id) }}', {});
+                }
+                return;
+            }
+
+            if (data.next_step) {
+                document.getElementById('assigneeModalTitle').textContent = 'انتخاب کاربر ' + data.next_step.title;
+                document.getElementById('assigneeModalSubtitle').textContent = 'برای مرحله «' + data.next_step.title + '» انتخاب کنید:';
+            }
+
+            if (!data.candidates || data.candidates.length === 0) {
+                list.innerHTML = '<div class="wn-empty-state"><i class="fa-solid fa-user-slash" style="color:#dc2626;"></i>کاربری یافت نشد</div>';
+                return;
+            }
+
+            // ★ دیباگ: نام کاندیدها
+            console.log('🔍 candidate names:', data.candidates.map(c => c.full_name));
+
+            // ★★★ اگر فقط یک کاندید هست → خودکار انتخاب شود ★★★
+            if (data.candidates.length === 1) {
+                const c = data.candidates[0];
+
+                list.innerHTML = `
+                    <div class="wn-controller-item selected"
+                         data-user-id="${c.id}"
+                         onclick="selectController(this)">
+                        <div class="wn-controller-avatar">${(c.full_name || '?').trim().charAt(0)}</div>
+                        <div class="wn-controller-info">
+                            <div class="wn-controller-name">${c.full_name || 'کاربر'}</div>
+                            <div class="wn-controller-username">@${c.username || '—'}</div>
+                        </div>
+                        <i class="fa-solid fa-circle-check"
+                           style="color:#1b698b;"
+                           data-check-icon></i>
+                    </div>
+                    <div class="wn-auto-select-hint">
+                        <i class="fa-solid fa-circle-check"></i>
+                        فقط یک مسئول برای این مرحله وجود دارد — به صورت خودکار انتخاب شد
+                    </div>
+                `;
+
+                // ★ فعال کردن دکمه تایید
+                selectedAssigneeId = c.id;
+                const btn = document.getElementById('assigneeSubmitBtn');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                return;
+            }
+
+            // حالت عادی (چند کاندید)
+            list.innerHTML = data.candidates.map(c => `
+                <div class="wn-controller-item" data-user-id="${c.id}" onclick="selectController(this)">
+                    <div class="wn-controller-avatar">${(c.full_name || '?').trim().charAt(0)}</div>
+                    <div class="wn-controller-info">
+                        <div class="wn-controller-name">${c.full_name || 'کاربر'}</div>
+                        <div class="wn-controller-username">@${c.username || '—'}</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check" style="color:#cbd5e0;" data-check-icon></i>
+                </div>
+            `).join('');
+        } catch (err) {
+            console.error('❌ Error loading candidates:', err);
+            list.innerHTML = '<div class="wn-empty-state">خطا در ارتباط</div>';
+        }
+    }
+
+    function closeAssigneeModal() {
+        document.getElementById('assigneeModal').classList.remove('show');
+        selectedAssigneeId = null;
+    }
+
+    function selectController(el) {
+        document.querySelectorAll('#controllerList .wn-controller-item').forEach(x => x.classList.remove('selected'));
+        document.querySelectorAll('#controllerList [data-check-icon]').forEach(i => i.style.color = '#cbd5e0');
+        el.classList.add('selected');
+        el.querySelector('[data-check-icon]').style.color = '#1b698b';
+        selectedAssigneeId = el.dataset.userId;
+        const btn = document.getElementById('assigneeSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
+
+    function resetBtn(id) {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        btn.disabled = true;
+        btn.style.opacity = '.5';
+        btn.style.cursor = 'not-allowed';
+    }
+
+    function submitApproveWithAssignee() {
+        if (!selectedAssigneeId) { alert('کاربر را انتخاب کنید'); return; }
+        const comment = document.getElementById('approveComment').value.trim();
+        submitForm('{{ url_for("workflow.approve_note", note_id=note.id) }}', {
+            next_assignee_id: selectedAssigneeId,
+            comment: comment,
+        });
+    }
+
+    // ============================================================
+    // ★ ارجاع
+    // ============================================================
+    async function openForwardModal() {
+        forwardSelectedUserId = null;
+        document.getElementById('forwardModal').classList.add('show');
+        document.getElementById('forwardReason').value = '';
+        document.getElementById('forwardSearch').value = '';
+
+        const list = document.getElementById('forwardList');
+        list.innerHTML = '<div class="wn-loading"><i class="fa-solid fa-spinner fa-spin"></i>در حال بارگذاری...</div>';
+        resetBtn('forwardSubmitBtn');
+
+        try {
+            const res = await fetch('/workflow/users-for-forward');
+            const data = await res.json();
+            if (!data.success) { list.innerHTML = '<div class="wn-empty-state">خطا</div>'; return; }
+            allForwardUsers = data.users || [];
+            if (allForwardUsers.length === 0) { list.innerHTML = '<div class="wn-empty-state">کاربری یافت نشد</div>'; return; }
+            renderForwardList(allForwardUsers);
+        } catch (err) {
+            list.innerHTML = '<div class="wn-empty-state">خطا</div>';
+        }
+    }
+
+    function renderForwardList(users) {
+        const list = document.getElementById('forwardList');
+        if (users.length === 0) { list.innerHTML = '<div class="wn-empty-state">نتیجه‌ای یافت نشد</div>'; return; }
+        list.innerHTML = users.map(u => `
+            <div class="wn-controller-item" data-user-id="${u.id}" onclick="selectForwardUser(this)">
+                <div class="wn-controller-avatar">${(u.full_name || '?').trim().charAt(0)}</div>
+                <div class="wn-controller-info">
+                    <div class="wn-controller-name">${u.full_name || 'کاربر'}</div>
+                    <div class="wn-controller-username">@${u.username || '—'}</div>
+                </div>
+                <i class="fa-solid fa-circle-check" style="color:#cbd5e0;" data-check-icon></i>
+            </div>
+        `).join('');
+    }
+
+    function filterForwardList(q) {
+        q = (q || '').toLowerCase().trim();
+        if (!q) { renderForwardList(allForwardUsers); return; }
+        renderForwardList(allForwardUsers.filter(u =>
+            (u.full_name || '').toLowerCase().includes(q) ||
+            (u.username || '').toLowerCase().includes(q)
+        ));
+    }
+
+    function selectForwardUser(el) {
+        document.querySelectorAll('#forwardList .wn-controller-item').forEach(x => x.classList.remove('selected'));
+        document.querySelectorAll('#forwardList [data-check-icon]').forEach(i => i.style.color = '#cbd5e0');
+        el.classList.add('selected');
+        el.querySelector('[data-check-icon]').style.color = '#6366f1';
+        forwardSelectedUserId = el.dataset.userId;
+        const btn = document.getElementById('forwardSubmitBtn');
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.cursor = 'pointer';
+    }
+
+    function closeForwardModal() {
+        document.getElementById('forwardModal').classList.remove('show');
+        forwardSelectedUserId = null;
+    }
+
+    function submitForward() {
+        if (!forwardSelectedUserId) { alert('کاربر را انتخاب کنید'); return; }
+        const reason = document.getElementById('forwardReason').value.trim();
+        submitForm('{{ url_for("workflow.forward_note", note_id=note.id) }}', {
+            to_user_id: forwardSelectedUserId,
+            reason: reason,
+        });
+    }
+
+    // ============================================================
+    // ★ بازگشایی
+    // ============================================================
+    async function openReopenModal() {
+        document.getElementById('reopenModal').classList.add('show');
+        document.getElementById('reopenReason').value = '';
+        if (isReopenStepsLoaded) return;
+
+        const select = document.getElementById('reopenTargetStep');
+        select.innerHTML = '<option value="">در حال بارگذاری...</option>';
+
+        try {
+            const res = await fetch('/workflow/reopen-steps');
+            const data = await res.json();
+            if (!data.success || !data.steps || data.steps.length === 0) {
+                select.innerHTML = '<option value="">مرحله‌ای یافت نشد</option>';
+                return;
+            }
+            select.innerHTML = '<option value="">انتخاب مرحله...</option>' +
+                data.steps.map(s => `<option value="${s.id}">${s.title}</option>`).join('');
+            isReopenStepsLoaded = true;
+        } catch (err) {
+            select.innerHTML = '<option value="">خطا</option>';
+        }
+    }
+
+    function closeReopenModal() {
+        document.getElementById('reopenModal').classList.remove('show');
+    }
+
+    function submitReopen() {
+        const reason = document.getElementById('reopenReason').value.trim();
+        const target = document.getElementById('reopenTargetStep').value;
+        if (!reason) { showToast('دلیل بازگشایی الزامی است', 'danger'); return; }
+        submitForm('{{ url_for("workflow.reopen_note", note_id=note.id) }}', {
+            reason: reason,
+            target_step_id: target || '',
+        });
+    }
+
+    // ============================================================
+    // ★ ارسال فرم
+    // ============================================================
+    function submitForm(url, data) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
+        for (const key in data) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+        const next = document.createElement('input');
+        next.type = 'hidden';
+        next.name = 'next';
+        next.value = '{{ url_for("workflow.inbox") }}';
+        form.appendChild(next);
+
+        // ★ توکن CSRF — فرم به‌صورت داینامیک ساخته می‌شود
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = 'csrf_token';
+        csrf.value = window.SSPE_CSRF_TOKEN || '';
+        form.appendChild(csrf);
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+    // ============================================================
+    // ★ بستن مودال‌ها با Escape
+    // ============================================================
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeReasonModal();
+            closeAssigneeModal();
+            closeForwardModal();
+            closeReopenModal();
+        }
+    });
+</script>
+{% endblock %}

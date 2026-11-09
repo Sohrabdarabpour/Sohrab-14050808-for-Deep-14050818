@@ -1,0 +1,806 @@
+/* استایل صفحه: profile/profile.html */
+
+    /* ============================================
+       SCOPE: .page-profile
+       ============================================ */
+
+    .page-profile {
+        --pf-primary: #5b9bb5;
+        --pf-primary-light: #7ab5a0;
+        --pf-primary-dark: #4a7f94;
+        --pf-text-primary: #2d3e4a;
+        --pf-text-secondary: #6b7d8a;
+        --pf-text-muted: #a0aeb8;
+        --pf-border-soft: #d8e6ed;
+        --pf-bg-soft: #f7fafc;
+        --pf-radius-lg: 18px;
+        --pf-radius-md: 12px;
+        --pf-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --pf-shadow-md: 0 8px 24px rgba(91, 155, 181, .12);
+        --pf-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-profile .pf-wrap {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+    }
+
+    .page-profile .pf-wrap *,
+    .page-profile .pf-wrap *::before,
+    .page-profile .pf-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       ★ پیام‌های Flash
+       ============================================ */
+    .page-profile .pf-flash-container {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .page-profile .pf-flash {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-size: clamp(.78rem, .9vw, .85rem);
+        font-weight: 600;
+        border: 1.5px solid transparent;
+        box-shadow: var(--pf-shadow-sm);
+        animation: pfFlashIn .35s ease;
+    }
+
+    .page-profile .pf-flash i {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .page-profile .pf-flash-success {
+        background: #eaf6f1;
+        color: #276749;
+        border-color: #c8e6d8;
+    }
+
+    .page-profile .pf-flash-danger {
+        background: #fdf0ec;
+        color: #c05621;
+        border-color: #f8d9cc;
+    }
+
+    .page-profile .pf-flash-warning {
+        background: #fdf6e3;
+        color: #b7791f;
+        border-color: #f4e4b8;
+    }
+
+    .page-profile .pf-flash-info {
+        background: #eaf4fb;
+        color: #2b6cb0;
+        border-color: #cce2f3;
+    }
+
+    @keyframes pfFlashIn {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* ============================================
+       هدر پروفایل
+       ============================================ */
+    .page-profile .pf-header {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: clamp(20px, 2.4vw, 28px);
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        border: 1.5px solid var(--pf-border-soft);
+        border-radius: var(--pf-radius-lg);
+        box-shadow: var(--pf-shadow-sm);
+        margin-bottom: 22px;
+        min-width: 0;
+    }
+
+    /* ============================================
+       آواتار + آپلود
+       ============================================ */
+    .page-profile .pf-avatar-wrapper {
+        position: relative;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .page-profile .pf-avatar-rings {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: clamp(84px, 8.5vw, 108px);
+        height: clamp(84px, 8.5vw, 108px);
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .page-profile .pf-avatar-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: calc(100% + 14px);
+        height: calc(100% + 14px);
+        margin-top: calc((100% + 14px) / -2);
+        margin-left: calc((100% + 14px) / -2);
+        border-radius: 50%;
+        border: 2px dashed var(--pf-primary);
+        opacity: 0.45;
+        animation: pfRingRotate 14s linear infinite;
+        transition: opacity var(--pf-transition), border-color var(--pf-transition);
+    }
+
+    .page-profile .pf-avatar-ring.ring-2 {
+        width: calc(100% + 28px);
+        height: calc(100% + 28px);
+        margin-top: calc((100% + 28px) / -2);
+        margin-left: calc((100% + 28px) / -2);
+        border: 1.5px dotted var(--pf-primary-light);
+        opacity: 0.35;
+        animation: pfRingRotateReverse 20s linear infinite;
+    }
+
+    @keyframes pfRingRotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes pfRingRotateReverse {
+        from {
+            transform: rotate(360deg);
+        }
+
+        to {
+            transform: rotate(0deg);
+        }
+    }
+
+    .page-profile .pf-avatar-wrapper:hover .pf-avatar-ring {
+        opacity: 0.75;
+        border-color: var(--pf-primary-dark);
+    }
+
+    .page-profile .pf-avatar-wrapper:hover .pf-avatar-ring.ring-2 {
+        opacity: 0.55;
+    }
+
+    .page-profile .pf-avatar {
+        position: relative;
+        width: clamp(84px, 8.5vw, 108px);
+        height: clamp(84px, 8.5vw, 108px);
+        border-radius: 50%;
+        overflow: hidden;
+        display: block;
+        background: linear-gradient(135deg, var(--pf-primary) 0%, var(--pf-primary-light) 100%);
+        color: #ffffff;
+        font-size: clamp(2rem, 3vw, 2.6rem);
+        border: 3px solid #ffffff;
+        box-shadow: 0 8px 24px rgba(91, 155, 181, .25);
+        cursor: pointer;
+        transition: transform var(--pf-transition), box-shadow var(--pf-transition);
+        z-index: 2;
+    }
+
+    .page-profile .pf-avatar:hover {
+        transform: scale(1.03);
+        box-shadow: 0 10px 30px rgba(91, 155, 181, .35);
+    }
+
+    .page-profile .pf-avatar img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+        border-radius: 50%;
+    }
+
+    .page-profile .pf-avatar-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(45, 62, 74, .55);
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity var(--pf-transition);
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    .page-profile .pf-avatar-overlay i {
+        font-size: 1.4rem;
+    }
+
+    .page-profile .pf-avatar-overlay span {
+        font-size: .65rem;
+        font-weight: 700;
+    }
+
+    .page-profile .pf-avatar:hover .pf-avatar-overlay,
+    .page-profile .pf-avatar.pf-dragover .pf-avatar-overlay {
+        opacity: 1;
+    }
+
+    .page-profile .pf-avatar.pf-dragover {
+        border-color: var(--pf-primary);
+        box-shadow: 0 0 0 6px rgba(91, 155, 181, .25), 0 10px 30px rgba(91, 155, 181, .35);
+    }
+
+    .page-profile .pf-avatar-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    /* ★ نوار پیشرفت آپلود */
+    .page-profile .pf-upload-progress {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, .3);
+        border-radius: 0 0 50% 50%;
+        overflow: hidden;
+        opacity: 0;
+        transition: opacity var(--pf-transition);
+        z-index: 4;
+    }
+
+    .page-profile .pf-upload-progress.active {
+        opacity: 1;
+    }
+
+    .page-profile .pf-upload-progress-bar {
+        height: 100%;
+        width: 0;
+        background: linear-gradient(90deg, var(--pf-primary) 0%, var(--pf-primary-light) 100%);
+        transition: width .2s ease;
+    }
+
+    /* ============================================
+       اطلاعات هدر
+       ============================================ */
+    .page-profile .pf-header-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-profile .pf-header-info h1 {
+        margin: 0;
+        color: var(--pf-text-primary);
+        font-size: clamp(1.15rem, 1.8vw, 1.5rem);
+        font-weight: 900;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .page-profile .pf-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        padding: 5px 14px;
+        background: #ffffff;
+        color: var(--pf-primary);
+        border: 1px solid rgba(91, 155, 181, .25);
+        border-radius: 20px;
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 700;
+    }
+
+    .page-profile .pf-role-badge i {
+        font-size: .78rem;
+    }
+
+    /* ★ گروه دکمه‌های آواتار */
+    .page-profile .pf-avatar-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-profile .pf-avatar-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 6px 14px;
+        background: #ffffff;
+        color: var(--pf-primary);
+        border: 1.5px solid rgba(91, 155, 181, .30);
+        border-radius: 20px;
+        font-family: inherit;
+        font-size: clamp(.68rem, .8vw, .76rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--pf-transition);
+    }
+
+    .page-profile .pf-avatar-btn i {
+        font-size: .78rem;
+    }
+
+    .page-profile .pf-avatar-btn:hover {
+        background: var(--pf-primary);
+        color: #ffffff;
+        border-color: var(--pf-primary);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(91, 155, 181, .25);
+    }
+
+    .page-profile .pf-avatar-remove {
+        background: #ffffff;
+        color: #c05621;
+        border-color: #f8d9cc;
+    }
+
+    .page-profile .pf-avatar-remove:hover {
+        background: #fdf0ec;
+        color: #c05621;
+        border-color: #f8d9cc;
+        box-shadow: 0 4px 12px rgba(192, 86, 33, .20);
+    }
+
+    /* ============================================
+       گرید کارت‌ها
+       ============================================ */
+    .page-profile .pf-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    /* ============================================
+       کارت پروفایل
+       ============================================ */
+    .page-profile .pf-card {
+        position: relative;
+        background: #ffffff;
+        border: 1.5px solid var(--pf-border-soft);
+        border-radius: var(--pf-radius-lg);
+        padding: clamp(20px, 2vw, 26px);
+        box-shadow: var(--pf-shadow-sm);
+        overflow: hidden;
+        transition: all var(--pf-transition);
+        min-width: 0;
+    }
+
+    .page-profile .pf-card:hover {
+        box-shadow: var(--pf-shadow-md);
+        border-color: #b8d4e0;
+    }
+
+    .page-profile .pf-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--pf-primary) 0%, var(--pf-primary-light) 100%);
+    }
+
+    .page-profile .pf-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0 0 22px;
+        color: var(--pf-text-primary);
+        font-size: clamp(.92rem, 1.1vw, 1.05rem);
+        font-weight: 800;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eef3f6;
+    }
+
+    .page-profile .pf-card h3 i {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e8f2f7 0%, #dceee8 100%);
+        color: var(--pf-primary);
+        border-radius: 9px;
+        font-size: .85rem;
+        border: 1px solid rgba(91, 155, 181, .15);
+        flex-shrink: 0;
+    }
+
+    /* ============================================
+       فیلدهای فرم
+       ============================================ */
+    .page-profile .pf-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        margin-bottom: 16px;
+        position: relative;
+    }
+
+    .page-profile .pf-field:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .page-profile .pf-field label {
+        color: #3d484b;
+        font-size: clamp(.72rem, .82vw, .78rem);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-profile .pf-field label i {
+        color: var(--pf-primary);
+        font-size: .8rem;
+        width: 14px;
+        text-align: center;
+    }
+
+    .page-profile .pf-field input,
+    .page-profile .pf-field select {
+        width: 100%;
+        min-height: 44px;
+        padding: 10px 14px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 12px;
+        background: #ffffff;
+        color: var(--pf-text-primary);
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .88vw, .84rem);
+        outline: none;
+        transition: all var(--pf-transition);
+    }
+
+    /* ★ استایل اختصاصی select */
+    .page-profile .pf-field select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235b9bb5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        background-size: 16px;
+        padding-left: 40px;
+    }
+
+    .page-profile .pf-field input::placeholder {
+        color: var(--pf-text-muted);
+    }
+
+    .page-profile .pf-field input:hover,
+    .page-profile .pf-field select:hover {
+        border-color: #b8ccd2;
+    }
+
+    .page-profile .pf-field input:focus,
+    .page-profile .pf-field select:focus {
+        border-color: var(--pf-primary);
+        box-shadow: 0 0 0 4px rgba(91, 155, 181, .12);
+    }
+
+    /* ★ فیلد نامعتبر */
+    .page-profile .pf-field input.pf-invalid {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, .10);
+    }
+
+    /* ★ راهنمای فیلد */
+    .page-profile .pf-field-help {
+        color: var(--pf-text-muted);
+        font-size: .7rem;
+        font-weight: 500;
+        margin-top: -2px;
+    }
+
+    /* ★ خطای فیلد */
+    .page-profile .pf-field-error {
+        color: #c53030;
+        font-size: .72rem;
+        font-weight: 600;
+        display: none;
+        margin-top: -2px;
+    }
+
+    .page-profile .pf-field-error.visible {
+        display: block;
+    }
+
+    /* ★ فیلد رمز عبور با دکمه نمایش */
+    .page-profile .pf-field-password {
+        position: relative;
+    }
+
+    .page-profile .pf-field-password input {
+        padding-left: 44px;
+    }
+
+    .page-profile .pf-toggle-password {
+        position: absolute;
+        left: 8px;
+        top: 30px;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+        border: none;
+        color: var(--pf-text-muted);
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all var(--pf-transition);
+        font-size: .85rem;
+    }
+
+    .page-profile .pf-toggle-password:hover {
+        background: #f1f5f9;
+        color: var(--pf-primary);
+    }
+
+    /* ★ نشانگر قدرت رمز */
+    .page-profile .pf-password-strength {
+        display: flex;
+        gap: 4px;
+        margin-top: 6px;
+        height: 5px;
+    }
+
+    .page-profile .pf-password-strength-bar {
+        flex: 1;
+        background: #e8eef2;
+        border-radius: 4px;
+        transition: background var(--pf-transition);
+    }
+
+    .page-profile .pf-password-strength[data-strength="weak"] .pf-password-strength-bar:nth-child(1) {
+        background: #ef4444;
+    }
+
+    .page-profile .pf-password-strength[data-strength="medium"] .pf-password-strength-bar:nth-child(1),
+    .page-profile .pf-password-strength[data-strength="medium"] .pf-password-strength-bar:nth-child(2) {
+        background: #f59e0b;
+    }
+
+    .page-profile .pf-password-strength[data-strength="strong"] .pf-password-strength-bar {
+        background: #22c55e;
+    }
+
+    .page-profile .pf-password-strength-text {
+        font-size: .7rem;
+        font-weight: 600;
+        margin-top: 4px;
+        color: var(--pf-text-muted);
+    }
+
+    /* ============================================
+       دکمه‌ها
+       ============================================ */
+    .page-profile .pf-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        min-height: 44px;
+        margin-top: 18px;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #5b9bb5 0%, #7ab5a0 100%);
+        color: #ffffff;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.76rem, .88vw, .84rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--pf-transition);
+        box-shadow: 0 3px 12px rgba(91, 155, 181, .22);
+    }
+
+    .page-profile .pf-btn i {
+        font-size: .9rem;
+    }
+
+    .page-profile .pf-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(91, 155, 181, .32);
+        color: #ffffff;
+    }
+
+    .page-profile .pf-btn:active:not(:disabled) {
+        transform: translateY(0);
+    }
+
+    .page-profile .pf-btn:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+        background: #cbd5e1;
+        box-shadow: none;
+    }
+
+    /* ★ دکمه انصراف / بازگشت */
+    .page-profile .pf-actions-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+
+    .page-profile .pf-cancel-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 20px;
+        background: #ffffff;
+        color: #5b6b78;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 11px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .84rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--pf-transition);
+    }
+
+    .page-profile .pf-cancel-btn:hover {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #2d3e4a;
+        transform: translateY(-2px);
+    }
+
+    /* ============================================
+       اطلاعات حساب
+       ============================================ */
+    .page-profile .pf-info-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 0;
+        border-bottom: 1px solid #eef3f6;
+        font-size: clamp(.75rem, .88vw, .84rem);
+        min-width: 0;
+    }
+
+    .page-profile .pf-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .page-profile .pf-info-item:first-of-type {
+        padding-top: 0;
+    }
+
+    .page-profile .pf-info-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--pf-text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .page-profile .pf-info-label i {
+        color: var(--pf-primary);
+        font-size: .8rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    .page-profile .pf-info-value {
+        color: var(--pf-text-primary);
+        font-weight: 700;
+        text-align: left;
+        direction: ltr;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        min-width: 0;
+    }
+
+    .page-profile .pf-info-value.fa {
+        direction: rtl;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+    @media (max-width: 1024px) {
+        .page-profile .pf-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-profile .pf-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .page-profile .pf-header {
+            flex-direction: column;
+            text-align: center;
+            gap: 16px;
+        }
+
+        .page-profile .pf-header-info {
+            text-align: center;
+        }
+
+        .page-profile .pf-avatar-actions {
+            justify-content: center;
+        }
+
+        .page-profile .pf-actions-row {
+            flex-direction: column;
+        }
+
+        .page-profile .pf-cancel-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-profile .pf-wrap {
+            padding: 10px;
+        }
+
+        .page-profile .pf-card {
+            padding: 18px;
+        }
+
+        .page-profile .pf-card h3 {
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .page-profile .pf-wrap *,
+        .page-profile .pf-wrap *::before,
+        .page-profile .pf-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

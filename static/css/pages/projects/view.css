@@ -1,0 +1,638 @@
+/* استایل صفحه: projects/view.html */
+
+    .page-project-view {
+        --pv-primary: #1b698b;
+        --pv-primary-light: #167a5c;
+        --pv-text: #2d3e4a;
+        --pv-text-secondary: #6b7d8a;
+        --pv-text-muted: #a0aeb8;
+        --pv-border: #d8e6ed;
+        --pv-bg-soft: #f7fafc;
+        --pv-radius-lg: 22px;
+        --pv-radius-md: 14px;
+        --pv-radius-sm: 10px;
+        --pv-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+    .page-project-view .pv-wrap {
+        width: 100%; padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box; direction: rtl;
+    }
+    .page-project-view .pv-wrap * { box-sizing: border-box; }
+
+    @keyframes pvEnter {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pvRingSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes pvPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .45; transform: scale(1.35); }
+    }
+
+    /* کارت اصلی */
+    .page-project-view .pv-card {
+        position: relative;
+        background: #fff;
+        border: 1.5px solid var(--pv-border);
+        border-radius: var(--pv-radius-lg);
+        box-shadow: 0 10px 30px rgba(91, 155, 181, .12);
+        overflow: hidden;
+        isolation: isolate;
+        animation: pvEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+    .page-project-view .pv-card::before {
+        content: ""; position: absolute; top: 0; right: 0;
+        width: 6px; height: 100%;
+        background: linear-gradient(180deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        z-index: 3;
+    }
+
+    /* هدر */
+    .page-project-view .pv-header {
+        position: relative;
+        display: flex; align-items: center; gap: 20px;
+        padding: 26px 32px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 10%, #fff),
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 2%, #fff));
+        border-bottom: 1px solid color-mix(in srgb, var(--pv-color, var(--pv-primary)) 15%, #fff);
+        flex-wrap: wrap;
+    }
+    .page-project-view .pv-avatar {
+        position: relative;
+        width: 88px; height: 88px; min-width: 88px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        color: #fff; font-size: 2.2rem;
+        box-shadow: 0 12px 28px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 40%, transparent);
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+    .page-project-view .pv-avatar::before {
+        content: ""; position: absolute; inset: -8px;
+        border-radius: 50%;
+        border: 2px dashed color-mix(in srgb, var(--pv-color, var(--pv-primary)) 40%, transparent);
+        opacity: .7;
+        animation: pvRingSpin 20s linear infinite;
+    }
+    .page-project-view .pv-card:hover .pv-avatar {
+        transform: scale(1.05) rotate(-4deg);
+    }
+
+    .page-project-view .pv-title-group {
+        flex: 1; min-width: 220px;
+    }
+    .page-project-view .pv-name {
+        margin: 0 0 10px;
+        font-size: clamp(1.2rem, 1.7vw, 1.55rem);
+        font-weight: 900; color: var(--pv-text);
+        letter-spacing: -.4px;
+        word-break: break-word;
+    }
+    .page-project-view .pv-meta {
+        display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .page-project-view .pv-code-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 9px;
+        background: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, #fff);
+        color: var(--pv-color, var(--pv-primary));
+        border: 1px solid color-mix(in srgb, var(--pv-color, var(--pv-primary)) 25%, #fff);
+        font-size: .75rem; font-weight: 700;
+        direction: ltr;
+    }
+    .page-project-view .pv-status {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 20px;
+        font-size: .72rem; font-weight: 700;
+    }
+    .page-project-view .pv-status.active    { background: rgba(22, 163, 74, .12);  color: #15803d; }
+    .page-project-view .pv-status.completed { background: rgba(59, 130, 246, .12); color: #1d4ed8; }
+    .page-project-view .pv-status.paused    { background: rgba(245, 158, 11, .12); color: #b45309; }
+    .page-project-view .pv-status.cancelled { background: rgba(220, 38, 38, .1);   color: #b91c1c; }
+    .page-project-view .pv-status.pending   { background: rgba(107, 114, 128, .12);color: #4b5563; }
+    .page-project-view .pv-status.active i { animation: pvPulse 2s ease-in-out infinite; }
+
+    .page-project-view .pv-header-actions {
+        display: flex; gap: 8px; flex-wrap: wrap;
+    }
+    .page-project-view .pv-btn {
+        display: inline-flex; align-items: center; justify-content: center;
+        gap: 7px; min-height: 42px; padding: 10px 18px;
+        border-radius: 11px; font-family: inherit;
+        font-size: .82rem; font-weight: 700;
+        text-decoration: none; cursor: pointer;
+        transition: all var(--pv-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+    .page-project-view .pv-btn-edit {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(245, 158, 11, .35);
+    }
+    .page-project-view .pv-btn-edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(245, 158, 11, .45);
+        color: #fff;
+    }
+    .page-project-view .pv-btn-back {
+        background: #fff; color: var(--pv-text-secondary);
+        border-color: var(--pv-border);
+    }
+    .page-project-view .pv-btn-back:hover {
+        color: var(--pv-color, var(--pv-primary));
+        border-color: var(--pv-color, var(--pv-primary));
+        transform: translateY(-2px);
+    }
+
+    /* بدنه */
+    .page-project-view .pv-body {
+        padding: 28px 32px;
+    }
+
+    /* بخش */
+    .page-project-view .pv-section {
+        margin-bottom: 28px;
+        animation: pvEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+    .page-project-view .pv-section:nth-child(1) { animation-delay: .1s; }
+    .page-project-view .pv-section:nth-child(2) { animation-delay: .18s; }
+    .page-project-view .pv-section:nth-child(3) { animation-delay: .26s; }
+    .page-project-view .pv-section:nth-child(4) { animation-delay: .34s; }
+    .page-project-view .pv-section:nth-child(5) { animation-delay: .42s; }
+    .page-project-view .pv-section:last-child { margin-bottom: 0; }
+
+    .page-project-view .pv-section-head {
+        display: flex; align-items: center; gap: 10px;
+        margin-bottom: 16px; padding-bottom: 12px;
+        border-bottom: 1.5px dashed color-mix(in srgb, var(--pv-color, var(--pv-primary)) 20%, #fff);
+    }
+    .page-project-view .pv-section-head h2 {
+        margin: 0; font-size: 1rem;
+        font-weight: 800; color: var(--pv-text);
+    }
+    .page-project-view .pv-section-icon {
+        width: 36px; height: 36px; min-width: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        color: #fff; font-size: .9rem;
+        box-shadow: 0 6px 14px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 30%, transparent);
+    }
+
+    /* گرید اطلاعات */
+    .page-project-view .pv-info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 12px;
+    }
+    .page-project-view .pv-info-item {
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 5%, #fff),
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 1%, #fff));
+        border: 1.5px solid color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, #fff);
+        border-radius: var(--pv-radius-md);
+        transition: all var(--pv-transition);
+        position: relative; overflow: hidden;
+        min-width: 0;
+    }
+    .page-project-view .pv-info-item::before {
+        content: ""; position: absolute; top: 0; right: 0;
+        width: 4px; height: 100%;
+        background: var(--pv-color, var(--pv-primary));
+        opacity: .6;
+    }
+    .page-project-view .pv-info-item:hover {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 35%, #fff);
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 15%, transparent);
+    }
+    .page-project-view .pv-info-icon {
+        width: 36px; height: 36px; min-width: 36px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        background: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, #fff);
+        color: var(--pv-color, var(--pv-primary));
+        font-size: .9rem;
+        transition: all .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+    .page-project-view .pv-info-item:hover .pv-info-icon {
+        background: var(--pv-color, var(--pv-primary));
+        color: #fff;
+        transform: scale(1.1) rotate(-8deg);
+    }
+    .page-project-view .pv-info-content {
+        flex: 1; min-width: 0;
+    }
+    .page-project-view .pv-info-label {
+        display: block; font-size: .7rem;
+        color: var(--pv-text-secondary);
+        font-weight: 600; margin-bottom: 3px;
+    }
+    .page-project-view .pv-info-value {
+        display: block; font-size: .88rem;
+        color: var(--pv-text); font-weight: 700;
+        word-break: break-word;
+    }
+    .page-project-view .pv-info-value.ltr {
+        direction: ltr; text-align: left;
+    }
+    .page-project-view .pv-info-value.muted {
+        color: var(--pv-text-muted); font-weight: 500;
+        font-style: italic;
+    }
+    .page-project-view .pv-info-item.full {
+        grid-column: 1 / -1;
+    }
+
+    /* ============================================
+       پیشرفت‌ها (۵ کارت)
+       ============================================ */
+    .page-project-view .pv-progress-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+    .page-project-view .pv-progress-card {
+        padding: 18px;
+        background: #fff;
+        border: 1.5px solid var(--pv-border);
+        border-radius: var(--pv-radius-md);
+        text-align: center;
+        transition: all var(--pv-transition);
+        position: relative; overflow: hidden;
+    }
+    .page-project-view .pv-progress-card::before {
+        content: "";
+        position: absolute;
+        top: -30px; right: -30px;
+        width: 90px; height: 90px;
+        border-radius: 50%;
+        background: var(--pv-color, var(--pv-primary));
+        opacity: .05;
+        transition: all .7s cubic-bezier(.25, .46, .45, .94);
+    }
+    .page-project-view .pv-progress-card:hover::before {
+        transform: scale(1.8);
+        opacity: .12;
+    }
+    .page-project-view .pv-progress-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 20%, transparent);
+        border-color: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 35%, #fff);
+    }
+    .page-project-view .pv-progress-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        color: #fff; font-size: 1rem;
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 30%, transparent);
+        margin-bottom: 10px;
+        position: relative;
+        z-index: 1;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+    .page-project-view .pv-progress-card:hover .pv-progress-icon {
+        transform: scale(1.1) rotate(-6deg);
+    }
+    .page-project-view .pv-progress-value {
+        font-size: 1.6rem; font-weight: 900;
+        color: var(--pv-color, var(--pv-primary));
+        line-height: 1.1;
+        letter-spacing: -.5px;
+        position: relative;
+        z-index: 1;
+    }
+    .page-project-view .pv-progress-label {
+        font-size: .72rem;
+        color: var(--pv-text-secondary);
+        font-weight: 600;
+        margin-top: 4px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* نوار پیشرفت */
+    .page-project-view .pv-progress-bar-wrap {
+        margin-top: 12px;
+        position: relative;
+        z-index: 1;
+    }
+    .page-project-view .pv-progress-bar {
+        height: 10px; border-radius: 12px;
+        background: #eef2f7;
+        overflow: hidden;
+    }
+    .page-project-view .pv-progress-fill {
+        height: 100%; border-radius: 12px;
+        background: linear-gradient(90deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        transition: width 1s ease;
+    }
+
+    /* ============================================
+       اطلاعات قرارداد (ریالی + ارزی)
+       ============================================ */
+    .page-project-view .pv-contract-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+    .page-project-view .pv-contract-block {
+        padding: 18px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 5%, #fff),
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 1%, #fff));
+        border: 1.5px solid color-mix(in srgb, var(--pv-color, var(--pv-primary)) 15%, #fff);
+        border-radius: var(--pv-radius-md);
+        transition: all var(--pv-transition);
+    }
+    .page-project-view .pv-contract-block:hover {
+        border-color: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 35%, #fff);
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, transparent);
+    }
+    .page-project-view .pv-contract-head {
+        display: flex; align-items: center; gap: 8px;
+        margin-bottom: 14px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed color-mix(in srgb, var(--pv-color, var(--pv-primary)) 20%, #fff);
+    }
+    .page-project-view .pv-contract-head-icon {
+        width: 32px; height: 32px;
+        border-radius: 9px;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        color: #fff; font-size: .82rem;
+    }
+    .page-project-view .pv-contract-head strong {
+        font-size: .88rem;
+        color: var(--pv-text);
+        font-weight: 800;
+    }
+    .page-project-view .pv-contract-rows {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .page-project-view .pv-contract-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: .82rem;
+    }
+    .page-project-view .pv-contract-row-label {
+        color: var(--pv-text-secondary);
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .page-project-view .pv-contract-row-label i {
+        color: var(--pv-color, var(--pv-primary));
+        font-size: .78rem;
+    }
+    .page-project-view .pv-contract-row-value {
+        color: var(--pv-text);
+        font-weight: 800;
+        text-align: left;
+    }
+    .page-project-view .pv-contract-row-value.ltr {
+        direction: ltr;
+    }
+    .page-project-view .pv-contract-row-value.muted {
+        color: var(--pv-text-muted);
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* ============================================
+       ★ تیم پروژه ★
+       ============================================ */
+    .page-project-view .pv-team-head {
+        display: flex; justify-content: space-between;
+        align-items: center; gap: 12px;
+        flex-wrap: wrap;
+    }
+    .page-project-view .pv-team-count {
+        background: color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, #fff);
+        color: var(--pv-color, var(--pv-primary));
+        font-size: .75rem; padding: 3px 12px;
+        border-radius: 20px; font-weight: 700;
+    }
+    .page-project-view .pv-team-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 12px;
+    }
+    .page-project-view .pv-member-card {
+        display: flex; align-items: center; gap: 12px;
+        padding: 14px 16px;
+        background: #fff;
+        border: 1.5px solid var(--pv-border);
+        border-right: 4px solid var(--member-color, var(--pv-primary));
+        border-radius: var(--pv-radius-md);
+        transition: all var(--pv-transition);
+        position: relative;
+        overflow: hidden;
+        min-width: 0;
+    }
+    .page-project-view .pv-member-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px color-mix(in srgb, var(--member-color, var(--pv-primary)) 20%, transparent);
+        border-color: color-mix(in srgb, var(--member-color, var(--pv-primary)) 40%, #fff);
+    }
+    .page-project-view .pv-member-avatar {
+        width: 44px; height: 44px; min-width: 44px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg,
+            var(--member-color, var(--pv-primary)),
+            color-mix(in srgb, var(--member-color, var(--pv-primary)) 70%, #000));
+        color: #fff; font-size: 1rem; font-weight: 800;
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--member-color, var(--pv-primary)) 35%, transparent);
+        flex-shrink: 0;
+    }
+    .page-project-view .pv-member-info {
+        flex: 1; min-width: 0;
+    }
+    .page-project-view .pv-member-name {
+        font-size: .88rem; font-weight: 700;
+        color: var(--pv-text);
+        display: block; margin-bottom: 4px;
+        overflow: hidden; text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .page-project-view .pv-member-role {
+        display: inline-flex; align-items: center; gap: 5px;
+        font-size: .68rem; font-weight: 700;
+        padding: 2px 8px; border-radius: 12px;
+        background: color-mix(in srgb, var(--member-color, var(--pv-primary)) 12%, #fff);
+        color: var(--member-color, var(--pv-primary));
+    }
+    .page-project-view .pv-member-remove {
+        width: 30px; height: 30px;
+        border-radius: 8px;
+        display: inline-flex; align-items: center; justify-content: center;
+        border: none; cursor: pointer;
+        font-size: .75rem;
+        color: var(--pv-text-secondary);
+        background: #f8fafc;
+        transition: all var(--pv-transition);
+        flex-shrink: 0;
+    }
+    .page-project-view .pv-member-remove:hover {
+        background: #dc2626; color: #fff;
+        transform: translateY(-2px);
+    }
+    .page-project-view .pv-member-card.me {
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--member-color, var(--pv-primary)) 8%, #fff),
+            color-mix(in srgb, var(--member-color, var(--pv-primary)) 2%, #fff));
+    }
+
+    /* فرم افزودن عضو */
+    .page-project-view .pv-add-member {
+        margin-top: 16px;
+        padding: 18px;
+        background: #f8fafc;
+        border: 1.5px dashed var(--pv-border);
+        border-radius: var(--pv-radius-md);
+    }
+    .page-project-view .pv-add-member-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 12px;
+        align-items: end;
+    }
+    .page-project-view .pv-add-field { grid-column: span 4; }
+    .page-project-view .pv-add-label {
+        display: block;
+        font-size: .75rem;
+        font-weight: 700;
+        color: var(--pv-text);
+        margin-bottom: 5px;
+    }
+    .page-project-view .pv-add-label .req { color: #dc2626; font-weight: 900; }
+    .page-project-view .pv-add-select,
+    .page-project-view .pv-add-input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1.5px solid var(--pv-border);
+        border-radius: 10px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .82rem;
+        color: var(--pv-text);
+        outline: none;
+        transition: all var(--pv-transition);
+    }
+    .page-project-view .pv-add-select:focus,
+    .page-project-view .pv-add-input:focus {
+        border-color: var(--pv-color, var(--pv-primary));
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 12%, transparent);
+    }
+    .page-project-view .pv-add-select {
+        appearance: none; cursor: pointer;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7d8a' stroke-width='3'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: left 12px center;
+        padding-left: 34px;
+    }
+    .page-project-view .pv-add-btn {
+        grid-column: span 12;
+        display: inline-flex; align-items: center; justify-content: center;
+        gap: 8px;
+        padding: 12px;
+        border-radius: 11px;
+        background: linear-gradient(135deg,
+            var(--pv-color, var(--pv-primary)),
+            var(--pv-color-light, var(--pv-primary-light)));
+        color: #fff;
+        border: none;
+        font-family: inherit;
+        font-size: .86rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--pv-transition);
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 30%, transparent);
+        margin-top: 6px;
+    }
+    .page-project-view .pv-add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px color-mix(in srgb, var(--pv-color, var(--pv-primary)) 40%, transparent);
+    }
+
+    /* empty team */
+    .page-project-view .pv-team-empty {
+        text-align: center; padding: 30px 20px;
+        color: var(--pv-text-muted); font-size: .85rem;
+        background: #f8fafc;
+        border-radius: var(--pv-radius-md);
+        border: 1.5px dashed var(--pv-border);
+    }
+    .page-project-view .pv-team-empty i {
+        font-size: 2rem; display: block; margin-bottom: 8px;
+        color: var(--pv-border);
+    }
+
+    /* توضیحات */
+    .page-project-view .pv-description-box {
+        padding: 16px 18px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 5%, #fff),
+            color-mix(in srgb, var(--pv-color, var(--pv-primary)) 1%, #fff));
+        border: 1.5px solid color-mix(in srgb, var(--pv-color, var(--pv-primary)) 15%, #fff);
+        border-radius: var(--pv-radius-md);
+        font-size: .88rem;
+        color: var(--pv-text);
+        line-height: 1.8;
+        word-break: break-word;
+    }
+
+    /* ریسپانسیو */
+    @media (max-width: 900px) {
+        .page-project-view .pv-header { padding: 22px 24px; gap: 18px; }
+        .page-project-view .pv-body { padding: 22px 24px; }
+        .page-project-view .pv-contract-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 700px) {
+        .page-project-view .pv-header {
+            flex-direction: column; text-align: center; align-items: center;
+            padding: 20px;
+        }
+        .page-project-view .pv-meta { justify-content: center; }
+        .page-project-view .pv-header-actions {
+            width: 100%; justify-content: center;
+        }
+        .page-project-view .pv-btn { flex: 1; }
+        .page-project-view .pv-body { padding: 18px; }
+        .page-project-view .pv-info-grid { grid-template-columns: 1fr; }
+        .page-project-view .pv-team-grid { grid-template-columns: 1fr; }
+        .page-project-view .pv-add-field { grid-column: span 12; }
+        .page-project-view .pv-avatar {
+            width: 72px; height: 72px; min-width: 72px;
+            font-size: 1.8rem;
+        }
+    }

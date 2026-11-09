@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}نوتیفیکیشن‌ها{% endblock %}
+{% block body_class %}page-notifications{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/notifications/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="nf-wrap">
+
+    <!-- ===== هدر ===== -->
+    <div class="nf-header">
+        <div class="nf-header-info">
+            <div class="nf-header-icon">
+                <i class="fa-solid fa-bell"></i>
+                <span class="nf-header-badge" id="nfHeaderBadge" {% if unread_count is not defined or unread_count==0
+                    %}style="display:none;" {% endif %}>
+                    {{ unread_count if unread_count is defined else '' }}
+                </span>
+            </div>
+            <div class="nf-header-text">
+                <h1>نوتیفیکیشن‌ها</h1>
+                <p id="nfHeaderSubtitle">
+                    {{ notifications|length }} نوتیف
+                    {% if unread_only %}— فقط نخوانده‌ها{% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="nf-filter">
+            <a href="{{ url_for('notifications.by_expert') }}" class="nf-btn nf-btn-experts">
+                <i class="fa-solid fa-users"></i>
+                یادداشت‌های کارشناسان
+            </a>
+
+            {% if unread_only %}
+            <a href="{{ url_for('notifications.list_notifications') }}" class="nf-btn nf-btn-outline">
+                <i class="fa-solid fa-list"></i>
+                همه
+            </a>
+            {% else %}
+            <a href="{{ url_for('notifications.list_notifications', unread=1) }}" class="nf-btn nf-btn-outline">
+                <i class="fa-solid fa-envelope"></i>
+                نخوانده‌ها
+            </a>
+            {% endif %}
+
+            <button type="button" class="nf-btn nf-btn-primary" id="nfMarkAllBtn" onclick="markAllRead()">
+                <i class="fa-solid fa-check-double"></i>
+                همه خوانده شد
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== لیست ===== -->
+    {% if notifications %}
+    <div class="nf-list" id="nfList">
+        {% for n in notifications %}
+        {% set colors = {
+        'info': '#0ea5e9',
+        'success': '#16a34a',
+        'warning': '#f59e0b',
+        'danger': '#dc2626',
+        } %}
+        {% set color = colors.get(n.notification_type, '#0ea5e9') %}
+        {% set icons = {
+        'info': 'fa-circle-info',
+        'success': 'fa-circle-check',
+        'warning': 'fa-triangle-exclamation',
+        'danger': 'fa-circle-xmark',
+        } %}
+        {% set icon = icons.get(n.notification_type, 'fa-bell') %}
+
+        <div class="nf-item {% if not n.is_read %}unread{% endif %}" data-id="{{ n.id }}"
+            style="--nf-color: {{ color }};">
+
+            <a href="{{ url_for('notifications.click', notification_id=n.id) }}" class="nf-item-link" data-action="open"
+                data-id="{{ n.id }}">
+                <div class="nf-icon">
+                    <i class="fa-solid {{ icon }}"></i>
+                </div>
+                <div class="nf-content">
+                    <div class="nf-title">{{ n.title }}</div>
+                    {% if n.message %}
+                    <div class="nf-message">{{ n.message }}</div>
+                    {% endif %}
+                    <div class="nf-time">
+                        <i class="fa-regular fa-clock"></i>
+                        {{ n.created_at_jalali or '—' }}
+                    </div>
+                </div>
+            </a>
+
+            <div class="nf-actions">
+                {% if not n.is_read %}
+                {# ★ نخوانده → دکمه «خواندم» #}
+                <button type="button" class="nf-act-btn read" title="خواندم" data-action="read" data-id="{{ n.id }}">
+                    <i class="fa-solid fa-check"></i>
+                </button>
+                {% else %}
+                {# ★★★ خوانده‌شده → دکمه «تبدیل به نخوانده» ★★★ #}
+                <button type="button" class="nf-act-btn unread" title="تبدیل به نخوانده" data-action="unread"
+                    data-id="{{ n.id }}">
+                    <i class="fa-solid fa-envelope"></i>
+                </button>
+                {% endif %}
+
+                <button type="button" class="nf-act-btn dismiss" title="حذف" data-action="dismiss" data-id="{{ n.id }}">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="nf-empty" id="nfEmpty">
+        <i class="fa-solid fa-bell-slash"></i>
+        <h3>هیچ نوتیفی ندارید</h3>
+        <p>
+            {% if unread_only %}
+            همه نوتیف‌ها رو خواندید. 🎉
+            {% else %}
+            وقتی فعالیتی رخ بده، اینجا نمایش داده می‌شه.
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+
+<!-- Toast -->
+<div class="nf-toast" id="nfToast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="nfToastText">عملیات انجام شد</span>
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        // ============================================================
+        // ★ کمکی‌ها
+        // ============================================================
+        function getHeaders() {
+            return {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('nfToast');
+            const text = document.getElementById('nfToastText');
+            const icon = toast ? toast.querySelector('i') : null;
+            if (!toast || !text) return;
+
+            text.textContent = message;
+            toast.className = 'nf-toast show ' + (type || 'success');
+            if (icon) {
+                icon.className = type === 'danger'
+                    ? 'fa-solid fa-circle-xmark'
+                    : 'fa-solid fa-circle-check';
+            }
+
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function updateHeaderBadge(delta) {
+            const badge = document.getElementById('nfHeaderBadge');
+            if (!badge) return;
+
+            const current = parseInt(badge.textContent || '0', 10) || 0;
+            const newCount = Math.max(0, current + delta);
+
+            if (newCount > 0) {
+                badge.textContent = newCount > 99 ? '99+' : newCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateSubtitle(delta) {
+            const subtitle = document.getElementById('nfHeaderSubtitle');
+            if (!subtitle) return;
+
+            const match = subtitle.textContent.match(/^(\d+)/);
+            if (match) {
+                const newCount = Math.max(0, parseInt(match[1], 10) + delta);
+                subtitle.textContent = subtitle.textContent.replace(/^\d+/, newCount);
+            }
+        }
+
+        function showEmptyIfNeeded() {
+            const list = document.getElementById('nfList');
+            if (!list) return;
+
+            const remaining = list.querySelectorAll('.nf-item');
+            if (remaining.length === 0) {
+                const unreadOnly = {{ 'true' if unread_only else 'false' }};
+                const emptyHTML = `
+                    <div class="nf-empty" id="nfEmpty">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <h3>هیچ نوتیفی ندارید</h3>
+                        <p>${unreadOnly ? 'همه نوتیف‌ها رو خواندید. 🎉' : 'وقتی فعالیتی رخ بده، اینجا نمایش داده می‌شه.'}</p>
+                    </div>
+                `;
+                list.outerHTML = emptyHTML;
+            }
+        }
+
+        // ============================================================
+        // ★ کلیک روی دکمه‌های عملیات
+        // ============================================================
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+            const id = btn.getAttribute('data-id');
+            if (!id) return;
+
+            // ─── باز کردن لینک (خودکار read می‌کند) ───
+            if (action === 'open') {
+                try {
+                    fetch('/notifications/' + id + '/read', {
+                        method: 'POST',
+                        headers: getHeaders()
+                    });
+                } catch (err) { }
+                return;
+            }
+
+            // ─── actions مجاز ───
+            if (action !== 'read' && action !== 'unread' && action !== 'dismiss') return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (btn.classList.contains('loading')) return;
+            btn.classList.add('loading');
+
+            try {
+                const endpoint = '/notifications/' + id + '/' + action;
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    const item = document.querySelector('.nf-item[data-id="' + id + '"]');
+                    if (!item) return;
+
+                    // ═══════════════════════════════════════════════════════
+                    // ★★★ action = unread: تبدیل به نخوانده ★★★
+                    // ═══════════════════════════════════════════════════════
+                    if (action === 'unread') {
+                        // item باقی می‌ماند، فقط وضعیتش عوض می‌شود
+                        item.classList.add('unread');
+
+                        // تغییر دکمه از «تبدیل به نخوانده» به «خواندم»
+                        btn.className = 'nf-act-btn read';
+                        btn.title = 'خواندم';
+                        btn.setAttribute('data-action', 'read');
+                        btn.innerHTML = '<i class="fa-solid fa-check"></i>';
+
+                        // ★ انیمیشن درخشش
+                        item.classList.add('just-unread');
+                        setTimeout(() => item.classList.remove('just-unread'), 800);
+
+                        // ★ به‌روزرسانی badge (+۱)
+                        updateHeaderBadge(+1);
+
+                        showToast('به حالت نخوانده برگشت', 'success');
+                        return;
+                    }
+
+                    // ═══════════════════════════════════════════════════════
+                    // ★ action = read یا dismiss: حذف با انیمیشن ★
+                    // ═══════════════════════════════════════════════════════
+                    const wasUnread = item.classList.contains('unread');
+                    item.classList.add('removing');
+
+                    setTimeout(function () {
+                        item.remove();
+                        updateSubtitle(-1);
+
+                        if (action === 'read') {
+                            updateHeaderBadge(-1);
+                        } else if (wasUnread) {
+                            updateHeaderBadge(-1);
+                        }
+
+                        showEmptyIfNeeded();
+                    }, 400);
+
+                } else {
+                    showToast(data.message || 'خطا در انجام عملیات', 'danger');
+                }
+            } catch (err) {
+                console.error('Notif action error:', err);
+                showToast('خطا در ارتباط با سرور', 'danger');
+            } finally {
+                btn.classList.remove('loading');
+            }
+        });
+
+        // ============================================================
+        // ★ همه خوانده شد
+        // ============================================================
+        window.markAllRead = async function () {
+            const btn = document.getElementById('nfMarkAllBtn');
+            if (!btn || btn.disabled) return;
+
+            const unreadItems = document.querySelectorAll('.nf-item.unread');
+            if (unreadItems.length === 0) {
+                showToast('همه نوتیف‌ها خوانده شده‌اند', 'success');
+                return;
+            }
+
+            btn.disabled = true;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال انجام...';
+
+            try {
+                const res = await fetch('/notifications/read-all', {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    unreadItems.forEach(function (item) {
+                        item.classList.remove('unread');
+                        item.classList.add('removing');
+                        setTimeout(function () {
+                            item.remove();
+                        }, 400);
+                    });
+
+                    const badge = document.getElementById('nfHeaderBadge');
+                    if (badge) badge.style.display = 'none';
+
+                    const subtitle = document.getElementById('nfHeaderSubtitle');
+                    if (subtitle) {
+                        subtitle.textContent = subtitle.textContent.replace(/^\d+/, '0');
+                    }
+
+                    setTimeout(showEmptyIfNeeded, 450);
+                    showToast('همه نوتیف‌ها خوانده شدند', 'success');
+                } else {
+                    showToast(data.message || 'خطا', 'danger');
+                }
+            } catch (err) {
+                console.error('Mark all read error:', err);
+                showToast('خطا در ارتباط', 'danger');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        };
+
+    })();
+</script>
+{% endblock %}

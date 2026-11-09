@@ -1,0 +1,832 @@
+/* استایل صفحه: contractors/form.html */
+
+    /* ============================================
+       SCOPE: .page-contractor-form
+       ============================================ */
+    .page-contractor-form {
+        --cf-primary: #1b698b;
+        --cf-primary-light: #167a5c;
+        --cf-primary-dark: #14506a;
+        --cf-text: #2d3e4a;
+        --cf-text-secondary: #6b7d8a;
+        --cf-text-muted: #a0aeb8;
+        --cf-border: #d8e6ed;
+        --cf-bg-soft: #f7fafc;
+        --cf-radius-lg: 22px;
+        --cf-radius-md: 14px;
+        --cf-radius-sm: 10px;
+        --cf-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --cf-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --cf-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* ============================================
+       ★ تمام‌عرض
+       ============================================ */
+    .page-contractor-form .cf-wrap {
+        width: 100%;
+        margin: 0;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+
+    .page-contractor-form .cf-wrap *,
+    .page-contractor-form .cf-wrap *::before,
+    .page-contractor-form .cf-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       انیمیشن‌ها
+       ============================================ */
+    @keyframes cfEnter {
+        0% { opacity: 0; transform: translateY(24px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cfHeaderEnter {
+        0% { opacity: 0; transform: translateY(-16px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cfShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    /* ============================================
+       ★ کارت اصلی فرم
+       ============================================ */
+    .page-contractor-form .cf-card {
+        position: relative;
+        background: #fff;
+        border: 1.5px solid var(--cf-border);
+        border-radius: var(--cf-radius-lg);
+        box-shadow: var(--cf-shadow-md);
+        overflow: hidden;
+        animation: cfEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    /* ★ نوار رنگی کناری */
+    .page-contractor-form .cf-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 6px;
+        background: linear-gradient(180deg,
+                var(--cf-primary) 0%,
+                var(--cf-primary-light) 100%);
+        z-index: 3;
+    }
+
+    /* ★ دایره تزئینی */
+    .page-contractor-form .cf-card::after {
+        content: "";
+        position: absolute;
+        top: -120px;
+        left: -120px;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                var(--cf-primary) 0%,
+                transparent 70%);
+        opacity: .04;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* ============================================
+       ★ هدر
+       ============================================ */
+    .page-contractor-form .cf-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 22px 28px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--cf-primary) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--cf-primary) 2%, #ffffff) 100%);
+        border-bottom: 1px solid color-mix(in srgb, var(--cf-primary) 12%, #ffffff);
+        z-index: 1;
+        animation: cfHeaderEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-contractor-form .cf-header-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .page-contractor-form .cf-header-icon {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+        color: #fff;
+        font-size: 1.15rem;
+        box-shadow:
+            0 8px 20px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-contractor-form .cf-header-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 18px;
+        border: 2px dashed rgba(27, 105, 139, .35);
+        opacity: 0;
+        transition: opacity .4s ease, transform .6s ease;
+    }
+
+    .page-contractor-form .cf-header-icon:hover {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-contractor-form .cf-header-icon:hover::before {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+
+    .page-contractor-form .cf-header-text {
+        min-width: 0;
+    }
+
+    .page-contractor-form .cf-title {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+        font-weight: 800;
+        color: var(--cf-text);
+        letter-spacing: -.3px;
+        background: linear-gradient(135deg, var(--cf-text) 0%, var(--cf-primary-dark) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-contractor-form .cf-subtitle {
+        margin: 4px 0 0;
+        font-size: .82rem;
+        color: var(--cf-text-secondary);
+        font-weight: 500;
+    }
+
+    /* ---- دکمه بازگشت هدر ---- */
+    .page-contractor-form .cf-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 11px;
+        background: #fff;
+        color: var(--cf-text-secondary);
+        border: 1.5px solid var(--cf-border);
+        font-family: inherit;
+        font-size: .83rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--cf-transition);
+        white-space: nowrap;
+    }
+
+    .page-contractor-form .cf-back-btn:hover {
+        background: color-mix(in srgb, var(--cf-primary) 8%, #ffffff);
+        color: var(--cf-primary);
+        border-color: color-mix(in srgb, var(--cf-primary) 35%, transparent);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(27, 105, 139, .15);
+    }
+
+    .page-contractor-form .cf-back-btn:hover i {
+        transform: translateX(-4px);
+    }
+
+    .page-contractor-form .cf-back-btn i {
+        transition: transform .35s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* ============================================
+       ★ بدنه فرم
+       ============================================ */
+    .page-contractor-form .cf-body {
+        padding: 28px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================
+       ★ بخش‌ها (Section)
+       ============================================ */
+    .page-contractor-form .cf-section {
+        margin-bottom: 28px;
+        padding: 22px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--cf-primary) 3%, #ffffff) 0%,
+                color-mix(in srgb, var(--cf-primary) 1%, #ffffff) 100%);
+        border: 1.5px solid color-mix(in srgb, var(--cf-primary) 12%, #ffffff);
+        border-radius: var(--cf-radius-md);
+        transition: all var(--cf-transition);
+        animation: cfEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-contractor-form .cf-section:nth-child(1) { animation-delay: .1s; }
+    .page-contractor-form .cf-section:nth-child(2) { animation-delay: .18s; }
+    .page-contractor-form .cf-section:nth-child(3) { animation-delay: .26s; }
+    .page-contractor-form .cf-section:nth-child(4) { animation-delay: .34s; }
+
+    .page-contractor-form .cf-section:last-child {
+        margin-bottom: 0;
+    }
+
+    .page-contractor-form .cf-section:hover {
+        border-color: color-mix(in srgb, var(--cf-primary) 25%, #ffffff);
+        box-shadow: 0 8px 24px rgba(27, 105, 139, .08);
+    }
+
+    .page-contractor-form .cf-section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1.5px dashed color-mix(in srgb, var(--cf-primary) 20%, #ffffff);
+    }
+
+    .page-contractor-form .cf-section-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 11px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+        color: #fff;
+        font-size: .95rem;
+        box-shadow: 0 6px 14px rgba(27, 105, 139, .28);
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+        flex-shrink: 0;
+    }
+
+    .page-contractor-form .cf-section:hover .cf-section-icon {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-contractor-form .cf-section-title {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--cf-text);
+        letter-spacing: -.2px;
+    }
+
+    /* ============================================
+       ★ گرید فرم (Auto-fit)
+       ============================================ */
+    .page-contractor-form .cf-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+    }
+
+    /* ============================================
+       ★ هر فیلد
+       ============================================ */
+    .page-contractor-form .cf-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    /* ستون‌ها */
+    .page-contractor-form .cf-col-3  { grid-column: span 3; }
+    .page-contractor-form .cf-col-4  { grid-column: span 4; }
+    .page-contractor-form .cf-col-6  { grid-column: span 6; }
+    .page-contractor-form .cf-col-12 { grid-column: span 12; }
+
+    /* ---- Label ---- */
+    .page-contractor-form .cf-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--cf-text);
+        margin: 0;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .page-contractor-form .cf-label .cf-req {
+        color: #dc2626;
+        font-weight: 900;
+        font-size: .9rem;
+    }
+
+    .page-contractor-form .cf-label i {
+        color: var(--cf-primary);
+        font-size: .8rem;
+        width: 16px;
+        text-align: center;
+    }
+
+    /* ---- Input / Textarea / Select ---- */
+    .page-contractor-form .cf-input,
+    .page-contractor-form .cf-textarea,
+    .page-contractor-form .cf-select {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--cf-border);
+        border-radius: var(--cf-radius-sm);
+        background: #fff;
+        font-family: inherit;
+        font-size: .85rem;
+        color: var(--cf-text);
+        transition: all var(--cf-transition);
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .page-contractor-form .cf-input:hover,
+    .page-contractor-form .cf-textarea:hover,
+    .page-contractor-form .cf-select:hover {
+        border-color: color-mix(in srgb, var(--cf-primary) 35%, #ffffff);
+    }
+
+    .page-contractor-form .cf-input:focus,
+    .page-contractor-form .cf-textarea:focus,
+    .page-contractor-form .cf-select:focus {
+        border-color: var(--cf-primary);
+        background: #fff;
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--cf-primary) 12%, transparent);
+    }
+
+    .page-contractor-form .cf-input::placeholder,
+    .page-contractor-form .cf-textarea::placeholder {
+        color: var(--cf-text-muted);
+        font-size: .82rem;
+    }
+
+    .page-contractor-form .cf-textarea {
+        resize: vertical;
+        min-height: 90px;
+        line-height: 1.6;
+    }
+
+    .page-contractor-form .cf-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7d8a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        padding-left: 38px;
+        cursor: pointer;
+    }
+
+    /* ---- LTR برای فیلدهای عددی ---- */
+    .page-contractor-form .cf-input.ltr {
+        direction: ltr;
+        text-align: left;
+    }
+
+    /* ============================================
+       ★ Checkbox (Toggle Switch)
+       ============================================ */
+    .page-contractor-form .cf-switch-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        background: #fff;
+        border: 1.5px solid var(--cf-border);
+        border-radius: var(--cf-radius-sm);
+        transition: all var(--cf-transition);
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .page-contractor-form .cf-switch-wrap:hover {
+        border-color: color-mix(in srgb, var(--cf-primary) 35%, #ffffff);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .08);
+    }
+
+    .page-contractor-form .cf-switch-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+    }
+
+    .page-contractor-form .cf-switch-info i {
+        color: var(--cf-primary);
+        font-size: 1rem;
+    }
+
+    .page-contractor-form .cf-switch-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+    }
+
+    .page-contractor-form .cf-switch-text strong {
+        font-size: .86rem;
+        font-weight: 700;
+        color: var(--cf-text);
+    }
+
+    .page-contractor-form .cf-switch-text small {
+        font-size: .72rem;
+        color: var(--cf-text-secondary);
+    }
+
+    /* ---- سوئیچ ---- */
+    .page-contractor-form .cf-switch {
+        position: relative;
+        width: 48px;
+        height: 26px;
+        flex-shrink: 0;
+    }
+
+    .page-contractor-form .cf-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+    }
+
+    .page-contractor-form .cf-switch-slider {
+        position: absolute;
+        inset: 0;
+        background: #cbd5e1;
+        border-radius: 26px;
+        cursor: pointer;
+        transition: all .35s cubic-bezier(.25, .46, .45, .94);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, .1);
+    }
+
+    .page-contractor-form .cf-switch-slider::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .2);
+        transition: all .35s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-contractor-form .cf-switch input:checked + .cf-switch-slider {
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .3);
+    }
+
+    .page-contractor-form .cf-switch input:checked + .cf-switch-slider::before {
+        transform: translateX(-22px);
+    }
+
+    .page-contractor-form .cf-switch input:focus + .cf-switch-slider {
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--cf-primary) 20%, transparent);
+    }
+
+    /* ============================================
+       ★ خطاهای اعتبارسنجی
+       ============================================ */
+    .page-contractor-form .cf-error {
+        display: none;
+        font-size: .74rem;
+        color: #dc2626;
+        font-weight: 600;
+        align-items: center;
+        gap: 5px;
+        margin-top: 2px;
+    }
+
+    .page-contractor-form .cf-error.show {
+        display: inline-flex;
+    }
+
+    .page-contractor-form .cf-field.has-error .cf-input,
+    .page-contractor-form .cf-field.has-error .cf-textarea,
+    .page-contractor-form .cf-field.has-error .cf-select {
+        border-color: #dc2626;
+        background: #fef2f2;
+    }
+
+    /* ============================================
+       ★ اکشن‌های پایین
+       ============================================ */
+    .page-contractor-form .cf-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 20px 28px;
+        background: linear-gradient(180deg, #ffffff 0%, var(--cf-bg-soft) 100%);
+        border-top: 1px solid color-mix(in srgb, var(--cf-primary) 12%, #ffffff);
+        flex-wrap: wrap;
+    }
+
+    .page-contractor-form .cf-actions-note {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .78rem;
+        color: var(--cf-text-secondary);
+        font-weight: 500;
+    }
+
+    .page-contractor-form .cf-actions-note i {
+        color: var(--cf-primary);
+    }
+
+    .page-contractor-form .cf-actions-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .page-contractor-form .cf-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 11px 24px;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: .86rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--cf-transition);
+        border: 1.5px solid transparent;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .page-contractor-form .cf-btn i {
+        font-size: .9rem;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* ---- ذخیره ---- */
+    .page-contractor-form .cf-btn-save {
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+        color: #fff;
+        box-shadow:
+            0 8px 22px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+    }
+
+    .page-contractor-form .cf-btn-save::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg,
+                transparent 0%,
+                rgba(255, 255, 255, .3) 50%,
+                transparent 100%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .3s ease;
+        z-index: -1;
+    }
+
+    .page-contractor-form .cf-btn-save:hover::before {
+        opacity: 1;
+        animation: cfShimmer 1.5s linear infinite;
+    }
+
+    .page-contractor-form .cf-btn-save:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 14px 30px rgba(27, 105, 139, .42),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+        color: #fff;
+    }
+
+    .page-contractor-form .cf-btn-save:hover i {
+        transform: scale(1.15) rotate(-8deg);
+    }
+
+    /* ---- انصراف ---- */
+    .page-contractor-form .cf-btn-cancel {
+        background: #fff;
+        color: var(--cf-text-secondary);
+        border-color: var(--cf-border);
+    }
+
+    .page-contractor-form .cf-btn-cancel:hover {
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fecaca;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 18px rgba(220, 38, 38, .12);
+    }
+
+    .page-contractor-form .cf-btn-cancel:hover i {
+        transform: translateX(-3px);
+    }
+
+    .page-contractor-form .cf-btn:active {
+        transform: translateY(-1px) scale(.98);
+    }
+
+    /* ============================================
+       ★ دکمه ذخیره شناور در موبایل
+       ============================================ */
+    .page-contractor-form .cf-mobile-save {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        right: 20px;
+        z-index: 900;
+        padding: 14px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--cf-primary) 0%, var(--cf-primary-light) 100%);
+        color: #fff;
+        font-family: inherit;
+        font-size: .95rem;
+        font-weight: 800;
+        box-shadow: 0 12px 32px rgba(27, 105, 139, .45);
+        border: none;
+        cursor: pointer;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all var(--cf-transition);
+    }
+
+    .page-contractor-form .cf-mobile-save:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 40px rgba(27, 105, 139, .55);
+    }
+
+    .page-contractor-form .cf-mobile-save i {
+        font-size: 1rem;
+    }
+
+    /* ============================================
+       ★ ریسپانسیو
+       ============================================ */
+
+    /* لپ‌تاپ متوسط */
+    @media (max-width: 1200px) {
+        .page-contractor-form .cf-col-3 {
+            grid-column: span 4;
+        }
+    }
+
+    /* تبلت افقی */
+    @media (max-width: 992px) {
+        .page-contractor-form .cf-col-3,
+        .page-contractor-form .cf-col-4 {
+            grid-column: span 6;
+        }
+        .page-contractor-form .cf-col-6 {
+            grid-column: span 6;
+        }
+        .page-contractor-form .cf-body {
+            padding: 22px;
+        }
+        .page-contractor-form .cf-section {
+            padding: 18px;
+        }
+    }
+
+    /* تبلت عمودی */
+    @media (max-width: 768px) {
+        .page-contractor-form .cf-header {
+            padding: 18px 20px;
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .page-contractor-form .cf-back-btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .page-contractor-form .cf-body {
+            padding: 18px;
+        }
+        .page-contractor-form .cf-section {
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .page-contractor-form .cf-section-header {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+        }
+
+        /* همه ستون‌ها → full */
+        .page-contractor-form .cf-col-3,
+        .page-contractor-form .cf-col-4,
+        .page-contractor-form .cf-col-6 {
+            grid-column: span 12;
+        }
+
+        .page-contractor-form .cf-grid {
+            gap: 14px;
+        }
+
+        .page-contractor-form .cf-actions {
+            padding: 16px 20px;
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+        .page-contractor-form .cf-actions-buttons {
+            flex-direction: column-reverse;
+            width: 100%;
+        }
+        .page-contractor-form .cf-btn {
+            width: 100%;
+        }
+        .page-contractor-form .cf-actions-note {
+            justify-content: center;
+            text-align: center;
+        }
+    }
+
+    /* موبایل */
+    @media (max-width: 576px) {
+        .page-contractor-form .cf-wrap {
+            padding: 10px;
+        }
+        .page-contractor-form .cf-header {
+            padding: 16px;
+        }
+        .page-contractor-form .cf-header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 1rem;
+        }
+        .page-contractor-form .cf-title {
+            font-size: 1rem;
+        }
+        .page-contractor-form .cf-subtitle {
+            font-size: .74rem;
+        }
+        .page-contractor-form .cf-body {
+            padding: 14px;
+        }
+        .page-contractor-form .cf-section {
+            padding: 14px;
+            margin-bottom: 16px;
+        }
+        .page-contractor-form .cf-section-icon {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: .85rem;
+        }
+        .page-contractor-form .cf-section-title {
+            font-size: .92rem;
+        }
+        .page-contractor-form .cf-input,
+        .page-contractor-form .cf-textarea,
+        .page-contractor-form .cf-select {
+            padding: 10px 12px;
+            font-size: .82rem;
+        }
+
+        /* فعال شدن دکمه شناور */
+        .page-contractor-form .cf-mobile-save {
+            display: flex;
+        }
+        .page-contractor-form .cf-actions {
+            padding-bottom: 90px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-contractor-form .cf-wrap *,
+        .page-contractor-form .cf-wrap *::before,
+        .page-contractor-form .cf-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

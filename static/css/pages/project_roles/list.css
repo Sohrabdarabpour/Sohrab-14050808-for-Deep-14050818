@@ -1,0 +1,861 @@
+/* استایل صفحه: project_roles/list.html */
+
+    /* ============================================
+       SCOPE: .page-project-roles
+       ============================================ */
+    .page-project-roles {
+        --pr-primary: #1b698b;
+        --pr-primary-light: #167a5c;
+        --pr-primary-dark: #14506a;
+        --pr-text: #2d3e4a;
+        --pr-text-secondary: #6b7d8a;
+        --pr-text-muted: #a0aeb8;
+        --pr-border: #d8e6ed;
+        --pr-bg-soft: #f7fafc;
+        --pr-radius-lg: 22px;
+        --pr-radius-md: 14px;
+        --pr-radius-sm: 10px;
+        --pr-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --pr-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --pr-transition: .35s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* تمام‌عرض */
+    .page-project-roles .pr-wrap {
+        width: 100%;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+    .page-project-roles .pr-wrap * { box-sizing: border-box; }
+
+    /* انیمیشن‌ها */
+    @keyframes prCardEnter {
+        0% { opacity: 0; transform: translateY(30px) scale(.96); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes prHeaderEnter {
+        0% { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes prShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @keyframes prRingSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes prPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .45; transform: scale(1.35); }
+    }
+    @keyframes prEmptyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    /* ============================================
+       هدر صفحه
+       ============================================ */
+    .page-project-roles .pr-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        padding-bottom: 22px;
+        position: relative;
+        animation: prHeaderEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-project-roles .pr-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+                transparent 0%,
+                color-mix(in srgb, var(--pr-primary) 30%, transparent) 20%,
+                color-mix(in srgb, var(--pr-primary) 30%, transparent) 80%,
+                transparent 100%);
+        border-radius: 2px;
+    }
+
+    .page-project-roles .pr-header-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .page-project-roles .pr-header-icon {
+        position: relative;
+        width: clamp(50px, 4.8vw, 60px);
+        height: clamp(50px, 4.8vw, 60px);
+        min-width: clamp(50px, 4.8vw, 60px);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--pr-primary) 0%, var(--pr-primary-light) 100%);
+        color: #fff;
+        font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+        box-shadow:
+            0 10px 24px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-project-roles .pr-header-icon::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 22px;
+        border: 2px dashed rgba(27, 105, 139, .35);
+        opacity: 0;
+        transition: opacity .4s ease, transform .6s ease;
+    }
+
+    .page-project-roles .pr-header-icon:hover {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-project-roles .pr-header-icon:hover::before {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+
+    .page-project-roles .pr-header-text { min-width: 0; }
+
+    .page-project-roles .pr-title {
+        margin: 0;
+        font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+        font-weight: 800;
+        color: var(--pr-text);
+        letter-spacing: -.3px;
+        background: linear-gradient(135deg, var(--pr-text) 0%, var(--pr-primary-dark) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-project-roles .pr-subtitle {
+        margin: 5px 0 0;
+        font-size: clamp(.74rem, .9vw, .84rem);
+        color: var(--pr-text-secondary);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       دکمه‌های هدر
+       ============================================ */
+    .page-project-roles .pr-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-project-roles .pr-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .86rem);
+        font-weight: 700;
+        white-space: nowrap;
+        transition: all var(--pr-transition);
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .page-project-roles .pr-btn i {
+        font-size: .9rem;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-project-roles .pr-btn-primary {
+        background: linear-gradient(135deg, var(--pr-primary) 0%, var(--pr-primary-light) 100%);
+        color: #fff;
+        box-shadow:
+            0 8px 22px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+    }
+
+    .page-project-roles .pr-btn-primary::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg,
+                transparent 0%,
+                rgba(255, 255, 255, .3) 50%,
+                transparent 100%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .3s ease;
+        z-index: -1;
+    }
+
+    .page-project-roles .pr-btn-primary:hover::before {
+        opacity: 1;
+        animation: prShimmer 1.5s linear infinite;
+    }
+
+    .page-project-roles .pr-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 14px 30px rgba(27, 105, 139, .42),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+        color: #fff;
+    }
+
+    .page-project-roles .pr-btn-primary:hover i {
+        transform: rotate(180deg);
+    }
+
+    .page-project-roles .pr-btn:active {
+        transform: translateY(-1px) scale(.98);
+    }
+
+    /* ============================================
+       ★ گرید — یک کارت در هر ردیف
+       ============================================ */
+    .page-project-roles .pr-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* ============================================
+       ★ کارت نقش — چیدمان افقی
+       ============================================ */
+    .page-project-roles .pr-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+        align-items: stretch;
+        gap: 0;
+        background: #ffffff;
+        border: 1.5px solid var(--pr-border);
+        border-radius: var(--pr-radius-lg);
+        box-shadow: var(--pr-shadow-sm);
+        overflow: hidden;
+        transition:
+            transform .45s cubic-bezier(.25, .46, .45, .94),
+            box-shadow .45s ease,
+            border-color .35s ease;
+        isolation: isolate;
+        min-width: 0;
+        animation: prCardEnter .7s cubic-bezier(.25, .46, .45, .94) both;
+        animation-delay: calc(var(--pr-index, 0) * 60ms + 80ms);
+    }
+
+    /* نوار رنگی کناری */
+    .page-project-roles .pr-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 6px;
+        background: linear-gradient(180deg,
+                var(--pr-color, var(--pr-primary)) 0%,
+                var(--pr-color-light, var(--pr-primary-light)) 100%);
+        z-index: 3;
+        transition: width .35s ease;
+    }
+
+    .page-project-roles .pr-card:hover::before {
+        width: 8px;
+    }
+
+    /* دایره تزئینی */
+    .page-project-roles .pr-card::after {
+        content: "";
+        position: absolute;
+        top: -80px;
+        left: -80px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                var(--pr-color, var(--pr-primary)) 0%,
+                transparent 70%);
+        opacity: .06;
+        transition: all 1s cubic-bezier(.25, .46, .45, .94);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-project-roles .pr-card:hover::after {
+        transform: scale(1.4) translate(-20px, 20px);
+        opacity: .12;
+    }
+
+    .page-project-roles .pr-card:hover {
+        transform: translateY(-4px);
+        box-shadow:
+            0 24px 55px color-mix(in srgb, var(--pr-color, var(--pr-primary)) 25%, transparent),
+            0 6px 16px color-mix(in srgb, var(--pr-color, var(--pr-primary)) 14%, transparent);
+        border-color: color-mix(in srgb, var(--pr-color, var(--pr-primary)) 40%, #ffffff);
+    }
+
+    .page-project-roles .pr-card.is-inactive {
+        opacity: .65;
+        filter: grayscale(.35);
+    }
+
+    /* ============================================
+       ★ ستون ۱: هدر کارت (آیکون + عنوان)
+       ============================================ */
+    .page-project-roles .pr-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--pr-color, var(--pr-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--pr-color, var(--pr-primary)) 2%, #ffffff) 100%);
+        border-left: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 15%, #ffffff);
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-project-roles .pr-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-project-roles .pr-card-avatar {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--pr-color, var(--pr-primary)) 0%,
+                var(--pr-color-light, var(--pr-primary-light)) 100%);
+        color: #fff;
+        font-size: 1.5rem;
+        box-shadow:
+            0 8px 20px color-mix(in srgb, var(--pr-color, var(--pr-primary)) 40%, transparent),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+        z-index: 1;
+    }
+
+    .page-project-roles .pr-card-avatar::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 2px dashed color-mix(in srgb, var(--pr-color, var(--pr-primary)) 40%, transparent);
+        opacity: 0;
+        transition: opacity .4s ease;
+        animation: prRingSpin 12s linear infinite;
+        animation-play-state: paused;
+    }
+
+    .page-project-roles .pr-card:hover .pr-card-avatar {
+        transform: scale(1.08) rotate(-8deg);
+    }
+
+    .page-project-roles .pr-card:hover .pr-card-avatar::before {
+        opacity: 1;
+        animation-play-state: running;
+    }
+
+    .page-project-roles .pr-card-title-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-project-roles .pr-card-name {
+        margin: 0 0 6px;
+        color: var(--pr-text);
+        font-size: clamp(1rem, 1.15vw, 1.15rem);
+        font-weight: 800;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: color .3s ease;
+    }
+
+    .page-project-roles .pr-card:hover .pr-card-name {
+        color: var(--pr-color, var(--pr-primary));
+    }
+
+    .page-project-roles .pr-card-subtitle {
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--pr-color, var(--pr-primary));
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        direction: ltr;
+        background: color-mix(in srgb, var(--pr-color, var(--pr-primary)) 10%, #ffffff);
+        padding: 3px 10px;
+        border-radius: 7px;
+        border: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 22%, #ffffff);
+        transition: all .3s ease;
+    }
+
+    .page-project-roles .pr-card:hover .pr-card-subtitle {
+        background: color-mix(in srgb, var(--pr-color, var(--pr-primary)) 18%, #ffffff);
+        transform: translateX(-2px);
+    }
+
+    /* ============================================
+       ★ ستون ۲: بدنه (توضیحات + ویژگی‌ها)
+       ============================================ */
+    .page-project-roles .pr-card-body {
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    /* بج‌های ویژگی */
+    .page-project-roles .pr-card-badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .page-project-roles .pr-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .72rem;
+        font-weight: 700;
+        padding: 6px 12px;
+        border-radius: 20px;
+        border: 1px solid transparent;
+        transition: all .3s ease;
+    }
+
+    .page-project-roles .pr-badge i {
+        font-size: .72rem;
+    }
+
+    .page-project-roles .pr-badge.exclusive {
+        background: rgba(168, 85, 247, .12);
+        color: #7c3aed;
+        border-color: rgba(168, 85, 247, .25);
+    }
+
+    .page-project-roles .pr-badge.required {
+        background: rgba(220, 38, 38, .1);
+        color: #b91c1c;
+        border-color: rgba(220, 38, 38, .2);
+    }
+
+    .page-project-roles .pr-badge.optional {
+        background: rgba(107, 114, 128, .1);
+        color: #4b5563;
+        border-color: rgba(107, 114, 128, .2);
+    }
+
+    /* توضیحات */
+    .page-project-roles .pr-card-description {
+        font-size: .82rem;
+        color: var(--pr-text-secondary);
+        line-height: 1.7;
+        margin: 0;
+        word-break: break-word;
+        padding-top: 8px;
+        border-top: 1px dashed color-mix(in srgb, var(--pr-color, var(--pr-primary)) 15%, transparent);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* ============================================
+       ★ ستون ۳: ساید (وضعیت + اکشن‌ها)
+       ============================================ */
+    .page-project-roles .pr-card-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: linear-gradient(180deg, #ffffff 0%, var(--pr-bg-soft) 100%);
+        border-right: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 12%, #ffffff);
+        padding: 18px 22px;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        min-width: 220px;
+    }
+
+    /* کارت وضعیت */
+    .page-project-roles .pr-status-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 12%, #ffffff) 0%,
+                color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 4%, #ffffff) 100%);
+        border: 1px solid color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 20%, #ffffff);
+        border-radius: 12px;
+        transition: all .4s cubic-bezier(.25, .46, .45, .94);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-project-roles .pr-status-card::before {
+        content: "";
+        position: absolute;
+        bottom: -25px;
+        right: -25px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: var(--status-color, var(--pr-color, var(--pr-primary)));
+        opacity: .08;
+        transition: all .7s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-project-roles .pr-status-card:hover::before {
+        transform: scale(1.8);
+        opacity: .18;
+    }
+
+    .page-project-roles .pr-status-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 22%, transparent);
+    }
+
+    .page-project-roles .pr-status-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg,
+                var(--status-color, var(--pr-color, var(--pr-primary))) 0%,
+                color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 70%, #000) 100%);
+        color: #fff;
+        font-size: .9rem;
+        box-shadow: 0 6px 14px color-mix(in srgb, var(--status-color, var(--pr-color, var(--pr-primary))) 35%, transparent);
+        position: relative;
+        z-index: 1;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-project-roles .pr-status-card:hover .pr-status-icon {
+        transform: scale(1.1) rotate(-6deg);
+    }
+
+    .page-project-roles .pr-status-text {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-project-roles .pr-status-label {
+        display: block;
+        font-size: .68rem;
+        color: var(--pr-text-secondary);
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .page-project-roles .pr-status-value {
+        display: block;
+        font-size: .86rem;
+        font-weight: 800;
+        color: var(--status-color, var(--pr-color, var(--pr-primary)));
+        line-height: 1.2;
+    }
+
+    /* اکشن‌ها */
+    .page-project-roles .pr-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-project-roles .pr-action-btn {
+        position: relative;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 38px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .35s cubic-bezier(.25, .46, .45, .94);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+        background: transparent;
+    }
+
+    .page-project-roles .pr-action-btn i {
+        font-size: .82rem;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* دکمه ویرایش */
+    .page-project-roles .pr-action-btn.edit {
+        background: color-mix(in srgb, var(--pr-color, var(--pr-primary)) 10%, #ffffff);
+        color: var(--pr-color, var(--pr-primary));
+        border-color: color-mix(in srgb, var(--pr-color, var(--pr-primary)) 32%, transparent);
+    }
+
+    .page-project-roles .pr-action-btn.edit::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--pr-color, var(--pr-primary));
+        transform: scaleX(0);
+        transform-origin: right center;
+        transition: transform .4s cubic-bezier(.25, .46, .45, .94);
+        z-index: -1;
+        border-radius: inherit;
+    }
+
+    .page-project-roles .pr-action-btn.edit:hover::before {
+        transform: scaleX(1);
+    }
+
+    .page-project-roles .pr-action-btn.edit:hover {
+        color: #ffffff;
+        border-color: var(--pr-color, var(--pr-primary));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--pr-color, var(--pr-primary)) 38%, transparent);
+    }
+
+    .page-project-roles .pr-action-btn.edit:hover i {
+        transform: rotate(-12deg) scale(1.1);
+    }
+
+    /* دکمه حذف */
+    .page-project-roles .pr-action-btn.delete {
+        flex: 0 0 42px;
+        background: #ffffff;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .page-project-roles .pr-action-btn.delete:hover {
+        background: #dc2626;
+        color: #fff;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(220, 38, 38, .35);
+    }
+
+    .page-project-roles .pr-action-btn.delete:hover i {
+        transform: scale(1.15);
+    }
+
+    /* ============================================
+       حالت خالی
+       ============================================ */
+    .page-project-roles .pr-empty {
+        background: #ffffff;
+        border: 2px dashed var(--pr-border);
+        border-radius: var(--pr-radius-lg);
+        padding: clamp(50px, 7vw, 90px) 24px;
+        text-align: center;
+        box-shadow: var(--pr-shadow-sm);
+        animation: prCardEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-project-roles .pr-empty::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                rgba(27, 105, 139, .08) 0%,
+                transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-project-roles .pr-empty-icon {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .12), rgba(22, 122, 92, .12));
+        color: var(--pr-primary);
+        font-size: 2.5rem;
+        animation: prEmptyFloat 4s ease-in-out infinite;
+    }
+
+    .page-project-roles .pr-empty-icon::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px dashed rgba(27, 105, 139, .3);
+        animation: prRingSpin 20s linear infinite;
+    }
+
+    .page-project-roles .pr-empty h3 {
+        margin: 0 0 10px;
+        color: var(--pr-text);
+        font-size: 1.2rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .page-project-roles .pr-empty p {
+        margin: 0 0 26px;
+        color: var(--pr-text-secondary);
+        font-size: .9rem;
+        position: relative;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+    @media (max-width: 1200px) {
+        .page-project-roles .pr-card {
+            grid-template-columns: minmax(0, 1.4fr) auto;
+        }
+        .page-project-roles .pr-card-header {
+            grid-column: 1 / -1;
+            border-left: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 15%, #ffffff);
+        }
+        .page-project-roles .pr-card-side {
+            min-width: 220px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .page-project-roles .pr-card {
+            grid-template-columns: 1fr;
+        }
+        .page-project-roles .pr-card-header {
+            border-bottom: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 15%, #ffffff);
+        }
+        .page-project-roles .pr-card-side {
+            border-right: none;
+            border-top: 1px solid color-mix(in srgb, var(--pr-color, var(--pr-primary)) 12%, #ffffff);
+            min-width: 0;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-project-roles .pr-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .page-project-roles .pr-header-actions {
+            width: 100%;
+        }
+        .page-project-roles .pr-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .page-project-roles .pr-card-header {
+            padding: 18px 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .page-project-roles .pr-card-body {
+            padding: 18px 20px;
+        }
+        .page-project-roles .pr-card-side {
+            padding: 16px 20px;
+        }
+        .page-project-roles .pr-card-avatar {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.3rem;
+        }
+        .page-project-roles .pr-card-name {
+            font-size: 1rem;
+            white-space: normal;
+            -webkit-line-clamp: 2;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+        .page-project-roles .pr-actions {
+            flex-wrap: wrap;
+        }
+        .page-project-roles .pr-action-btn.edit {
+            flex: 1 1 calc(50% - 4px);
+        }
+        .page-project-roles .pr-action-btn.delete {
+            flex: 1 1 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-project-roles .pr-wrap {
+            padding: 10px;
+        }
+        .page-project-roles .pr-card-avatar {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.1rem;
+        }
+        .page-project-roles .pr-actions {
+            flex-direction: column;
+        }
+        .page-project-roles .pr-action-btn {
+            width: 100%;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-project-roles .pr-wrap *,
+        .page-project-roles .pr-wrap *::before,
+        .page-project-roles .pr-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

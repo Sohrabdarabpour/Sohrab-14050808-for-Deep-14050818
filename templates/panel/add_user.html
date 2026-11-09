@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}
+افزودن کاربر
+{% endblock %}
+
+{% block body_class %}
+page-add-user
+{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-add-user" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/panel/add_user.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="au-wrap">
+
+    <div class="au-card">
+
+        <div class="au-header">
+            <div class="au-header-icon">
+                <i class="fa-solid fa-user-plus"></i>
+            </div>
+            <div class="au-header-text">
+                <h2 class="au-header-title">اطلاعات کاربر</h2>
+                <p class="au-header-description">اطلاعات کاربر و سطح دسترسی را وارد کنید.</p>
+            </div>
+        </div>
+
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="au-grid">
+
+                <!-- نام کاربری -->
+                <div class="au-field">
+                    <label class="au-label" for="{{ form.username.id }}">
+                        <i class="fa-solid fa-user"></i>
+                        <span>{{ form.username.label.text }}</span>
+                    </label>
+
+                    {{ form.username(
+                    class="au-input",
+                    placeholder="نام کاربری را وارد کنید",
+                    autocomplete="username"
+                    ) }}
+
+                    {% if form.username.errors %}
+                    {% for error in form.username.errors %}
+                    <div class="au-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- نام و نام خانوادگی -->
+                <div class="au-field">
+                    <label class="au-label" for="{{ form.full_name.id }}">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>{{ form.full_name.label.text }}</span>
+                    </label>
+
+                    {{ form.full_name(
+                    class="au-input",
+                    placeholder="نام و نام خانوادگی را وارد کنید",
+                    autocomplete="name"
+                    ) }}
+
+                    {% if form.full_name.errors %}
+                    {% for error in form.full_name.errors %}
+                    <div class="au-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- رمز عبور -->
+                <div class="au-field">
+                    <label class="au-label" for="{{ form.password.id }}">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>{{ form.password.label.text }}</span>
+                    </label>
+
+                    {{ form.password(
+                    class="au-input",
+                    placeholder="رمز عبور را وارد کنید",
+                    autocomplete="new-password"
+                    ) }}
+
+                    {% if form.password.errors %}
+                    {% for error in form.password.errors %}
+                    <div class="au-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- نقش -->
+                <div class="au-field">
+                    <label class="au-label" for="{{ form.role.id }}">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>{{ form.role.label.text }}</span>
+                    </label>
+
+                    {{ form.role(class="au-select") }}
+
+                    {% if form.role.errors %}
+                    {% for error in form.role.errors %}
+                    <div class="au-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+
+                <!-- ★ دپارتمان -->
+                {% if form.department_id is defined %}
+                <div class="au-field">
+                    <label class="au-label" for="{{ form.department_id.id }}">
+                        <i class="fa-solid fa-building"></i>
+                        <span>{{ form.department_id.label.text }}</span>
+                    </label>
+
+                    {{ form.department_id(class="au-select") }}
+
+                    {% if form.department_id.errors %}
+                    {% for error in form.department_id.errors %}
+                    <div class="au-error">{{ error }}</div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                {% endif %}
+
+<!-- ★ جنسیت -->
+<div class="au-field">
+    <label class="au-label" for="{{ form.gender.id }}">
+        <i class="fa-solid fa-venus-mars"></i>
+        <span>{{ form.gender.label.text }}</span>
+    </label>
+    {{ form.gender(class="au-select") }}
+    {% if form.gender.errors %}
+    {% for error in form.gender.errors %}
+    <div class="au-error">{{ error }}</div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<!-- ★ وضعیت فعال -->
+<div class="au-field">
+    <label class="au-label" for="{{ form.is_active.id }}">
+        <i class="fa-solid fa-toggle-on"></i>
+        <span>{{ form.is_active.label.text }}</span>
+    </label>
+    <div class="au-checkbox-wrapper">
+        {{ form.is_active(class="au-checkbox") }}
+        <span class="au-checkbox-text">کاربر بتواند وارد سیستم شود</span>
+    </div>
+</div>
+
+            </div>
+
+            <div class="au-actions">
+                <a href="{{ url_for('panel.users') }}" class="au-btn au-btn-secondary">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت
+                </a>
+
+                <button type="submit" class="au-btn au-btn-primary">
+                    <i class="fa-solid fa-user-plus"></i>
+                    {{ form.submit.label.text }}
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

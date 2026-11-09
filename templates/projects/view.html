@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+{% block title %}{{ project.name }}{% endblock %}
+{% block body_class %}page-project-view{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/projects/view.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set colors = [
+    ('#1b698b', '#3d8bb5'),
+    ('#167a5c', '#2aa07a'),
+    ('#d69e2e', '#e8b94a'),
+    ('#c05621', '#dd7a3d'),
+    ('#4a5568', '#6b7a8f'),
+    ('#2b6cb0', '#3d8ad4'),
+    ('#319795', '#4fc3c0'),
+    ('#805ad5', '#9f7ae8'),
+    ('#718096', '#8fa0b5'),
+    ('#2f855a', '#4aa876')
+] %}
+{% set pc = colors[project.id % colors|length] %}
+
+<div class="pv-wrap">
+    <div class="pv-card"
+         style="--pv-color: {{ pc[0] }}; --pv-color-light: {{ pc[1] }};">
+
+        <!-- هدر -->
+        <div class="pv-header">
+            <div class="pv-avatar">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+
+            <div class="pv-title-group">
+                <h1 class="pv-name">{{ project.name }}</h1>
+                <div class="pv-meta">
+                    {% if project.code %}
+                    <span class="pv-code-badge">
+                        <i class="fa-solid fa-barcode"></i>
+                        {{ project.code }}
+                    </span>
+                    {% endif %}
+
+                    {% if project.status == 'active' %}
+                        <span class="pv-status active"><i class="fa-solid fa-circle" style="font-size:.5rem;"></i>فعال</span>
+                    {% elif project.status == 'completed' %}
+                        <span class="pv-status completed"><i class="fa-solid fa-circle-check" style="font-size:.5rem;"></i>تکمیل</span>
+                    {% elif project.status == 'paused' %}
+                        <span class="pv-status paused"><i class="fa-solid fa-pause" style="font-size:.5rem;"></i>متوقف</span>
+                    {% elif project.status == 'cancelled' %}
+                        <span class="pv-status cancelled"><i class="fa-solid fa-xmark" style="font-size:.5rem;"></i>لغو</span>
+                    {% else %}
+                        <span class="pv-status pending"><i class="fa-solid fa-hourglass" style="font-size:.5rem;"></i>در انتظار</span>
+                    {% endif %}
+
+                    {% if project.priority %}
+                    <span class="pv-code-badge" style="direction:rtl;">
+                        <i class="fa-solid fa-flag"></i>
+                        {% if project.priority == 'critical' %}بحرانی
+                        {% elif project.priority == 'high' %}بالا
+                        {% elif project.priority == 'medium' %}متوسط
+                        {% else %}کم{% endif %}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="pv-header-actions">
+                <a href="{{ url_for('projects.edit_project', project_id=project.id) }}"
+                   class="pv-btn pv-btn-edit">
+                    <i class="fa-solid fa-pen"></i>
+                    ویرایش
+                </a>
+                <a href="{{ url_for('projects.list_projects') }}"
+                   class="pv-btn pv-btn-back">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت
+                </a>
+            </div>
+        </div>
+
+        <!-- بدنه -->
+        <div class="pv-body">
+
+            <!-- ============ اطلاعات اصلی ============ -->
+            <section class="pv-section">
+                <div class="pv-section-head">
+                    <div class="pv-section-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <h2>اطلاعات پروژه</h2>
+                </div>
+
+                <div class="pv-info-grid">
+                    {% if project.project_number %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-hashtag"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">شماره پروژه</span>
+                            <span class="pv-info-value ltr">{{ project.project_number }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-helmet-safety"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">پیمانکار</span>
+                            <span class="pv-info-value {{ 'muted' if not project.contractor_name else '' }}">
+                                {{ project.contractor_name or 'تعیین نشده' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-file-contract"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">نوع قرارداد</span>
+                            <span class="pv-info-value {{ 'muted' if not project.contract_type_title else '' }}">
+                                {{ project.contract_type_title or 'تعیین نشده' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-map-location-dot"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">ناحیه</span>
+                            <span class="pv-info-value {{ 'muted' if not project.area_title else '' }}">
+                                {{ project.area_title or 'تعیین نشده' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    {% if project.province or project.city %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-map"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">موقعیت</span>
+                            <span class="pv-info-value">
+                                {{ project.province or '' }}{% if project.province and project.city %} - {% endif %}{{ project.city or '' }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if project.location %}
+                    <div class="pv-info-item full">
+                        <div class="pv-info-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">آدرس / موقعیت دقیق</span>
+                            <span class="pv-info-value">{{ project.location }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if project.description %}
+                <div style="margin-top:16px;">
+                    <p style="font-size:.75rem;font-weight:700;color:var(--pv-text-secondary);margin:0 0 8px;">
+                        <i class="fa-solid fa-align-right" style="color:var(--pv-color);"></i>
+                        توضیحات
+                    </p>
+                    <div class="pv-description-box">{{ project.description }}</div>
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- ============ اطلاعات قرارداد (ریالی + ارزی) ============ -->
+            <section class="pv-section">
+                <div class="pv-section-head">
+                    <div class="pv-section-icon">
+                        <i class="fa-solid fa-file-signature"></i>
+                    </div>
+                    <h2>اطلاعات قرارداد</h2>
+                </div>
+
+                <div class="pv-contract-layout">
+
+                    <!-- ★ بلوک ریالی -->
+                    <div class="pv-contract-block">
+                        <div class="pv-contract-head">
+                            <div class="pv-contract-head-icon">
+                                <i class="fa-solid fa-money-bill-wave"></i>
+                            </div>
+                            <strong>قرارداد ریالی</strong>
+                        </div>
+                        <div class="pv-contract-rows">
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-hashtag"></i>
+                                    شماره قرارداد
+                                </span>
+                                <span class="pv-contract-row-value ltr {{ 'muted' if not project.contract_number else '' }}">
+                                    {{ project.contract_number or '—' }}
+                                </span>
+                            </div>
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-money-bill-wave"></i>
+                                    مبلغ قرارداد
+                                </span>
+                                <span class="pv-contract-row-value {{ 'muted' if not project.contract_amount else '' }}">
+                                    {% if project.contract_amount %}
+                                        {{ "{:,.0f}".format(project.contract_amount) }} ریال
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-sack-dollar"></i>
+                                    بودجه
+                                </span>
+                                <span class="pv-contract-row-value {{ 'muted' if not project.budget else '' }}">
+                                    {% if project.budget %}
+                                        {{ "{:,.0f}".format(project.budget) }} ریال
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ★ بلوک ارزی -->
+                    <div class="pv-contract-block">
+                        <div class="pv-contract-head">
+                            <div class="pv-contract-head-icon">
+                                <i class="fa-solid fa-dollar-sign"></i>
+                            </div>
+                            <strong>قرارداد ارزی</strong>
+                        </div>
+                        <div class="pv-contract-rows">
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-passport"></i>
+                                    شماره قرارداد
+                                </span>
+                                <span class="pv-contract-row-value ltr {{ 'muted' if not project.contract_number_foreign else '' }}">
+                                    {{ project.contract_number_foreign or '—' }}
+                                </span>
+                            </div>
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-dollar-sign"></i>
+                                    مبلغ قرارداد
+                                </span>
+                                <span class="pv-contract-row-value {{ 'muted' if not project.contract_amount_foreign else '' }}">
+                                    {% if project.contract_amount_foreign %}
+                                        {{ "{:,.0f}".format(project.contract_amount_foreign) }}
+                                        {{ project.currency or 'USD' }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="pv-contract-row">
+                                <span class="pv-contract-row-label">
+                                    <i class="fa-solid fa-coins"></i>
+                                    واحد پول
+                                </span>
+                                <span class="pv-contract-row-value ltr {{ 'muted' if not project.currency else '' }}">
+                                    {{ project.currency or '—' }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- تاریخ‌های قرارداد -->
+                <div class="pv-info-grid" style="margin-top:14px;">
+                    {% if project.contract_start_date %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">شروع قرارداد</span>
+                            <span class="pv-info-value">{{ project.contract_start_date | jalali_date }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if project.contract_end_date %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">پایان قرارداد</span>
+                            <span class="pv-info-value">{{ project.contract_end_date | jalali_date }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ============ وضعیت و پیشرفت ============ -->
+            <section class="pv-section">
+                <div class="pv-section-head">
+                    <div class="pv-section-icon">
+                        <i class="fa-solid fa-chart-line"></i>
+                    </div>
+                    <h2>وضعیت و پیشرفت</h2>
+                </div>
+
+                <div class="pv-progress-grid">
+                    <!-- پیشرفت کلی -->
+                    <div class="pv-progress-card">
+                        <div class="pv-progress-icon">
+                            <i class="fa-solid fa-percent"></i>
+                        </div>
+                        <div class="pv-progress-value">{{ project.progress_percent or 0 }}٪</div>
+                        <div class="pv-progress-label">پیشرفت کلی</div>
+                        <div class="pv-progress-bar-wrap">
+                            <div class="pv-progress-bar">
+                                <div class="pv-progress-fill"
+                                     style="width: {{ project.progress_percent or 0 }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- پیشرفت فیزیکی -->
+                    <div class="pv-progress-card">
+                        <div class="pv-progress-icon">
+                            <i class="fa-solid fa-trowel-bricks"></i>
+                        </div>
+                        <div class="pv-progress-value">{{ project.physical_progress or 0 }}٪</div>
+                        <div class="pv-progress-label">پیشرفت فیزیکی</div>
+                        <div class="pv-progress-bar-wrap">
+                            <div class="pv-progress-bar">
+                                <div class="pv-progress-fill"
+                                     style="width: {{ project.physical_progress or 0 }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ★ پیشرفت برنامه‌ای -->
+                    <div class="pv-progress-card">
+                        <div class="pv-progress-icon">
+                            <i class="fa-solid fa-clock"></i>
+                        </div>
+                        <div class="pv-progress-value">{{ project.time_progress or 0 }}٪</div>
+                        <div class="pv-progress-label">پیشرفت برنامه‌ای</div>
+                        <div class="pv-progress-bar-wrap">
+                            <div class="pv-progress-bar">
+                                <div class="pv-progress-fill"
+                                     style="width: {{ project.time_progress or 0 }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ★ پیشرفت مالی ریالی -->
+                    <div class="pv-progress-card">
+                        <div class="pv-progress-icon">
+                            <i class="fa-solid fa-money-bill-1-wave"></i>
+                        </div>
+                        <div class="pv-progress-value">{{ project.financial_progress_rial or 0 }}٪</div>
+                        <div class="pv-progress-label">پیشرفت مالی ریالی</div>
+                        <div class="pv-progress-bar-wrap">
+                            <div class="pv-progress-bar">
+                                <div class="pv-progress-fill"
+                                     style="width: {{ project.financial_progress_rial or 0 }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ★ پیشرفت مالی ارزی -->
+                    <div class="pv-progress-card">
+                        <div class="pv-progress-icon">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                        </div>
+                        <div class="pv-progress-value">{{ project.financial_progress_foreign or 0 }}٪</div>
+                        <div class="pv-progress-label">پیشرفت مالی ارزی</div>
+                        <div class="pv-progress-bar-wrap">
+                            <div class="pv-progress-bar">
+                                <div class="pv-progress-fill"
+                                     style="width: {{ project.financial_progress_foreign or 0 }}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زمان‌بندی -->
+                {% if project.start_date or project.planned_end_date or project.actual_end_date or project.duration_days %}
+                <div class="pv-info-grid" style="margin-top:16px;">
+                    {% if project.start_date %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-calendar-plus"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">شروع پروژه</span>
+                            <span class="pv-info-value">{{ project.start_date | jalali_date }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if project.planned_end_date %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">پایان برنامه‌ای</span>
+                            <span class="pv-info-value">{{ project.planned_end_date | jalali_date }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if project.actual_end_date %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-flag-checkered"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">پایان واقعی</span>
+                            <span class="pv-info-value">{{ project.actual_end_date | jalali_date }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if project.duration_days %}
+                    <div class="pv-info-item">
+                        <div class="pv-info-icon"><i class="fa-solid fa-stopwatch"></i></div>
+                        <div class="pv-info-content">
+                            <span class="pv-info-label">مدت پروژه</span>
+                            <span class="pv-info-value">{{ project.duration_days }} روز</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </section>
+
+            <!-- ============ ★ تیم پروژه ★ ============ -->
+            <section class="pv-section">
+                <div class="pv-section-head pv-team-head">
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <div class="pv-section-icon">
+                            <i class="fa-solid fa-users"></i>
+                        </div>
+                        <h2>تیم پروژه</h2>
+                        <span class="pv-team-count">{{ members|length }} نفر</span>
+                    </div>
+                </div>
+
+                {% if members %}
+                <div class="pv-team-grid">
+                    {% for m in members %}
+                    {% set mc = colors[loop.index0 % colors|length] %}
+                    <div class="pv-member-card {% if m.user_id == session.get('user_id') %}me{% endif %}"
+                         style="--member-color: {{ m.role_color or mc[0] }};">
+                        <div class="pv-member-avatar">
+                            {{ m.full_name[0] if m.full_name else '?' }}
+                        </div>
+                        <div class="pv-member-info">
+                            <span class="pv-member-name">{{ m.full_name or m.username }}</span>
+                            <span class="pv-member-role">
+                                <i class="fa-solid fa-user-tag"></i>
+                                {{ m.role_title }}
+                            </span>
+                        </div>
+                        <form method="POST"
+                              action="{{ url_for('projects.remove_member', member_id=m.id) }}"
+                              style="display:inline"
+                              onsubmit="return confirm('حذف {{ m.full_name }} از تیم؟')">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                            <button type="submit" class="pv-member-remove" title="حذف">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="pv-team-empty">
+                    <i class="fa-solid fa-users"></i>
+                    هنوز عضوی به تیم اضافه نشده است
+                </div>
+                {% endif %}
+
+                <!-- ★ فرم افزودن عضو -->
+                <form method="POST"
+                      action="{{ url_for('projects.add_member', project_id=project.id) }}"
+                      class="pv-add-member">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                        <i class="fa-solid fa-user-plus" style="color:var(--pv-color);"></i>
+                        <strong style="font-size:.88rem;color:var(--pv-text);">افزودن عضو جدید به تیم</strong>
+                    </div>
+
+                    <div class="pv-add-member-grid">
+                        <div class="pv-add-field">
+                            <label class="pv-add-label">
+                                <span class="req">*</span> کاربر
+                            </label>
+                            <select name="user_id" class="pv-add-select" required>
+                                <option value="">— انتخاب کنید —</option>
+                                {% for u in all_users %}
+                                <option value="{{ u.id }}">{{ u.full_name }} ({{ u.username }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="pv-add-field">
+                            <label class="pv-add-label">
+                                <span class="req">*</span> نقش
+                            </label>
+                            <select name="role_id" class="pv-add-select" required>
+                                <option value="">— انتخاب کنید —</option>
+                                {% for r in all_roles %}
+                                <option value="{{ r.id }}">
+                                    {{ r.title }}{% if r.is_required %} (اجباری){% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="pv-add-field">
+                            <label class="pv-add-label">شرح وظایف</label>
+                            <input type="text" name="responsibility"
+                                   class="pv-add-input"
+                                   placeholder="اختیاری">
+                        </div>
+
+                        <button type="submit" class="pv-add-btn">
+                            <i class="fa-solid fa-plus"></i>
+                            افزودن به تیم
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

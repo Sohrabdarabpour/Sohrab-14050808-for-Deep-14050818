@@ -1,0 +1,853 @@
+/* ========================================
+   استایل پایه - مشترک همه صفحات
+   نسخه بهینه‌شده
+   ======================================== */
+
+/* ============================================================
+   ★ متغیرهای رنگ
+   ============================================================ */
+:root {
+    /* رنگ‌های اصلی */
+    --primary: #4e6068;
+    --primary-dark: #3a4a52;
+    --primary-light: #6b7f88;
+    --secondary: #00CEC9;
+    --success: #00B894;
+    --warning: #FDCB6E;
+    --danger: #E17055;
+    --info: #74B9FF;
+    --dark: #2D3436;
+    --gray: #636E72;
+    --light-gray: #DFE6E9;
+    --bg: #F4F6F9;
+    --white: #FFFFFF;
+
+    /* سایه‌ها */
+    --shadow: 0 4px 20px rgba(78, 96, 104, 0.12);
+    --shadow-hover: 0 8px 30px rgba(78, 96, 104, 0.20);
+    --shadow-sm: 0 2px 8px rgba(78, 96, 104, 0.08);
+    --shadow-md: 0 6px 24px rgba(78, 96, 104, 0.16);
+
+    /* گردی گوشه‌ها */
+    --radius: 12px;
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
+
+    /* ترنزیشن */
+    --transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --transition-fast: all 0.15s ease;
+    --transition-slow: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* ابعاد لایوت */
+    --navbar-height: 60px;
+    --content-padding-top: 0.6rem;
+    --content-padding-bottom: 0.4rem;
+    --container-width: 98%;
+    --container-max-width: 100%;
+
+    /* ★ متغیرهای پیش‌فرض صفحات (برای استفاده در استایل‌های اختصاصی) */
+    --page-primary: var(--primary);
+    --page-primary-light: var(--primary-light);
+    --page-primary-dark: var(--primary-dark);
+    --page-bg: var(--bg);
+    --page-border: var(--light-gray);
+    --page-text: var(--dark);
+    --page-text-light: var(--gray);
+    --page-shadow-sm: var(--shadow-sm);
+    --page-shadow-md: var(--shadow-md);
+    --page-shadow-lg: var(--shadow-hover);
+    --page-radius-sm: var(--radius-sm);
+    --page-radius-md: var(--radius-md);
+    --page-radius-lg: var(--radius-lg);
+    --page-transition: var(--transition);
+}
+
+/* ============================================================
+   ★ ریست و تنظیمات پایه
+   ============================================================ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--dark);
+    font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* ★ اعمال فونت فقط روی عناصر متنی (نه همه) */
+body,
+input,
+select,
+textarea,
+button,
+optgroup {
+    font-family: 'Vazir', 'Tahoma', 'Arial', sans-serif;
+}
+
+/* ============================================================
+   ★ کانتینر
+   ============================================================ */
+.container-fluid-custom {
+    width: var(--container-width);
+    max-width: var(--container-max-width);
+    margin: 0 auto;
+    padding: 0 12px;
+}
+
+/* ============================================================
+   ★ نوار ناوبری
+   ============================================================ */
+.navbar-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    box-shadow: 0 2px 12px rgba(78, 96, 104, 0.25);
+    padding: 6px 0;
+    min-height: var(--navbar-height);
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+}
+
+.navbar-custom .navbar-brand {
+    color: var(--white) !important;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 4px 0;
+    letter-spacing: 0.3px;
+    transition: var(--transition);
+}
+
+.navbar-custom .navbar-brand i {
+    margin-left: 8px;
+    font-size: 1.3rem;
+}
+
+.navbar-custom .navbar-brand:hover {
+    transform: scale(1.03);
+}
+
+.navbar-custom .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 4px 14px;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.navbar-custom .nav-link:hover,
+.navbar-custom .nav-link:focus {
+    color: var(--white) !important;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.navbar-custom .nav-link i {
+    margin-left: 6px;
+}
+
+.navbar-custom .dropdown-menu {
+    border: none;
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-hover);
+    padding: 6px 0;
+    margin-top: 4px;
+    min-width: 180px;
+}
+
+.navbar-custom .dropdown-item {
+    padding: 6px 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.navbar-custom .dropdown-item:hover,
+.navbar-custom .dropdown-item:focus {
+    background: rgba(78, 96, 104, 0.06);
+    color: var(--primary);
+}
+
+.navbar-custom .dropdown-item i {
+    margin-left: 8px;
+    font-size: 0.9rem;
+}
+
+.navbar-custom .dropdown-divider {
+    border-color: var(--light-gray);
+    margin: 4px 0;
+}
+
+/* ============================================================
+   ★ محتوای اصلی
+   ============================================================ */
+.main-content {
+    padding-top: var(--content-padding-top);
+    padding-bottom: var(--content-padding-bottom);
+    min-height: calc(100vh - var(--navbar-height) - 4px);
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.main-content .container-fluid-custom {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   ★ کارت‌ها
+   ============================================================ */
+.card-custom {
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    overflow: hidden;
+    background: var(--white);
+    margin-bottom: 0.5rem;
+}
+
+.card-custom:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    padding: 10px 18px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    letter-spacing: 0.2px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.card-header-custom i {
+    margin-left: 10px;
+    font-size: 1.1rem;
+}
+
+.card-body {
+    padding: 14px 18px;
+}
+
+/* ============================================================
+   ★ کارت‌های آمار (پایه - قابل بازنویسی در صفحات)
+   ============================================================ */
+.stat-card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-height: 100px;
+    padding: 20px;
+    border: 1px solid var(--page-border);
+    border-right: 4px solid var(--page-primary);
+    border-radius: var(--page-radius-md);
+    background: #fff;
+    box-shadow: var(--page-shadow-sm);
+    transition: var(--page-transition);
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: "";
+    position: absolute;
+    top: -25px;
+    left: -25px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--page-primary);
+    opacity: 0.05;
+    pointer-events: none;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--page-shadow-md);
+}
+
+.stat-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: color-mix(in srgb, var(--page-primary) 14%, white);
+    color: var(--page-primary);
+    font-size: 1.45rem;
+}
+
+.stat-number {
+    color: var(--page-primary);
+    font-size: 1.8rem;
+    font-weight: 900;
+    line-height: 1.2;
+}
+
+.stat-label {
+    color: var(--page-text-light);
+    font-size: 0.8rem;
+}
+
+/* ============================================================
+   ★ دکمه‌ها
+   ============================================================ */
+.btn-primary-custom,
+.btn-success-custom,
+.btn-info-custom {
+    border: none;
+    padding: 10px 28px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    color: var(--white);
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.4);
+    color: var(--white);
+}
+
+.btn-success-custom {
+    background: linear-gradient(135deg, var(--success) 0%, #00A381 100%);
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+.btn-success-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 184, 148, 0.4);
+    color: var(--white);
+}
+
+.btn-info-custom {
+    background: linear-gradient(135deg, var(--info) 0%, #4A9EFF 100%);
+    box-shadow: 0 4px 15px rgba(116, 185, 255, 0.3);
+}
+
+.btn-info-custom:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(116, 185, 255, 0.4);
+    color: var(--white);
+}
+
+.btn-outline-custom {
+    background: transparent;
+    border: 2px solid var(--primary);
+    color: var(--primary);
+    padding: 8px 24px;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.btn-outline-custom:hover {
+    background: var(--primary);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.btn-action {
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: var(--transition);
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-action:hover {
+    transform: scale(1.15);
+}
+
+.btn-action-edit {
+    background: linear-gradient(135deg, #FDCB6E 0%, #F39C12 100%);
+    color: var(--white);
+}
+
+.btn-action-edit:hover {
+    background: linear-gradient(135deg, #F39C12 0%, #E67E22 100%);
+    color: var(--white);
+}
+
+.btn-action-delete {
+    background: linear-gradient(135deg, #E17055 0%, #D63031 100%);
+    color: var(--white);
+}
+
+.btn-action-delete:hover {
+    background: linear-gradient(135deg, #D63031 0%, #C0392B 100%);
+    color: var(--white);
+}
+
+/* ============================================================
+   ★ جدول
+   ============================================================ */
+.table-responsive {
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    margin-bottom: 0;
+    font-size: 0.8rem;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table> :not(caption)>*>* {
+    padding: 0.3rem 0.5rem;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    font-weight: 600;
+    font-size: 0.75rem;
+    border: none;
+    white-space: nowrap;
+    padding: 0.4rem 0.5rem;
+}
+
+.table tbody tr {
+    transition: var(--transition);
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.table tbody tr:hover {
+    background: rgba(78, 96, 104, 0.04);
+}
+
+.table tbody td {
+    padding: 0.3rem 0.5rem;
+    vertical-align: middle;
+    font-size: 0.8rem;
+}
+
+/* ستون‌های از پیش تعریف شده */
+.table .col-check {
+    width: 35px;
+    min-width: 35px;
+    text-align: center;
+}
+
+.table .col-code {
+    width: 90px;
+    min-width: 80px;
+}
+
+.table .col-subject {
+    width: auto;
+    min-width: 150px;
+}
+
+.table .col-contractor {
+    width: 120px;
+    min-width: 100px;
+}
+
+.table .col-status {
+    width: 85px;
+    min-width: 70px;
+}
+
+.table .col-actions {
+    width: 75px;
+    min-width: 65px;
+    text-align: center;
+}
+
+.table .col-date {
+    width: 100px;
+    min-width: 85px;
+}
+
+.table .col-project {
+    width: 110px;
+    min-width: 90px;
+}
+
+/* ============================================================
+   ★ نشان‌ها (Badges)
+   ============================================================ */
+.badge-custom {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 0.3px;
+    display: inline-block;
+}
+
+.badge-success {
+    background: linear-gradient(135deg, var(--success) 0%, #00A381 100%);
+    color: var(--white);
+}
+
+.badge-warning {
+    background: linear-gradient(135deg, var(--warning) 0%, #F39C12 100%);
+    color: var(--dark);
+}
+
+.badge-danger {
+    background: linear-gradient(135deg, var(--danger) 0%, #D63031 100%);
+    color: var(--white);
+}
+
+.badge-info {
+    background: linear-gradient(135deg, var(--info) 0%, #4A9EFF 100%);
+    color: var(--white);
+}
+
+.badge-secondary {
+    background: linear-gradient(135deg, var(--gray) 0%, #4A4A4A 100%);
+    color: var(--white);
+}
+
+.badge-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+}
+
+/* ============================================================
+   ★ فرم‌ها
+   ============================================================ */
+.form-custom .form-control,
+.form-custom .form-select {
+    border-radius: var(--radius-sm);
+    border: 2px solid var(--light-gray);
+    padding: 12px 18px;
+    transition: var(--transition);
+    font-size: 0.95rem;
+    background: var(--white);
+}
+
+.form-custom .form-control:focus,
+.form-custom .form-select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.15);
+    outline: none;
+}
+
+.form-custom .form-label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+}
+
+/* ============================================================
+   ★ پیام‌های فلش (Alert) — تمیز شده
+   ============================================================ */
+.alert-custom {
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px 24px;
+    box-shadow: var(--shadow);
+}
+
+.alert-success-custom,
+.alert-danger-custom,
+.alert-warning-custom {
+    animation: alertFadeOut 0.8s ease forwards;
+    animation-delay: 3s;
+}
+
+.alert-success-custom {
+    background: linear-gradient(135deg, #d4edda 0%, #b7ebc5 100%);
+    color: #155724;
+    border-right: 5px solid var(--success);
+}
+
+.alert-danger-custom {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+    border-right: 5px solid var(--danger);
+}
+
+.alert-warning-custom {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    color: #856404;
+    border-right: 5px solid var(--warning);
+}
+
+@keyframes alertFadeOut {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    80% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 0;
+        height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+        overflow: hidden;
+        visibility: hidden;
+    }
+}
+
+/* ============================================================
+   ★ منطقه آپلود فایل
+   ============================================================ */
+.drop-zone {
+    border: 3px dashed var(--primary);
+    border-radius: var(--radius);
+    padding: 50px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: linear-gradient(135deg, #fafaff 0%, #f0f0ff 100%);
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+    background: linear-gradient(135deg, #f0f0ff 0%, #e8e8ff 100%);
+    border-color: var(--primary-dark);
+    transform: scale(1.02);
+}
+
+.drop-zone.dragover {
+    transform: scale(1.05);
+}
+
+.drop-zone i {
+    font-size: 4rem;
+    color: var(--primary);
+    margin-bottom: 16px;
+}
+
+/* ============================================================
+   ★ اسکرول بار سفارشی
+   ============================================================ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--light-gray);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary) 100%);
+}
+
+/* اسکرول بار برای فایرفاکس */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--light-gray);
+}
+
+/* ============================================================
+   ★ انیمیشن‌ها
+   ============================================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+/* ============================================================
+   ★ کلاس‌های کمکی
+   ============================================================ */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.shadow-hover {
+    transition: var(--transition);
+}
+
+.shadow-hover:hover {
+    box-shadow: var(--shadow-hover);
+}
+
+.rounded-custom {
+    border-radius: var(--radius);
+}
+
+.transition {
+    transition: var(--transition);
+}
+
+/* ============================================================
+   ★ دسترس‌پذیری
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ============================================================
+   ★ ریسپانسیو
+   ============================================================ */
+@media (max-width: 768px) {
+    .stat-number {
+        font-size: 2rem;
+    }
+
+    .table-responsive {
+        font-size: 0.85rem;
+    }
+
+    .card-header-custom {
+        padding: 14px 18px;
+        font-size: 1rem;
+    }
+
+    .navbar-custom .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .navbar-custom .nav-link {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+    }
+
+    .btn-primary-custom,
+    .btn-success-custom,
+    .btn-info-custom {
+        padding: 8px 18px;
+        font-size: 0.9rem;
+    }
+
+    .drop-zone {
+        padding: 30px 15px;
+    }
+
+    .drop-zone i {
+        font-size: 3rem;
+    }
+
+    .container-fluid-custom {
+        width: 98%;
+        padding: 0 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .stat-number {
+        font-size: 1.6rem;
+    }
+
+    .card-body {
+        padding: 16px;
+    }
+
+    .table-custom thead th,
+    .table-custom tbody td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    .badge-custom {
+        font-size: 0.7rem;
+        padding: 4px 10px;
+    }
+}
+
+/* ============================================================
+   ★ Font Awesome — اصلاح فونت
+   ============================================================ */
+.fa-solid,
+.fas {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 900 !important;
+}
+
+.fa-regular,
+.far {
+    font-family: "Font Awesome 6 Free" !important;
+    font-weight: 400 !important;
+}
+
+.fa-brands,
+.fab {
+    font-family: "Font Awesome 6 Brands" !important;
+    font-weight: 400 !important;
+}

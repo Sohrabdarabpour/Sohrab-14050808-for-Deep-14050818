@@ -1,0 +1,647 @@
+/* استایل صفحه: reports/area_departments.html */
+
+.page-report-area-departments {
+    --page-primary: #1b698b;
+    --page-primary-light: #167a5c;
+    --page-primary-dark: #14506a;
+    --page-bg: #f0f4f8;
+    --card-shadow: 0 8px 30px rgba(65, 151, 201, .20);
+    --radius-lg: 20px;
+    --radius-md: 14px;
+    --radius-sm: 10px;
+    --transition: .3s cubic-bezier(.25, .46, .45, .94);
+}
+
+
+    /* ===== دکمه بازگشت ===== */
+.page-report-area-departments .back-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.page-report-area-departments .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, var(--page-primary) 0%, var(--page-primary-light) 100%);
+    color: #fff;
+    border-radius: 30px;
+    text-decoration: none;
+    font-family: inherit;
+    font-size: .85rem;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(27, 105, 139, .25);
+    transition: all var(--transition);
+    white-space: nowrap;
+}
+
+.page-report-area-departments .back-button i {
+    font-size: .95rem;
+    transition: transform var(--transition);
+}
+
+.page-report-area-departments .back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(27, 105, 139, .35);
+}
+
+.page-report-area-departments .back-button:hover i {
+    transform: translateX(-4px);
+}
+
+.page-report-area-departments .back-button:active {
+    transform: translateY(0);
+}
+
+/* ===== عنوان صفحه در کنار دکمه ===== */
+.page-report-area-departments .page-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.page-report-area-departments .page-heading-icon {
+    width: 46px;
+    height: 46px;
+    min-width: 46px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--page-primary), var(--page-primary-dark));
+    color: #fff;
+    font-size: 20px;
+    box-shadow: 0 6px 16px rgba(27, 105, 139, .25);
+}
+
+.page-report-area-departments .page-heading-text {
+    min-width: 0;
+}
+
+.page-report-area-departments .page-heading h1 {
+    margin: 0;
+    color: #183b4d;
+    font-size: clamp(1rem, 1.5vw, 1.25rem);
+    font-weight: 800;
+    word-break: break-word;
+}
+
+.page-report-area-departments .page-heading .area-code {
+    display: block;
+    margin-top: 4px;
+    color: #78909c;
+    font-size: clamp(.68rem, .85vw, .78rem);
+}
+
+/* ریسپانسیو دکمه بازگشت */
+@media(max-width: 576px) {
+    .page-report-area-departments .back-row {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .page-report-area-departments .back-button {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .page-report-area-departments .page-heading {
+        width: 100%;
+    }
+}
+
+
+    .page-report-area-departments .report-container {
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+    }
+
+    /* ===== فیلتر ===== */
+    .page-report-area-departments .filter-card {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: clamp(14px, 1.6vw, 20px);
+        margin-bottom: 24px;
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--card-shadow);
+        flex-wrap: wrap;
+    }
+
+    .page-report-area-departments .filter-title {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #315466;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    .page-report-area-departments .filter-title i {
+        color: var(--page-primary);
+    }
+
+    .page-report-area-departments .year-form {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-area-departments .year-select {
+        min-width: 170px;
+        height: 42px;
+        padding: 0 14px;
+        border: 1px solid #d9e3ea;
+        border-radius: 10px;
+        background: #f8f9fa;
+        color: #345261;
+        font-family: "Vazirmatn", inherit;
+        font-size: 13px;
+        outline: none;
+        cursor: pointer;
+        transition: all var(--transition);
+    }
+
+    .page-report-area-departments .year-select:focus,
+    .page-report-area-departments .year-select:hover {
+        border-color: var(--page-primary);
+        box-shadow: 0 0 0 3px rgba(27, 105, 139, .10);
+    }
+
+    .page-report-area-departments .filter-button {
+        height: 42px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--page-primary), var(--page-primary-light));
+        color: #fff;
+        font-family: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .25);
+    }
+
+    .page-report-area-departments .filter-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(27, 105, 139, .35);
+    }
+
+    /* ===== چیدمان: کارت‌ها + نمودار ===== */
+    .page-report-area-departments .departments-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: 20px;
+        align-items: start;
+        margin-bottom: 24px;
+    }
+
+    .page-report-area-departments .departments-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        gap: 16px;
+        align-content: start;
+    }
+
+    /* ===== کارت دپارتمان ===== */
+    .page-report-area-departments .department-card {
+        position: relative;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid rgba(220, 230, 236, .75);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--card-shadow);
+        transition: transform var(--transition), box-shadow var(--transition);
+        overflow: hidden;
+        isolation: isolate;
+        min-width: 0;
+    }
+
+    .page-report-area-departments .department-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg,
+                var(--dept-color, var(--page-primary)),
+                var(--dept-color-light, var(--page-primary-light)));
+        z-index: 2;
+    }
+
+    .page-report-area-departments .department-card::after {
+        content: "";
+        position: absolute;
+        bottom: -30px;
+        left: -30px;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--dept-color, var(--page-primary));
+        opacity: .04;
+        transition: all .6s ease;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-report-area-departments .department-card:hover::after {
+        transform: scale(1.6);
+        opacity: .08;
+    }
+
+    .page-report-area-departments .department-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 14px 38px rgba(65, 151, 201, .22);
+        border-color: color-mix(in srgb, var(--dept-color, var(--page-primary)) 25%, transparent);
+    }
+
+    .page-report-area-departments .department-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        min-height: 68px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-report-area-departments .department-icon {
+        flex: 0 0 48px;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--dept-color, var(--page-primary)) 0%,
+                var(--dept-color-light, var(--page-primary-light)) 100%);
+        color: #fff;
+        border-radius: 12px;
+        font-size: 20px;
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .22);
+        transition: transform var(--transition);
+    }
+
+    .page-report-area-departments .department-card:hover .department-icon {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-report-area-departments .department-icon i {
+        color: inherit;
+        line-height: 1;
+    }
+
+    .page-report-area-departments .department-info {
+        min-width: 0;
+        padding-top: 2px;
+        flex: 1;
+    }
+
+    .page-report-area-departments .department-info h3 {
+        margin: 0;
+        color: #234758;
+        font-size: clamp(.9rem, 1.05vw, 1rem);
+        line-height: 1.7;
+        font-weight: 800;
+        word-break: break-word;
+    }
+
+    .page-report-area-departments .department-code {
+        display: block;
+        margin-top: 3px;
+        color: #8a9ca6;
+        font-size: 11px;
+    }
+
+    .page-report-area-departments .department-card-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-top: 17px;
+        padding-top: 15px;
+        border-top: 1px solid #edf2f5;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-report-area-departments .work-label {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #7c909b;
+        font-size: 12px;
+    }
+
+    .page-report-area-departments .work-label i {
+        color: var(--dept-color, var(--page-primary));
+    }
+
+    .page-report-area-departments .work-count {
+        color: var(--dept-color, var(--page-primary));
+        font-size: clamp(1.1rem, 1.5vw, 1.4rem);
+        font-weight: 900;
+        line-height: 1;
+        background: color-mix(in srgb, var(--dept-color, var(--page-primary)) 10%, transparent);
+        padding: 3px 14px;
+        border-radius: 12px;
+        min-width: 48px;
+        text-align: center;
+    }
+
+    /* ===== کارت نمودار ===== */
+    .page-report-area-departments .chart-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 20px;
+        padding: clamp(14px, 1.6vw, 22px);
+        border: 1px solid #eef1f5;
+        box-shadow: 0 4px 20px rgba(65, 151, 201, .06);
+        display: flex;
+        flex-direction: column;
+        transition: all var(--transition);
+        position: sticky;
+        top: 90px;
+        min-width: 0;
+    }
+
+    .page-report-area-departments .chart-card:hover {
+        border-color: rgba(27, 105, 139, .25);
+        box-shadow: 0 12px 35px rgba(65, 151, 201, .14);
+    }
+
+    .page-report-area-departments .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-area-departments .chart-title {
+        font-size: clamp(.82rem, 1vw, .98rem);
+        font-weight: 700;
+        color: #2d3436;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .page-report-area-departments .chart-title i {
+        color: #fff;
+        background: linear-gradient(135deg, var(--page-primary) 0%, var(--page-primary-light) 100%);
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .8rem;
+        box-shadow: 0 4px 10px rgba(27, 105, 139, .25);
+    }
+
+    .page-report-area-departments .chart-update {
+        font-size: clamp(.6rem, .75vw, .72rem);
+        color: #b2bec3;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .page-report-area-departments .chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: clamp(320px, 34vw, 440px);
+        min-height: 300px;
+    }
+
+    .page-report-area-departments .chart-wrapper canvas {
+        filter: drop-shadow(0 6px 18px rgba(27, 105, 139, 0.10));
+    }
+
+    .page-report-area-departments .chart-center-label {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+        z-index: 10;
+    }
+
+    .page-report-area-departments .chart-center-label .total-count {
+        font-size: clamp(1.1rem, 2vw, 1.9rem);
+        font-weight: 800;
+        line-height: 1.2;
+        background: linear-gradient(135deg, var(--page-primary) 0%, var(--page-primary-light) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+        filter: drop-shadow(0 2px 4px rgba(27, 105, 139, .25));
+    }
+
+    .page-report-area-departments .chart-center-label .total-label {
+        font-size: clamp(.55rem, .8vw, .72rem);
+        color: #636e72;
+        margin-top: 4px;
+        font-weight: 600;
+    }
+
+    /* ===== حالت خالی ===== */
+    .page-report-area-departments .empty-state {
+        padding: 60px 25px;
+        text-align: center;
+        background: #fff;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--card-shadow);
+    }
+
+    .page-report-area-departments .empty-icon {
+        width: 75px;
+        height: 75px;
+        margin: 0 auto 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .10), rgba(22, 122, 92, .10));
+        color: var(--page-primary);
+        border-radius: 50%;
+        font-size: 30px;
+    }
+
+    .page-report-area-departments .empty-state h3 {
+        margin: 0 0 8px;
+        color: #315466;
+        font-size: 18px;
+    }
+
+    .page-report-area-departments .empty-state p {
+        margin: 0 0 20px;
+        color: #8a9ca6;
+        font-size: 13px;
+    }
+
+    .page-report-area-departments .empty-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: linear-gradient(135deg, var(--page-primary), var(--page-primary-light));
+        color: #fff;
+        border-radius: 10px;
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all var(--transition);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .25);
+    }
+
+    .page-report-area-departments .empty-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(27, 105, 139, .35);
+    }
+
+    /* ============ ریسپانسیو ============ */
+
+    @media(min-width: 1600px) {
+        .page-report-area-departments .chart-wrapper {
+            height: clamp(380px, 28vw, 500px);
+        }
+    }
+
+    @media(max-width: 1200px) {
+        .page-report-area-departments .departments-layout {
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        }
+
+        .page-report-area-departments .departments-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+    }
+
+    @media(max-width: 992px) {
+        .page-report-area-departments .departments-layout {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .page-report-area-departments .departments-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        }
+
+        .page-report-area-departments .chart-wrapper {
+            height: clamp(340px, 55vw, 460px);
+        }
+
+        .page-report-area-departments .chart-card {
+            position: static;
+        }
+    }
+
+    @media(max-width: 768px) {
+        .page-report-area-departments .filter-card {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .page-report-area-departments .year-form {
+            width: 100%;
+        }
+
+        .page-report-area-departments .year-select {
+            flex: 1;
+            width: 100%;
+        }
+
+        .page-report-area-departments .filter-button {
+            white-space: nowrap;
+        }
+
+        .page-report-area-departments .departments-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .page-report-area-departments .department-card {
+            padding: 16px;
+        }
+
+        .page-report-area-departments .department-icon {
+            flex: 0 0 42px;
+            width: 42px;
+            height: 42px;
+            font-size: 17px;
+            border-radius: 11px;
+        }
+
+        .page-report-area-departments .chart-wrapper {
+            height: clamp(320px, 78vw, 420px);
+        }
+
+        .page-report-area-departments .chart-center-label .total-label {
+            display: none;
+        }
+    }
+
+    @media(max-width: 576px) {
+        .page-report-area-departments .departments-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .page-report-area-departments .year-form {
+            flex-direction: column;
+        }
+
+        .page-report-area-departments .year-select,
+        .page-report-area-departments .filter-button {
+            width: 100%;
+        }
+
+        .page-report-area-departments .chart-wrapper {
+            height: clamp(300px, 92vw, 400px);
+        }
+    }
+
+    @media(max-width: 380px) {
+        .page-report-area-departments .report-container {
+            padding: 8px;
+        }
+
+        .page-report-area-departments .department-card {
+            padding: 12px;
+        }
+
+        .page-report-area-departments .department-info h3 {
+            font-size: .82rem;
+        }
+
+        .page-report-area-departments .work-count {
+            font-size: 1rem;
+            padding: 2px 10px;
+        }
+    }
+
+    @media(prefers-reduced-motion: reduce) {
+        .page-report-area-departments * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

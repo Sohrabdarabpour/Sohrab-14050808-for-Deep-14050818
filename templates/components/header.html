@@ -1,0 +1,442 @@
+<!-- =====================================
+     APP HEADER - STICKY + GLASS + AUTO-FIT NAME
+     ===================================== -->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+
+<header class="app-header">
+    <div class="app-header-left">
+        <button class="sidebar-toggle-btn" type="button" id="sidebarToggleBtn" title="نمایش / مخفی کردن منو"
+            aria-label="نمایش یا مخفی کردن منو">
+            <i class="bi bi-layout-sidebar-inset"></i>
+        </button>
+        <button class="mobile-menu-btn" type="button" id="mobileMenuBtn" title="نمایش منو" aria-label="نمایش منو">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="app-header-logo">
+            <span>سامانه مدیریت اسناد نظارت عالیه</span>
+            <div class="company-logo-circle">
+                <img src="{{ url_for('static', filename='images/sspe.jpg') }}" alt="لوگوی شرکت">
+            </div>
+        </div>
+    </div>
+
+    <div class="app-header-actions">
+
+        <!-- ★★★ دکمه زنگوله ★★★ -->
+        <div class="nfd-wrapper" id="notifDropdown">
+            <button type="button" class="nfd-bell" onclick="toggleNotifDropdown()" aria-label="نوتیفیکیشن‌ها">
+                <i class="bi bi-bell"></i>
+                <span class="nfd-badge" id="notifBadge" style="display:none;">0</span>
+            </button>
+            
+        </div>
+
+        <!-- کارت کاربر -->
+        <a href="{{ url_for('profile.profile') }}" class="sidebar-user-link app-header-user" id="userNameBadge"
+            title="نمایش نام کامل">
+            <i class="bi bi-person-circle"></i>
+            <span class="user-name" data-full-name="{{ session.get('full_name','کاربر سیستم') }}">{{
+                session.get('full_name','کاربر سیستم') }}</span>
+        </a>
+
+        <!-- خروج -->
+        <a href="{{ url_for('auth.logout') }}" class="app-header-logout" title="خروج" aria-label="خروج">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+</header>
+
+<!-- ★★★ Backdrop (فقط موبایل) ★★★ -->
+<div class="nfd-backdrop" id="notifBackdrop" onclick="closeNotifDropdown()"></div>
+
+<!-- ★★★ پنل نوتیفیکیشن — خارج از header ★★★ -->
+<div class="nfd-panel" id="notifPanel">
+    <div class="nfd-head">
+        <span>
+            <i class="bi bi-bell"></i>
+            نوتیفیکیشن‌ها
+        </span>
+        <button type="button" class="nfd-close" onclick="closeNotifDropdown()" aria-label="بستن">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+
+    <div class="nfd-list" id="notifList">
+        <div class="nfd-empty">در حال بارگذاری...</div>
+    </div>
+
+    <a href="{{ url_for('notifications.list_notifications') }}"
+       class="nfd-footer">
+        مشاهده همه نوتیفیکیشن‌ها
+        <i class="bi bi-arrow-left"></i>
+    </a>
+</div>
+
+<!-- Popover نام کامل -->
+<div class="user-name-popover" id="userNamePopover"></div>
+
+<!-- =====================================
+     SCRIPT - Auto-fit + Truncate Name + Notif Dropdown
+     ===================================== -->
+<script>
+    // ============================================================
+    // ★ بخش ۱: Auto-fit + Truncate Name
+    // ============================================================
+    (function () {
+        'use strict';
+
+        const userNameEl = document.querySelector('.app-header-user .user-name');
+        const userBadge = document.getElementById('userNameBadge');
+        const popover = document.getElementById('userNamePopover');
+
+        if (!userNameEl || !userBadge) return;
+
+        const fullName = (userNameEl.dataset.fullName || userNameEl.textContent || '').trim();
+
+        const CONFIG = {
+            maxChars: 20,
+            maxFontSize: 0.82,
+            minFontSize: 0.62,
+            fontStep: 0.02,
+            mobileBreakpoint: 576,
+        };
+
+        function truncateText(text, maxChars) {
+            if (text.length <= maxChars) return text;
+            return text.slice(0, maxChars - 1).trim() + '…';
+        }
+
+        function fitTextInContainer(el, text, maxFont, minFont, step) {
+            el.style.fontSize = maxFont + 'rem';
+            el.textContent = text;
+
+            if (el.scrollWidth <= el.clientWidth) {
+                return {text: text, fontSize: maxFont, truncated: false};
+            }
+
+            let currentSize = maxFont;
+            while (currentSize > minFont) {
+                currentSize -= step;
+                el.style.fontSize = currentSize + 'rem';
+
+                if (el.scrollWidth <= el.clientWidth) {
+                    return {text: text, fontSize: currentSize, truncated: false};
+                }
+            }
+
+            return {text: text, fontSize: minFont, truncated: true};
+        }
+
+        function updateUserName() {
+            const width = window.innerWidth;
+
+            if (width > CONFIG.mobileBreakpoint) {
+                userNameEl.style.fontSize = '';
+                userNameEl.textContent = fullName;
+                userNameEl.removeAttribute('title');
+                return;
+            }
+
+            userNameEl.style.fontSize = CONFIG.maxFontSize + 'rem';
+            userNameEl.textContent = fullName;
+
+            requestAnimationFrame(function () {
+                const result = fitTextInContainer(
+                    userNameEl,
+                    fullName,
+                    CONFIG.maxFontSize,
+                    CONFIG.minFontSize,
+                    CONFIG.fontStep
+                );
+
+                if (result.truncated) {
+                    const truncated = truncateText(fullName, CONFIG.maxChars);
+                    userNameEl.textContent = truncated;
+                    userNameEl.setAttribute('title', fullName);
+                    userNameEl.style.fontSize = CONFIG.maxFontSize + 'rem';
+
+                    requestAnimationFrame(function () {
+                        if (userNameEl.scrollWidth > userNameEl.clientWidth) {
+                            let size = CONFIG.maxFontSize;
+                            while (size > CONFIG.minFontSize) {
+                                size -= CONFIG.fontStep;
+                                userNameEl.style.fontSize = size + 'rem';
+                                if (userNameEl.scrollWidth <= userNameEl.clientWidth) {
+                                    break;
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    userNameEl.removeAttribute('title');
+                }
+            });
+        }
+
+        setTimeout(updateUserName, 50);
+        window.addEventListener('load', updateUserName);
+
+        let resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(updateUserName, 150);
+        });
+
+        function showPopover() {
+            if (window.innerWidth > CONFIG.mobileBreakpoint) return;
+            if (!popover) return;
+
+            popover.textContent = fullName;
+
+            const rect = userBadge.getBoundingClientRect();
+            popover.style.top = (rect.bottom + 10) + 'px';
+
+            const popoverWidth = popover.offsetWidth || 150;
+            let right = window.innerWidth - rect.right;
+
+            if (right + popoverWidth > window.innerWidth - 10) {
+                right = window.innerWidth - popoverWidth - 10;
+            }
+            popover.style.right = Math.max(10, right) + 'px';
+            popover.style.left = 'auto';
+
+            popover.classList.add('show');
+        }
+
+        function hidePopover() {
+            if (!popover) return;
+            popover.classList.remove('show');
+        }
+
+        userBadge.addEventListener('click', function (e) {
+            e.stopPropagation();
+            if (popover.classList.contains('show')) {
+                hidePopover();
+            } else {
+                showPopover();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!userBadge.contains(e.target)) {
+                hidePopover();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') hidePopover();
+        });
+
+        window.addEventListener('scroll', hidePopover, {passive: true});
+
+    })();
+
+    // ============================================================
+    // ★ بخش ۲: Notif Dropdown
+    // ============================================================
+    (function () {
+        'use strict';
+
+        let isLoading = false;
+        let isOpen = false;
+
+        // ============================================================
+        // ★★★ تنظیم موقعیت پنل در دسکتاپ — دقیقاً کنار دکمه زنگ
+        // ============================================================
+        function adjustPanelPositionDesktop() {
+            const panel = document.getElementById('notifPanel');
+            const bell = document.querySelector('.nfd-bell');
+
+            if (!panel || !bell) return;
+            if (window.innerWidth <= 768) return;
+
+            const bellRect = bell.getBoundingClientRect();
+            const panelWidth = 420;
+            const viewportWidth = window.innerWidth;
+            const padding = 12;
+
+            // ★ فاصله لبه راست صفحه تا لبه راست دکمه زنگ
+            let right = viewportWidth - bellRect.right;
+
+            // ★ اگر پنل از سمت چپ صفحه بیرون می‌زند
+            if (right + panelWidth > viewportWidth - padding) {
+                right = viewportWidth - panelWidth - padding;
+            }
+
+            // ★ حداقل فاصله از لبه راست
+            if (right < padding) {
+                right = padding;
+            }
+
+            // ★ اعمال موقعیت
+            panel.style.top = (bellRect.bottom + 10) + 'px';
+            panel.style.right = right + 'px';
+            panel.style.left = 'auto';
+            panel.style.transform = 'none';
+        }
+
+        // ============================================================
+        // ★ باز/بسته کردن
+        // ============================================================
+        window.toggleNotifDropdown = function () {
+            const panel = document.getElementById('notifPanel');
+            const backdrop = document.getElementById('notifBackdrop');
+            if (!panel) return;
+
+            isOpen = !isOpen;
+
+            if (isOpen) {
+                panel.classList.add('show');
+                backdrop.classList.add('show');
+                document.body.style.overflow = 'hidden';
+
+                // ★ تنظیم موقعیت بعد از نمایش (دسکتاپ)
+                if (window.innerWidth > 768) {
+                    requestAnimationFrame(function () {
+                        adjustPanelPositionDesktop();
+                    });
+                }
+
+                if (!isLoading) {
+                    loadNotifications();
+                }
+            } else {
+                closeNotifDropdown();
+            }
+        };
+
+        window.closeNotifDropdown = function () {
+            const panel = document.getElementById('notifPanel');
+            const backdrop = document.getElementById('notifBackdrop');
+            if (!panel) return;
+
+            panel.classList.remove('show');
+            backdrop.classList.remove('show');
+            document.body.style.overflow = '';
+            isOpen = false;
+        };
+
+        // ============================================================
+        // ★ بارگذاری نوتیف‌ها
+        // ============================================================
+        async function loadNotifications() {
+            isLoading = true;
+            const list = document.getElementById('notifList');
+            if (!list) return;
+
+            try {
+                const res = await fetch('{{ url_for("notifications.dropdown") }}');
+                const data = await res.json();
+
+                updateBadge(data.unread_count);
+
+                if (!data.notifications || data.notifications.length === 0) {
+                    list.innerHTML = '<div class="nfd-empty">هیچ نوتیفی ندارید</div>';
+                    return;
+                }
+
+                list.innerHTML = data.notifications.map(function (n) {
+                    const colors = {
+                        'info':    '#1b698b',
+                        'success': '#16a34a',
+                        'warning': '#f59e0b',
+                        'danger':  '#dc2626',
+                    };
+                    const icons = {
+                        'info':    'bi-info-circle',
+                        'success': 'bi-check-circle',
+                        'warning': 'bi-exclamation-triangle',
+                        'danger':  'bi-x-circle',
+                    };
+                    const color = colors[n.notification_type] || '#1b698b';
+                    const icon = icons[n.notification_type] || 'bi-bell';
+
+                    return `
+                        <a href="/notifications/${n.id}/click"
+                           class="nfd-item ${n.is_read ? '' : 'unread'}"
+                           style="--ic: ${color};">
+                            <div class="nfd-item-icon">
+                                <i class="bi ${icon}"></i>
+                            </div>
+                            <div class="nfd-item-body">
+                                <div class="nfd-item-title">${n.title || ''}</div>
+                                ${n.message ? `<div class="nfd-item-msg">${n.message}</div>` : ''}
+                                <div class="nfd-item-time">
+                                    <i class="bi bi-clock"></i>
+                                    ${n.created_at_jalali || ''}
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+
+            } catch (err) {
+                console.error('Notif fetch error:', err);
+                list.innerHTML = '<div class="nfd-empty">خطا در دریافت</div>';
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        function updateBadge(count) {
+            const badge = document.getElementById('notifBadge');
+            if (!badge) return;
+
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // ★ بستن با Escape
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && isOpen) {
+                closeNotifDropdown();
+            }
+        });
+
+        // ★ بستن با کلیک بیرون (فقط دسکتاپ)
+        document.addEventListener('click', function (e) {
+            if (window.innerWidth <= 768) return;
+            if (!isOpen) return;
+
+            const panel = document.getElementById('notifPanel');
+            const wrapper = document.getElementById('notifDropdown');
+
+            if (!panel || !wrapper) return;
+            if (wrapper.contains(e.target)) return;
+            if (panel.contains(e.target)) return;
+
+            closeNotifDropdown();
+        });
+
+        // ★ بازمحاسبه موقعیت هنگام resize
+        let resizeTimer = null;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                if (isOpen && window.innerWidth > 768) {
+                    adjustPanelPositionDesktop();
+                }
+            }, 100);
+        });
+
+        // ★ بارگذاری اولیه badge
+        fetch('{{ url_for("notifications.unread_count") }}')
+            .then(r => r.json())
+            .then(d => updateBadge(d.count))
+            .catch(() => {});
+
+        setInterval(function () {
+            fetch('{{ url_for("notifications.unread_count") }}')
+                .then(r => r.json())
+                .then(d => updateBadge(d.count))
+                .catch(() => {});
+        }, 60000);
+
+    })();
+</script>

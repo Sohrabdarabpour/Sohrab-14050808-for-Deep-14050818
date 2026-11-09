@@ -1,0 +1,939 @@
+/* استایل صفحه: departments/list.html */
+
+    /* ============================================
+       SCOPE: .page-departments
+       ============================================ */
+
+    .page-departments {
+        --dp-primary: #1b698b;
+        --dp-primary-light: #167a5c;
+        --dp-primary-dark: #14506a;
+        --dp-text: #2d3e4a;
+        --dp-text-secondary: #6b7d8a;
+        --dp-text-muted: #a0aeb8;
+        --dp-border: #d8e6ed;
+        --dp-bg-soft: #f7fafc;
+        --dp-radius-lg: 22px;
+        --dp-radius-md: 14px;
+        --dp-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --dp-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --dp-shadow-lg: 0 24px 60px rgba(91, 155, 181, .22);
+        --dp-transition: .35s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* ============================================
+       ★ تمام‌عرض
+       ============================================ */
+    .page-departments .dp-wrap {
+        width: 100%;
+        margin: 0;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+
+    .page-departments .dp-wrap *,
+    .page-departments .dp-wrap *::before,
+    .page-departments .dp-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       انیمیشن‌ها
+       ============================================ */
+    @keyframes dpCardEnter {
+        0% { opacity: 0; transform: translateY(30px) scale(.96); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes dpHeaderEnter {
+        0% { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes dpShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+
+    @keyframes dpRingSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes dpPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .45; transform: scale(1.35); }
+    }
+
+    @keyframes dpEmptyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    /* ============================================
+       هدر صفحه
+       ============================================ */
+    .page-departments .dp-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        padding-bottom: 22px;
+        position: relative;
+        animation: dpHeaderEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-departments .dp-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+                transparent 0%,
+                color-mix(in srgb, var(--dp-primary) 30%, transparent) 20%,
+                color-mix(in srgb, var(--dp-primary) 30%, transparent) 80%,
+                transparent 100%);
+        border-radius: 2px;
+    }
+
+    .page-departments .dp-header-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .page-departments .dp-header-icon {
+        position: relative;
+        width: clamp(50px, 4.8vw, 60px);
+        height: clamp(50px, 4.8vw, 60px);
+        min-width: clamp(50px, 4.8vw, 60px);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        color: #fff;
+        font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+        box-shadow:
+            0 10px 24px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-departments .dp-header-icon::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 22px;
+        border: 2px dashed rgba(27, 105, 139, .35);
+        opacity: 0;
+        transition: opacity .4s ease, transform .6s ease;
+    }
+
+    .page-departments .dp-header-icon:hover {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-departments .dp-header-icon:hover::before {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+
+    .page-departments .dp-header-text {
+        min-width: 0;
+    }
+
+    .page-departments .dp-title {
+        margin: 0;
+        color: var(--dp-text);
+        font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+        font-weight: 800;
+        letter-spacing: -.3px;
+        word-break: break-word;
+        background: linear-gradient(135deg, var(--dp-text) 0%, var(--dp-primary-dark) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-departments .dp-subtitle {
+        margin: 5px 0 0;
+        color: var(--dp-text-secondary);
+        font-size: clamp(.74rem, .9vw, .84rem);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       دکمه افزودن
+       ============================================ */
+    .page-departments .dp-add-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 46px;
+        padding: 11px 24px;
+        border-radius: 13px;
+        background: linear-gradient(135deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        color: #fff;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.78rem, .9vw, .88rem);
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow:
+            0 8px 22px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+        transition: all var(--dp-transition);
+        border: none;
+        cursor: pointer;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .page-departments .dp-add-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg,
+                transparent 0%,
+                rgba(255, 255, 255, .3) 50%,
+                transparent 100%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .3s ease;
+        z-index: -1;
+    }
+
+    .page-departments .dp-add-btn:hover::before {
+        opacity: 1;
+        animation: dpShimmer 1.5s linear infinite;
+    }
+
+    .page-departments .dp-add-btn i {
+        font-size: .95rem;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-departments .dp-add-btn:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 14px 30px rgba(27, 105, 139, .42),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+        color: #fff;
+    }
+
+    .page-departments .dp-add-btn:hover i {
+        transform: rotate(180deg);
+    }
+
+    .page-departments .dp-add-btn:active {
+        transform: translateY(-1px) scale(.98);
+    }
+
+    /* ============================================
+       ★ گرید — یک کارت در هر ردیف
+       ============================================ */
+    .page-departments .dp-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* ============================================
+       ★ کارت دپارتمان — چیدمان افقی
+       ============================================ */
+    .page-departments .dp-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.2fr) auto;
+        align-items: stretch;
+        gap: 0;
+        background: #ffffff;
+        border: 1.5px solid var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        box-shadow: var(--dp-shadow-sm);
+        overflow: hidden;
+        transition:
+            transform .45s cubic-bezier(.25, .46, .45, .94),
+            box-shadow .45s ease,
+            border-color .35s ease;
+        isolation: isolate;
+        min-width: 0;
+        animation: dpCardEnter .7s cubic-bezier(.25, .46, .45, .94) both;
+        animation-delay: calc(var(--dept-index, 0) * 60ms + 80ms);
+    }
+
+    /* ★ نوار رنگی کناری */
+    .page-departments .dp-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 6px;
+        background: linear-gradient(180deg,
+                var(--dept-color, var(--dp-primary)) 0%,
+                var(--dept-color-light, var(--dp-primary-light)) 100%);
+        z-index: 3;
+        transition: width .35s ease;
+    }
+
+    .page-departments .dp-card:hover::before {
+        width: 8px;
+    }
+
+    /* ★ دایره تزئینی */
+    .page-departments .dp-card::after {
+        content: "";
+        position: absolute;
+        top: -80px;
+        left: -80px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                var(--dept-color, var(--dp-primary)) 0%,
+                transparent 70%);
+        opacity: .06;
+        transition: all 1s cubic-bezier(.25, .46, .45, .94);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-departments .dp-card:hover::after {
+        transform: scale(1.4) translate(-20px, 20px);
+        opacity: .12;
+    }
+
+    .page-departments .dp-card:hover {
+        transform: translateY(-4px);
+        box-shadow:
+            0 24px 55px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 25%, transparent),
+            0 6px 16px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 14%, transparent);
+        border-color: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 40%, #ffffff);
+    }
+
+    /* ============================================
+       ★ ستون ۱: هدر کارت (آیکون + عنوان + کد + بج)
+       ============================================ */
+    .page-departments .dp-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--dept-color, var(--dp-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--dept-color, var(--dp-primary)) 2%, #ffffff) 100%);
+        border-left: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 15%, #ffffff);
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-departments .dp-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-departments .dp-card-icon {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--dept-color, var(--dp-primary)) 0%,
+                var(--dept-color-light, var(--dp-primary-light)) 100%);
+        color: #fff;
+        font-size: 1.45rem;
+        box-shadow:
+            0 8px 20px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 40%, transparent),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+        z-index: 1;
+    }
+
+    .page-departments .dp-card-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 2px dashed color-mix(in srgb, var(--dept-color, var(--dp-primary)) 40%, transparent);
+        opacity: 0;
+        transition: opacity .4s ease;
+        animation: dpRingSpin 12s linear infinite;
+        animation-play-state: paused;
+    }
+
+    .page-departments .dp-card:hover .dp-card-icon {
+        transform: scale(1.08) rotate(-8deg);
+    }
+
+    .page-departments .dp-card:hover .dp-card-icon::before {
+        opacity: 1;
+        animation-play-state: running;
+    }
+
+    .page-departments .dp-card-title-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-departments .dp-card-name {
+        margin: 0 0 6px;
+        color: var(--dp-text);
+        font-size: clamp(1rem, 1.15vw, 1.15rem);
+        font-weight: 800;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: color .3s ease;
+    }
+
+    .page-departments .dp-card:hover .dp-card-name {
+        color: var(--dept-color, var(--dp-primary));
+    }
+
+    .page-departments .dp-card-code {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--dept-color, var(--dp-primary));
+        font-size: .74rem;
+        font-weight: 700;
+        direction: ltr;
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 10%, #ffffff);
+        padding: 3px 10px;
+        border-radius: 7px;
+        border: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 22%, #ffffff);
+        overflow-wrap: anywhere;
+        transition: all .3s ease;
+    }
+
+    .page-departments .dp-card:hover .dp-card-code {
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 18%, #ffffff);
+        transform: translateX(-2px);
+    }
+
+    /* ============================================
+       بج وضعیت
+       ============================================ */
+    .page-departments .dp-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        border: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 30%, transparent);
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff);
+        color: var(--dept-color, var(--dp-primary));
+        box-shadow: 0 2px 6px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 15%, transparent);
+        transition: all .3s ease;
+    }
+
+    .page-departments .dp-status i {
+        font-size: .5rem;
+        animation: dpPulse 2s ease-in-out infinite;
+    }
+
+    .page-departments .dp-card:hover .dp-status {
+        transform: scale(1.05);
+    }
+
+    .page-departments .dp-status.inactive {
+        color: #c05621;
+        background: #fdf0ec;
+        border-color: #f8d9cc;
+        box-shadow: 0 2px 6px rgba(192, 86, 33, .12);
+    }
+
+    .page-departments .dp-status.inactive i {
+        animation: none;
+    }
+
+    /* ============================================
+       ★ ستون ۲: بدنه (سرپرست، ترتیب)
+       ============================================ */
+    .page-departments .dp-card-body {
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-departments .dp-info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: clamp(.76rem, .88vw, .86rem);
+        min-width: 0;
+        padding: 8px 0;
+        border-bottom: 1px dashed color-mix(in srgb, var(--dept-color, var(--dp-primary)) 15%, transparent);
+        transition: all .3s ease;
+    }
+
+    .page-departments .dp-info-row:hover {
+        padding-right: 4px;
+    }
+
+    .page-departments .dp-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .page-departments .dp-info-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: var(--dp-text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .page-departments .dp-info-label i {
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff);
+        color: var(--dept-color, var(--dp-primary));
+        border-radius: 8px;
+        font-size: .78rem;
+        flex-shrink: 0;
+        transition: all .35s ease;
+    }
+
+    .page-departments .dp-card:hover .dp-info-label i {
+        background: var(--dept-color, var(--dp-primary));
+        color: #fff;
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-departments .dp-info-value {
+        color: var(--dp-text);
+        font-weight: 700;
+        text-align: left;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        min-width: 0;
+    }
+
+    .page-departments .dp-info-value.muted {
+        color: var(--dp-text-muted);
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* ============================================
+       ★ ستون ۳: آمار + اکشن‌ها (عمودی)
+       ============================================ */
+    .page-departments .dp-card-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: linear-gradient(180deg, #ffffff 0%, var(--dp-bg-soft) 100%);
+        border-right: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff);
+        padding: 18px 22px;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        min-width: 240px;
+    }
+
+    /* آمار */
+    .page-departments .dp-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .page-departments .dp-stat {
+        position: relative;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff) 0%,
+                color-mix(in srgb, var(--dept-color, var(--dp-primary)) 4%, #ffffff) 100%);
+        border: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 20%, #ffffff);
+        border-radius: 12px;
+        padding: 12px 8px;
+        text-align: center;
+        transition: all .4s cubic-bezier(.25, .46, .45, .94);
+        overflow: hidden;
+    }
+
+    .page-departments .dp-stat::before {
+        content: "";
+        position: absolute;
+        bottom: -25px;
+        right: -25px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: var(--dept-color, var(--dp-primary));
+        opacity: .08;
+        transition: all .7s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-departments .dp-stat:hover::before {
+        transform: scale(1.8);
+        opacity: .18;
+    }
+
+    .page-departments .dp-stat:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 22%, transparent);
+        border-color: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 40%, #ffffff);
+    }
+
+    .page-departments .dp-stat-number {
+        display: block;
+        color: var(--dept-color, var(--dp-primary));
+        font-size: clamp(1.15rem, 1.4vw, 1.4rem);
+        font-weight: 900;
+        line-height: 1.1;
+        position: relative;
+        z-index: 1;
+        letter-spacing: -.5px;
+        transition: transform .3s ease;
+    }
+
+    .page-departments .dp-stat:hover .dp-stat-number {
+        transform: scale(1.08);
+    }
+
+    .page-departments .dp-stat-label {
+        display: block;
+        color: var(--dp-text-secondary);
+        font-size: .7rem;
+        margin-top: 4px;
+        font-weight: 600;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* اکشن‌ها */
+    .page-departments .dp-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-departments .dp-action-btn {
+        position: relative;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 38px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .35s cubic-bezier(.25, .46, .45, .94);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .page-departments .dp-action-btn i {
+        font-size: .82rem;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* دکمه مشاهده */
+    .page-departments .dp-action-btn.view {
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 10%, #ffffff);
+        color: var(--dept-color, var(--dp-primary));
+        border-color: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 32%, transparent);
+    }
+
+    .page-departments .dp-action-btn.view::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--dept-color, var(--dp-primary));
+        transform: scaleX(0);
+        transform-origin: right center;
+        transition: transform .4s cubic-bezier(.25, .46, .45, .94);
+        z-index: -1;
+        border-radius: inherit;
+    }
+
+    .page-departments .dp-action-btn.view:hover::before {
+        transform: scaleX(1);
+    }
+
+    .page-departments .dp-action-btn.view:hover {
+        color: #ffffff;
+        border-color: var(--dept-color, var(--dp-primary));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 38%, transparent);
+    }
+
+    .page-departments .dp-action-btn.view:hover i {
+        transform: scale(1.15);
+    }
+
+    /* دکمه ویرایش */
+    .page-departments .dp-action-btn.edit {
+        background: #ffffff;
+        color: var(--dp-text-secondary);
+        border-color: var(--dp-border);
+    }
+
+    .page-departments .dp-action-btn.edit::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 8%, #ffffff);
+        transform: scaleX(0);
+        transform-origin: right center;
+        transition: transform .4s cubic-bezier(.25, .46, .45, .94);
+        z-index: -1;
+        border-radius: inherit;
+    }
+
+    .page-departments .dp-action-btn.edit:hover::before {
+        transform: scaleX(1);
+    }
+
+    .page-departments .dp-action-btn.edit:hover {
+        color: var(--dept-color, var(--dp-primary));
+        border-color: color-mix(in srgb, var(--dept-color, var(--dp-primary)) 35%, transparent);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--dept-color, var(--dp-primary)) 18%, transparent);
+    }
+
+    .page-departments .dp-action-btn.edit:hover i {
+        transform: rotate(-12deg) scale(1.1);
+    }
+
+    .page-departments .dp-action-btn:active {
+        transform: translateY(0) scale(.98);
+    }
+
+    /* ============================================
+       حالت خالی
+       ============================================ */
+    .page-departments .dp-empty {
+        background: #ffffff;
+        border: 2px dashed var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        padding: clamp(50px, 7vw, 90px) 24px;
+        text-align: center;
+        box-shadow: var(--dp-shadow-sm);
+        animation: dpCardEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-departments .dp-empty::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                rgba(27, 105, 139, .08) 0%,
+                transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-departments .dp-empty-icon {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .12), rgba(22, 122, 92, .12));
+        color: var(--dp-primary);
+        font-size: 2.5rem;
+        animation: dpEmptyFloat 4s ease-in-out infinite;
+    }
+
+    .page-departments .dp-empty-icon::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px dashed rgba(27, 105, 139, .3);
+        animation: dpRingSpin 20s linear infinite;
+    }
+
+    .page-departments .dp-empty h3 {
+        margin: 0 0 10px;
+        color: var(--dp-text);
+        font-size: 1.2rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .page-departments .dp-empty p {
+        margin: 0 0 26px;
+        color: var(--dp-text-secondary);
+        font-size: .9rem;
+        position: relative;
+    }
+
+    /* ============================================
+       ★ ریسپانسیو
+       ============================================ */
+
+    /* تبلت بزرگ: کارت به 2 ستون (هدر بالا، بدنه+ساید کنار) */
+    @media (max-width: 1200px) {
+        .page-departments .dp-card {
+            grid-template-columns: minmax(0, 1.4fr) auto;
+        }
+
+        .page-departments .dp-card-header {
+            grid-column: 1 / -1;
+            border-left: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 15%, #ffffff);
+        }
+
+        .page-departments .dp-card-side {
+            border-right: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff);
+            min-width: 220px;
+        }
+    }
+
+    /* تبلت: کارت به 1 ستون */
+    @media (max-width: 900px) {
+        .page-departments .dp-card {
+            grid-template-columns: 1fr;
+        }
+
+        .page-departments .dp-card-header {
+            border-bottom: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 15%, #ffffff);
+        }
+
+        .page-departments .dp-card-side {
+            border-right: none;
+            border-top: 1px solid color-mix(in srgb, var(--dept-color, var(--dp-primary)) 12%, #ffffff);
+            min-width: 0;
+        }
+
+        .page-departments .dp-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    /* موبایل */
+    @media (max-width: 700px) {
+        .page-departments .dp-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-departments .dp-add-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-departments .dp-card-header {
+            padding: 18px 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .page-departments .dp-card-body {
+            padding: 18px 20px;
+        }
+
+        .page-departments .dp-card-side {
+            padding: 16px 20px;
+        }
+
+        .page-departments .dp-card-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.25rem;
+        }
+
+        .page-departments .dp-card-name {
+            font-size: 1rem;
+            white-space: normal;
+            -webkit-line-clamp: 2;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+
+        .page-departments .dp-actions {
+            flex-direction: row;
+        }
+    }
+
+    /* موبایل کوچک */
+    @media (max-width: 480px) {
+        .page-departments .dp-wrap {
+            padding: 10px;
+        }
+
+        .page-departments .dp-card-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.1rem;
+        }
+
+        .page-departments .dp-actions {
+            flex-direction: column;
+        }
+
+        .page-departments .dp-action-btn {
+            width: 100%;
+        }
+
+        .page-departments .dp-stats {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .page-departments .dp-stat {
+            padding: 12px 6px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-departments .dp-wrap *,
+        .page-departments .dp-wrap *::before,
+        .page-departments .dp-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

@@ -1,0 +1,833 @@
+/* استایل صفحه: components/header.html */
+
+    .app-header-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .company-logo-circle {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        background-color: #eb5252;
+        border: 2px solid #e77743;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        flex-shrink: 0;
+    }
+
+    .company-logo-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        animation: rotate95 10s ease-in-out infinite;
+    }
+
+    @media (max-width: 768px) {
+        .company-logo-circle {
+            width: 45px;
+            height: 45px;
+        }
+    }
+
+    @keyframes rotate95 {
+        0% { transform: rotate(0deg); }
+        15% { transform: rotate(65deg); }
+        30% { transform: rotate(65deg); }
+        45% { transform: rotate(0deg); }
+        100% { transform: rotate(0deg); }
+    }
+
+    /* =====================================
+       APP HEADER - STICKY + GLASS
+       ===================================== */
+    .app-header {
+        --header-color: var(--page-primary, #1b698b);
+        --header-text: #ffffff;
+        --header-radius: 14px;
+        --header-transition: .3s cubic-bezier(.25, .46, .45, .94);
+
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--header-color) 82%, transparent) 0%,
+                color-mix(in srgb, var(--header-color) 68%, transparent) 100%);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid color-mix(in srgb, #ffffff 25%, transparent);
+        color: var(--header-text);
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+
+        border-radius: var(--header-radius);
+        padding: 12px 18px;
+        margin-bottom: 20px;
+        box-shadow:
+            0 8px 32px color-mix(in srgb, var(--header-color) 25%, transparent),
+            inset 0 1px 0 rgba(255, 255, 255, 0.20);
+
+        position: sticky;
+        top: 12px;
+        z-index: 1000;
+
+        overflow: visible;
+        min-width: 0;
+    }
+
+    .app-header::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: var(--header-radius);
+        background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0) 40%,
+                rgba(255, 255, 255, 0) 60%,
+                rgba(255, 255, 255, 0.08) 100%);
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .app-header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1;
+        position: relative;
+        z-index: 2;
+    }
+
+    .app-header .sidebar-toggle-btn,
+    .app-header .mobile-menu-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        cursor: pointer;
+        font-size: 1.15rem;
+        transition: all var(--header-transition);
+        flex-shrink: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .app-header .sidebar-toggle-btn:hover,
+    .app-header .mobile-menu-btn:hover {
+        background: rgba(255, 255, 255, 0.30);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .app-header .mobile-menu-btn {
+        display: none;
+    }
+
+    .app-header .app-header-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 800;
+        color: #ffffff;
+        white-space: nowrap;
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
+    .app-header .app-header-logo span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+    }
+
+    .app-header .app-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-shrink: 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* =====================================
+       ★★★ دکمه زنگوله ★★★
+       ===================================== */
+    .app-header .nfd-wrapper {
+        position: relative;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .app-header .nfd-bell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 1.15rem;
+        cursor: pointer;
+        transition: all .3s;
+        flex-shrink: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 0;
+        margin: 0;
+        outline: none;
+    }
+
+    .app-header .nfd-bell:hover {
+        background: rgba(255, 255, 255, 0.30);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .app-header .nfd-bell i,
+    .app-header .nfd-bell .bi {
+        color: #ffffff;
+        font-size: 1.15rem;
+        display: inline-block;
+        line-height: 1;
+    }
+
+    .app-header .nfd-badge {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 10px;
+        background: #dc2626;
+        color: #fff;
+        font-size: .68rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, .4);
+        z-index: 2;
+    }
+
+    /* ---------- کارت کاربر ---------- */
+    .app-header .app-header-user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.18);
+        padding: 6px 14px;
+        border-radius: 30px;
+        font-size: .85rem;
+        font-weight: 600;
+        color: #ffffff;
+        white-space: nowrap;
+        transition: all var(--header-transition);
+        min-width: 0;
+        max-width: 280px;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .app-header .app-header-user:hover {
+        background: rgba(255, 255, 255, 0.28);
+        color: #ffffff;
+    }
+
+    .app-header .app-header-user i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        color: rgba(255, 255, 255, 0.95);
+    }
+
+    .app-header .app-header-user .user-name {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        min-width: 0;
+        flex: 1;
+        font-size: inherit;
+        transition: font-size .2s ease;
+        display: inline-block;
+    }
+
+    .app-header .app-header-logout {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 1.1rem;
+        transition: all var(--header-transition);
+        flex-shrink: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .app-header .app-header-logout:hover {
+        background: rgba(231, 76, 60, 0.85);
+        border-color: rgba(231, 76, 60, 0.85);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+    }
+
+    /* ---------- Popover ---------- */
+    .user-name-popover {
+        position: fixed;
+        background: #2d3436;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: .82rem;
+        font-weight: 600;
+        font-family: "Vazirmatn", inherit;
+        white-space: nowrap;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-8px);
+        transition: opacity .2s ease, transform .2s ease;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        direction: rtl;
+    }
+
+    .user-name-popover.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .user-name-popover::before {
+        content: '';
+        position: absolute;
+        top: -6px;
+        right: 20px;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-bottom: 6px solid #2d3436;
+    }
+
+    /* =====================================
+       ★★★★★★ پنل نوتیفیکیشن ★★★★★★
+       ===================================== */
+    .nfd-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        z-index: 99998;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .nfd-backdrop.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* ★ پنل — دسکتاپ
+       ★ موقعیت با JS تنظیم می‌شود
+       ★ این مقادیر فقط پیش‌فرض اولیه هستند */
+    .nfd-panel {
+        position: fixed;
+        top: 70px;
+        right: 100px;
+        left: auto;
+        width: 420px;
+        max-width: calc(100vw - 40px);
+        background: #fff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 18px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
+        z-index: 99999;
+        display: none;
+        overflow: hidden;
+        direction: rtl;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    .nfd-panel.show {
+        display: block;
+        animation: nfdEnter .25s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    @keyframes nfdEnter {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nfd-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #f0f7fa, #eaf5f0);
+        border-bottom: 1.5px solid #e2e8f0;
+        font-size: .95rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .nfd-head span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nfd-head span i {
+        color: #1b698b;
+        font-size: 1.05rem;
+    }
+
+    .nfd-close {
+        display: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(0, 0, 0, 0.06);
+        color: #64748b;
+        cursor: pointer;
+        font-size: .9rem;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+    }
+
+    .nfd-close:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .nfd-list {
+        max-height: 60vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nfd-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .nfd-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+
+    .nfd-empty {
+        padding: 50px 24px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .9rem;
+    }
+
+    .nfd-item {
+        display: flex;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        text-decoration: none;
+        color: inherit;
+        transition: background .2s;
+    }
+
+    .nfd-item:last-child {
+        border-bottom: none;
+    }
+
+    .nfd-item:hover {
+        background: #f8fafc;
+    }
+
+    .nfd-item.unread {
+        background: #f0f9ff;
+        border-right: 3px solid #1b698b;
+        padding-right: 15px;
+    }
+
+    .nfd-item-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--ic, #1b698b) 12%, #fff);
+        color: var(--ic, #1b698b);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .nfd-item-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .nfd-item-title {
+        font-size: .88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.4;
+    }
+
+    .nfd-item-msg {
+        font-size: .78rem;
+        color: #64748b;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+
+    .nfd-item-time {
+        font-size: .68rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .nfd-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px;
+        background: #f8fafc;
+        color: #1b698b;
+        font-size: .85rem;
+        font-weight: 700;
+        text-decoration: none;
+        border-top: 1.5px solid #e2e8f0;
+        transition: background .3s;
+    }
+
+    .nfd-footer:hover {
+        background: #eff8fb;
+    }
+
+    /* =====================================
+       RESPONSIVE
+       ===================================== */
+
+    @media(max-width: 992px) {
+        .app-header {
+            padding: 10px 14px;
+            border-radius: 12px;
+            top: 8px;
+        }
+
+        .app-header .sidebar-toggle-btn { display: none; }
+        .app-header .mobile-menu-btn { display: inline-flex; }
+        .app-header .app-header-logo { font-size: .92rem; }
+
+        .app-header .app-header-user {
+            font-size: .82rem;
+            padding: 5px 12px;
+            max-width: 220px;
+        }
+    }
+
+    @media(max-width: 768px) {
+        .app-header {
+            padding: 10px 12px;
+            gap: 10px;
+            border-radius: 12px;
+            top: 8px;
+        }
+
+        .app-header-left { gap: 8px; }
+
+        .app-header .mobile-menu-btn,
+        .app-header .sidebar-toggle-btn {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: 1.05rem;
+            border-radius: 9px;
+        }
+
+        .app-header .app-header-logo {
+            font-size: .88rem;
+            gap: 8px;
+        }
+
+        .app-header .app-header-logo span { max-width: 150px; }
+
+        .app-header .app-header-user {
+            font-size: .8rem;
+            padding: 5px 12px;
+            max-width: 200px;
+            gap: 6px;
+        }
+
+        .app-header .app-header-user i { font-size: 1.1rem; }
+
+        .app-header .app-header-logout {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: 1.05rem;
+        }
+
+        .app-header .nfd-bell {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: 1.05rem;
+        }
+
+        /* ★★★★★★ پنل موبایل — وسط صفحه ★★★★★★ */
+        .nfd-panel {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: translate(-50%, -50%) !important;
+            width: calc(100vw - 32px) !important;
+            max-width: 480px !important;
+            max-height: 80vh !important;
+            border-radius: 18px !important;
+            margin: 0 !important;
+        }
+
+        .nfd-panel.show {
+            display: flex !important;
+            flex-direction: column !important;
+            animation: nfdCenterIn .3s cubic-bezier(.25, .46, .45, .94) !important;
+        }
+
+        @keyframes nfdCenterIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .nfd-close { display: inline-flex; }
+
+        .nfd-list {
+            flex: 1;
+            max-height: none;
+            overflow-y: auto;
+        }
+
+        .nfd-head {
+            padding: 14px 18px;
+            font-size: .92rem;
+            flex-shrink: 0;
+            border-radius: 18px 18px 0 0;
+        }
+
+        .nfd-item {
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
+        .nfd-item.unread { padding-right: 11px; }
+
+        .nfd-item-icon {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: .9rem;
+            border-radius: 10px;
+        }
+
+        .nfd-item-title { font-size: .84rem; }
+        .nfd-item-msg { font-size: .74rem; }
+        .nfd-item-time { font-size: .64rem; }
+
+        .nfd-footer {
+            padding: 12px;
+            font-size: .8rem;
+            flex-shrink: 0;
+            border-radius: 0 0 18px 18px;
+        }
+    }
+
+    @media(max-width: 576px) {
+        .app-header {
+            padding: 8px 10px;
+            gap: 8px;
+            border-radius: 10px;
+            top: 6px;
+        }
+
+        .app-header-left { gap: 6px; }
+
+        .app-header .mobile-menu-btn,
+        .app-header .sidebar-toggle-btn {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: 1rem;
+            border-radius: 8px;
+        }
+
+        .app-header .app-header-logo {
+            font-size: .8rem;
+            gap: 6px;
+        }
+
+        .app-header .app-header-logo span { display: none; }
+
+        .app-header .app-header-actions {
+            gap: 6px;
+            flex: 1;
+            justify-content: flex-end;
+        }
+
+        .app-header .nfd-bell {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: 1rem;
+        }
+
+        .app-header .app-header-user {
+            font-size: .78rem;
+            padding: 5px 10px;
+            max-width: none;
+            flex: 1;
+            min-width: 0;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.20);
+        }
+
+        .app-header .app-header-user i {
+            display: inline-flex;
+            font-size: 1rem;
+            color: #ffffff;
+        }
+
+        .app-header .app-header-user .user-name { font-weight: 700; }
+
+        .app-header .app-header-logout {
+            width: 36px;
+            height: 36px;
+            min-width: 36px;
+            font-size: 1rem;
+        }
+    }
+
+    @media(max-width: 480px) {
+        .nfd-panel {
+            width: calc(100vw - 24px) !important;
+            max-height: 85vh !important;
+            border-radius: 16px !important;
+        }
+
+        .nfd-head {
+            padding: 12px 16px;
+            font-size: .88rem;
+        }
+
+        .nfd-item { padding: 10px 12px; }
+
+        .nfd-item-icon {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            font-size: .82rem;
+        }
+
+        .nfd-item-title { font-size: .8rem; }
+        .nfd-item-msg { font-size: .72rem; }
+    }
+
+    @media(max-width: 380px) {
+        .app-header {
+            padding: 6px 8px;
+            gap: 6px;
+            top: 4px;
+        }
+
+        .app-header .mobile-menu-btn,
+        .app-header .sidebar-toggle-btn {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            font-size: .95rem;
+        }
+
+        .app-header .nfd-bell {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            font-size: .95rem;
+        }
+
+        .app-header .app-header-user {
+            font-size: .72rem;
+            padding: 4px 8px;
+            gap: 4px;
+        }
+
+        .app-header .app-header-user i { font-size: .9rem; }
+
+        .app-header .app-header-logout {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            font-size: .95rem;
+        }
+    }
+
+    @supports not (background: color-mix(in srgb, red 50%, blue)) {
+        .app-header {
+            background: linear-gradient(135deg,
+                    rgba(27, 105, 139, 0.88) 0%,
+                    rgba(20, 80, 106, 0.78) 100%);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .app-header *,
+        .app-header *::before,
+        .app-header *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

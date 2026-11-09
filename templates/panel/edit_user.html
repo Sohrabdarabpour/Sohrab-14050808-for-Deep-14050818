@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}
+ویرایش کاربر
+{% endblock %}
+
+{% block body_class %}
+page-edit-user
+{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-edit-user" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/panel/edit_user.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="eu-wrap">
+
+    <div class="eu-card">
+
+        <!-- ===== هدر کارت: آواتار + نام کاربر ===== -->
+        <div class="eu-card-header">
+<!-- ★ آواتار با عکس کاربر و حلقه‌های چرخان ★ -->
+<div class="eu-avatar">
+    <span class="eu-avatar-ring"></span>
+    <span class="eu-avatar-ring ring-2"></span>
+
+    {% set user_avatar = user.avatar %}
+    {% set user_gender = user.gender or 'male' %}
+
+    {% if user_avatar and user_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+        {# آواتار اختصاصی کاربر #}
+        <img src="{{ url_for('static', filename='uploads/avatar/' + user_avatar) }}"
+            alt="{{ user.full_name or 'کاربر' }}"
+            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+    {% elif user_gender == 'female' %}
+        {# آواتار پیش‌فرض خانم #}
+        <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+            alt="{{ user.full_name or 'کاربر' }}" />
+    {% else %}
+        {# آواتار پیش‌فرض آقا #}
+        <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+            alt="{{ user.full_name or 'کاربر' }}" />
+    {% endif %}
+</div>
+
+            <div class="eu-header-info">
+                <h2 class="eu-header-title">ویرایش: {{ user.full_name }}</h2>
+                <span class="eu-header-username">
+                    <i class="fa-solid fa-at"></i>
+                    {{ user.username }}
+                </span>
+            </div>
+        </div>
+
+        <!-- ===== بدنه فرم ===== -->
+        <div class="eu-card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="eu-grid">
+
+                    <!-- نام کاربری -->
+                    <div class="eu-field">
+                        <label class="eu-label" for="{{ form.username.id }}">
+                            <i class="fa-solid fa-user"></i>
+                            <span>{{ form.username.label.text }}</span>
+                        </label>
+
+                        {{ form.username(
+                        class="eu-input",
+                        placeholder="نام کاربری را وارد کنید"
+                        ) }}
+
+                        {% if form.username.errors %}
+                        {% for error in form.username.errors %}
+                        <div class="eu-error">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- نام و نام خانوادگی -->
+                    <div class="eu-field">
+                        <label class="eu-label" for="{{ form.full_name.id }}">
+                            <i class="fa-solid fa-id-card"></i>
+                            <span>{{ form.full_name.label.text }}</span>
+                        </label>
+
+                        {{ form.full_name(
+                        class="eu-input",
+                        placeholder="نام و نام خانوادگی را وارد کنید"
+                        ) }}
+
+                        {% if form.full_name.errors %}
+                        {% for error in form.full_name.errors %}
+                        <div class="eu-error">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- نقش -->
+                    <div class="eu-field">
+                        <label class="eu-label" for="{{ form.role.id }}">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span>{{ form.role.label.text }}</span>
+                        </label>
+
+                        {{ form.role(class="eu-select") }}
+
+                        {% if form.role.errors %}
+                        {% for error in form.role.errors %}
+                        <div class="eu-error">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <!-- دپارتمان -->
+                    <div class="eu-field">
+                        <label class="eu-label" for="{{ form.department_id.id }}">
+                            <i class="fa-solid fa-building"></i>
+                            <span>{{ form.department_id.label.text }}</span>
+                        </label>
+
+                        {{ form.department_id(class="eu-select") }}
+
+                        {% if form.department_id.errors %}
+                        {% for error in form.department_id.errors %}
+                        <div class="eu-error">{{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+
+<!-- ★ جنسیت -->
+<div class="eu-field">
+    <label class="eu-label" for="{{ form.gender.id }}">
+        <i class="fa-solid fa-venus-mars"></i>
+        <span>{{ form.gender.label.text }}</span>
+    </label>
+    {{ form.gender(class="eu-select") }}
+    {% if form.gender.errors %}
+    {% for error in form.gender.errors %}
+    <div class="eu-error">{{ error }}</div>
+    {% endfor %}
+    {% endif %}
+</div>
+
+<!-- ★ وضعیت فعال -->
+<div class="eu-field">
+    <label class="eu-label" for="{{ form.is_active.id }}">
+        <i class="fa-solid fa-toggle-on"></i>
+        <span>{{ form.is_active.label.text }}</span>
+    </label>
+    <div class="eu-checkbox-wrapper">
+        {{ form.is_active(class="eu-checkbox") }}
+        <span class="eu-checkbox-text">کاربر بتواند وارد سیستم شود</span>
+    </div>
+</div>
+
+                </div>
+
+                <!-- ===== دکمه‌ها ===== -->
+                <div class="eu-actions">
+                    <a href="{{ url_for('panel.users') }}" class="eu-btn eu-btn-secondary">
+                        <i class="fa-solid fa-xmark"></i>
+                        انصراف
+                    </a>
+
+                    <button type="submit" class="eu-btn eu-btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        ذخیره تغییرات
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

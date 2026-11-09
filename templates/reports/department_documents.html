@@ -1,0 +1,600 @@
+{% extends "base.html" %}
+
+{% block title %}
+اسناد دپارتمان {{ department.title }}
+{% endblock %}
+
+{% block body_class %}
+page-report-department-documents
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/department_documents.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="report-main-container">
+    <div class="report-header">
+        <div class="report-title">
+            <div class="report-title-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div class="report-title-content">
+                <h1>{{ department.title }}</h1>
+                <span>
+                    {% if department.code %}
+                    کد دپارتمان: {{ department.code }}
+                    {% else %}
+                    کارشناسان و اسناد دپارتمان
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="back-buttons-group">
+
+            {% if request.args.get('from') == 'view_department' %}
+            {# ★ از صفحه دپارتمان (سرپرست/ادمین) اومده — فقط یه دکمه ساده #}
+            <a href="{{ url_for('departments.view_department',
+                                    department_id=department.id,
+                                    year=selected_year) }}" class="btn-back">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به دپارتمان
+            </a>
+
+            {% else %}
+            {# ★ حالت پیش‌فرض — دکمه‌های گزارش #}
+            <a href="{{ url_for('reports.department_report', year=selected_year) }}" class="btn-back">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به گزارش دپارتمان
+            </a>
+
+            {% if department.area_id %}
+            <a href="{{ url_for('reports.area_departments',
+                                    area_id=department.area_id,
+                                    year=selected_year) }}" class="btn-back btn-back-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به دپارتمان‌های ناحیه
+            </a>
+            {% endif %}
+            {% endif %}
+
+        </div>
+    </div>
+
+    <div class="report-filter">
+        <div class="report-filter-left">
+            <div class="report-filter-item">
+                <label for="yearFilter">
+                    <i class="fa-solid fa-calendar"></i>
+                    سال دریافت
+                </label>
+
+                <select id="yearFilter">
+                    <option value="all" {% if selected_year|string=="all" %}selected{% endif %}>
+                        همه سال‌ها
+                    </option>
+
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year|string==year|string %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" class="search-input" value="{{ search }}"
+                    placeholder="جستجوی نام کارشناس..." autocomplete="off">
+            </div>
+
+            <button type="button" id="clearFilters" class="btn-clear-top">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+                پاک کردن فیلترها
+            </button>
+        </div>
+    </div>
+
+    <div class="department-overview">
+        <div class="experts-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fa-solid fa-users"></i>
+                    کارشناسان دپارتمان
+                </div>
+
+                <div class="section-count" id="visibleExpertCount">
+                    {{ experts|length }} کارشناس
+                </div>
+            </div>
+
+            {% if experts %}
+            <div class="experts-grid" id="expertsGrid">
+                {% for expert in experts %}
+                <a href="{{ url_for(
+                    'reports.department_expert_documents',
+                    department_id=department.id,
+                    expert_id=expert.id,
+                    year=selected_year,
+                    area_id=area_id
+                ) }}" class="expert-card" data-expert-name="{{ expert.full_name|default('', true)|lower }}"
+                    data-expert-index="{{ loop.index0 }}">
+
+                    <!-- ★ آواتار کارشناس با حلقه‌های چرخان ★ -->
+<div class="expert-avatar">
+    <span class="expert-avatar-ring"></span>
+    <span class="expert-avatar-ring ring-2"></span>
+
+    {% set ex_avatar = expert.avatar %}
+    {% set ex_gender = expert.gender or 'male' %}
+
+    {% if ex_avatar and ex_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+        <img src="{{ url_for('static', filename='uploads/avatar/' + ex_avatar) }}"
+            alt="{{ expert.full_name or 'کارشناس' }}"
+            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+    {% elif ex_gender == 'female' %}
+        <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+            alt="{{ expert.full_name or 'کارشناس' }}" />
+    {% else %}
+        <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+            alt="{{ expert.full_name or 'کارشناس' }}" />
+    {% endif %}
+</div>
+
+                    <div class="expert-content">
+                        <span class="expert-name">
+                            {{ expert.full_name or "بدون نام" }}
+                        </span>
+
+                        <div class="expert-meta">
+                            <span>اسناد:</span>
+                            <span class="expert-count">
+                                {{ expert.document_count|default(0, true) }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <i class="fa-solid fa-chevron-left expert-arrow"></i>
+                </a>
+                {% endfor %}
+            </div>
+
+            <div class="no-search-results" id="noSearchResults">
+                <i class="fa-solid fa-user-slash"></i>
+                <h3>کارشناس موردنظر پیدا نشد</h3>
+                <p>نام کارشناس دیگری را جستجو کنید.</p>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-user-slash"></i>
+                <h3>کارشناس فعالی پیدا نشد</h3>
+                <p>
+                    برای این دپارتمان در سال انتخاب‌شده سندی ثبت نشده است.
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="report-chart-card">
+            <div class="report-chart-header">
+                <div class="report-chart-title">
+                    <i class="fa-solid fa-chart-simple"></i>
+                    توزیع اسناد بین کارشناسان
+                </div>
+
+                <span class="chart-update">
+                    <i class="fa-regular fa-clock"></i>
+                    لحظه‌ای
+                </span>
+            </div>
+
+            <div class="report-chart">
+                <canvas id="expertReportChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    {% if experts %}
+    <div class="experts-summary">
+        <div class="summary-card">
+            <div class="summary-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+
+            <div class="summary-content">
+                <span class="summary-value" id="summaryExpertCount">
+                    {{ experts|length }}
+                </span>
+                <span class="summary-label">
+                    تعداد کارشناسان
+                </span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+
+            <div class="summary-content">
+                <span class="summary-value" id="summaryDocumentCount">
+                    {{ experts|sum(attribute='document_count') }}
+                </span>
+                <span class="summary-label">
+                    مجموع اسناد
+                </span>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <div class="summary-icon">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+
+            <div class="summary-content">
+                <span class="summary-value" id="summaryActiveExpertCount">
+                    {{ experts|length }}
+                </span>
+                <span class="summary-label">
+                    کارشناسان دارای سند
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- ★ Chart.js اصلی -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- ★ پلاگین Treemap برای Chart.js 4 -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-treemap@3.1.0/dist/chartjs-chart-treemap.min.js"></script>
+
+<script>
+    let expertChart = null;
+
+    // ★ پالت رنگ اصلی (برای کارت‌های کارشناس)
+    const EXPERT_COLORS = [
+        "#1b698b",
+        "#167a5c",
+        "#d69e2e",
+        "#c05621",
+        "#4a5568",
+        "#2b6cb0",
+        "#319795",
+        "#805ad5",
+        "#718096",
+        "#2f855a"
+    ];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearFiltersBtn = document.getElementById("clearFilters");
+        const yearFilter = document.getElementById("yearFilter");
+        const searchInput = document.getElementById("searchInput");
+        const expertCards = Array.from(document.querySelectorAll(".expert-card"));
+        const noSearchResults = document.getElementById("noSearchResults");
+        const visibleExpertCount = document.getElementById("visibleExpertCount");
+
+        let searchTimer = null;
+
+        applyExpertCardColors();
+
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener("click", function () {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("year");
+                url.searchParams.delete("search");
+                url.searchParams.delete("page");
+                window.location.href = url.toString();
+            });
+        }
+
+        if (yearFilter) {
+            yearFilter.addEventListener("change", function () {
+                const url = new URL(window.location.href);
+
+                if (this.value === "all") {
+                    url.searchParams.delete("year");
+                } else {
+                    url.searchParams.set("year", this.value);
+                }
+
+                url.searchParams.delete("page");
+                window.location.href = url.toString();
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                const value = this.value.trim().toLowerCase();
+
+                filterExperts(value);
+
+                clearTimeout(searchTimer);
+
+                searchTimer = setTimeout(function () {
+                    const url = new URL(window.location.href);
+
+                    if (value) {
+                        url.searchParams.set("search", searchInput.value.trim());
+                    } else {
+                        url.searchParams.delete("search");
+                    }
+
+                    url.searchParams.delete("page");
+                    window.history.replaceState({}, "", url.toString());
+                }, 300);
+            });
+        }
+
+        function filterExperts(value) {
+            let visibleCount = 0;
+
+            expertCards.forEach(function (card) {
+                const expertName = card.dataset.expertName || "";
+                const matched = !value || expertName.includes(value);
+
+                card.style.display = matched ? "flex" : "none";
+
+                if (matched) {
+                    visibleCount++;
+                }
+            });
+
+            if (visibleExpertCount) {
+                visibleExpertCount.textContent = visibleCount + " کارشناس";
+            }
+
+            if (noSearchResults) {
+                noSearchResults.style.display =
+                    expertCards.length > 0 && visibleCount === 0 ? "block" : "none";
+            }
+        }
+
+        initializeExpertChart();
+    });
+
+    function applyExpertCardColors() {
+        const cards = document.querySelectorAll(".expert-card");
+        cards.forEach(function (card, index) {
+            const color = EXPERT_COLORS[index % EXPERT_COLORS.length];
+            card.style.setProperty("--expert-color", color);
+        });
+    }
+
+    // ============================================================
+    // ★ رنگ‌بندی Treemap بر اساس مقدار (مثل بورس)
+    // ============================================================
+    function getTreemapColor(value, allValues) {
+        if (!allValues || allValues.length === 0) {
+            return "#3D8499";
+        }
+
+        const max = Math.max.apply(null, allValues);
+        const min = Math.min.apply(null, allValues);
+        const range = max - min || 1;
+
+        // ★ نرمال‌سازی بین 0 و 1
+        const normalized = (value - min) / range;
+
+        if (normalized >= 0.5) {
+            // ★ سبز: از متوسط به بالا
+            const t = (normalized - 0.5) / 0.5; // 0 تا 1
+            const r = Math.round(22 + (1 - t) * 40);   // 62 → 22
+            const g = Math.round(120 + t * 77);        // 120 → 197
+            const b = Math.round(92 + (1 - t) * 20);   // 112 → 92
+            return "rgb(" + r + ", " + g + ", " + b + ")";
+        } else {
+            // ★ قرمز: از متوسط به پایین
+            const t = (0.5 - normalized) / 0.5; // 0 تا 1
+            const r = Math.round(180 + t * 40);        // 180 → 220
+            const g = Math.round(60 - t * 30);         // 60 → 30
+            const b = Math.round(70 - t * 20);         // 70 → 50
+            return "rgb(" + r + ", " + g + ", " + b + ")";
+        }
+    }
+
+    // ============================================================
+    // ★ مقدار متناسب با میانه برای رنگ‌بندی
+    // ============================================================
+    function getMedianValue(values) {
+        if (!values.length) return 0;
+        const sorted = values.slice().sort(function (a, b) {
+            return a - b;
+        });
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0
+            ? sorted[mid]
+            : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    // ============================================================
+    // ★ راه‌اندازی نمودار Treemap
+    // ============================================================
+    function initializeExpertChart() {
+        const canvas = document.getElementById("expertReportChart");
+        const expertData = {{experts | tojson
+    }};
+
+    if (!canvas || !expertData || expertData.length === 0) {
+        return;
+    }
+
+    // ★ مرتب‌سازی نزولی
+    const sortedData = expertData.slice().sort(function (a, b) {
+        return (b.document_count || 0) - (a.document_count || 0);
+    });
+
+    const total = sortedData.reduce(function (sum, item) {
+        return sum + Number(item.document_count || 0);
+    }, 0);
+
+    // ★ داده‌ها برای Treemap
+    const treeData = sortedData.map(function (item) {
+        return {
+            name: item.full_name || "بدون نام",
+            value: Number(item.document_count || 0)
+        };
+    });
+
+    const allValues = treeData.map(function (d) {
+        return d.value;
+    });
+
+    const medianValue = getMedianValue(allValues);
+
+    // ★ استفاده از پلاگین Treemap
+    if (typeof Chart === "undefined") {
+        console.error("Chart.js لود نشده!");
+        return;
+    }
+
+    expertChart = new Chart(canvas, {
+        type: "treemap",
+
+        data: {
+            datasets: [{
+                tree: treeData,
+                key: "value",
+                groups: ["name"],
+                spacing: 3,
+                borderWidth: 3,
+                borderColor: "#ffffff",
+                borderRadius: 8,
+
+                backgroundColor: function (ctx) {
+                    if (ctx.type !== "data") {
+                        return "transparent";
+                    }
+                    const item = ctx.raw && ctx.raw._data;
+                    if (!item) return "#3D8499";
+
+                    // ★ اگر بالای میانه باشه → سبز، پایین → قرمز
+                    if (item.value >= medianValue) {
+                        return getTreemapColor(item.value, allValues);
+                    }
+                    return getTreemapColor(item.value, allValues);
+                },
+
+                hoverBackgroundColor: function (ctx) {
+                    if (ctx.type !== "data") {
+                        return "transparent";
+                    }
+                    const item = ctx.raw && ctx.raw._data;
+                    if (!item) return "#3D8499";
+                    return getTreemapColor(item.value, allValues);
+                },
+
+                labels: {
+                    display: true,
+                    align: "center",
+                    position: "center",
+                    color: "#ffffff",
+                    font: [{
+                        family: "Vazirmatn",
+                        size: 13,
+                        weight: "700"
+                    }, {
+                        family: "Vazirmatn",
+                        size: 11,
+                        weight: "500"
+                    }],
+                    formatter: function (ctx) {
+                        const item = ctx.raw && ctx.raw._data;
+                        if (!item) return "";
+
+                        const name = item.name || "";
+                        const value = item.value || 0;
+                        const percent = total > 0
+                            ? Math.round((value / total) * 100)
+                            : 0;
+
+                        // ★ برگرداندن دو خط: اسم + (تعداد و درصد)
+                        return [name, value + " (" + percent + "%)"];
+                    },
+                    overflow: "hidden"
+                }
+            }]
+        },
+
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+
+            plugins: {
+                legend: {
+                    display: false
+                },
+
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: "rgba(45, 52, 54, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+
+                    titleFont: {
+                        family: "Vazirmatn",
+                        size: 13,
+                        weight: "700"
+                    },
+
+                    bodyFont: {
+                        family: "Vazirmatn",
+                        size: 12
+                    },
+
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: false,
+
+                    callbacks: {
+                        title: function (items) {
+                            if (!items.length) return "";
+                            const item = items[0].raw && items[0].raw._data;
+                            return item ? item.name : "";
+                        },
+                        label: function (context) {
+                            const item = context.raw && context.raw._data;
+                            if (!item) return "";
+
+                            const value = item.value || 0;
+                            const percent = total > 0
+                                ? Math.round((value / total) * 100)
+                                : 0;
+
+                            return "📄 " + value + " سند  (" + percent + "%)";
+                        }
+                    }
+                },
+
+                datalabels: {
+                    display: false
+                }
+            },
+
+            animation: {
+                duration: 800,
+                easing: "easeOutQuart"
+            }
+        },
+
+        plugins: []
+    });
+
+    // ★ تنظیم ارتفاع داینامیک بر اساس تعداد کارشناسان
+    const chartContainer = canvas.parentElement;
+    if (chartContainer && sortedData.length > 0) {
+        const isSmall = window.innerWidth <= 576;
+        const perItemHeight = isSmall ? 45 : 60;
+        const dynamicHeight = Math.max(400, sortedData.length * perItemHeight);
+
+        // حداکثر ارتفاع برای اینکه خیلی بلند نشه
+        const maxHeight = isSmall ? 600 : 800;
+        chartContainer.style.height = Math.min(dynamicHeight, maxHeight) + "px";
+    }
+    }
+</script>
+{% endblock %}

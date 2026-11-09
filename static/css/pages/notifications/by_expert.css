@@ -1,0 +1,727 @@
+/* استایل صفحه: notifications/by_expert.html */
+
+    /* ============================================================
+       متغیرهای اصلی
+       ============================================================ */
+    .page-expert-cards {
+        --ec-primary: #1b698b;
+        --ec-primary-2: #167a5c;
+        --ec-accent: #7c3aed;
+        --ec-text: #0f172a;
+        --ec-text-2: #64748b;
+        --ec-text-3: #94a3b8;
+        --ec-border: #e2e8f0;
+        --ec-border-soft: #eef2f6;
+        --ec-bg: #f4f7fa;
+        --ec-bg-card: #ffffff;
+        --ec-danger: #dc2626;
+        --ec-danger-dark: #b91c1c;
+        --ec-success: #16a34a;
+        --ec-radius-xl: 22px;
+        --ec-radius-lg: 18px;
+        --ec-radius-md: 14px;
+        --ec-radius-sm: 10px;
+        --ec-shadow-xs: 0 1px 2px rgba(15, 23, 42, .04);
+        --ec-shadow-sm: 0 2px 8px rgba(15, 23, 42, .05);
+        --ec-shadow-md: 0 8px 24px rgba(15, 23, 42, .08);
+        --ec-shadow-lg: 0 16px 48px rgba(15, 23, 42, .12);
+        --ec-transition: .3s cubic-bezier(.4, 0, .2, 1);
+    }
+
+    /* ============================================================
+       کانتینر اصلی
+       ============================================================ */
+    .page-expert-cards .ec-wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: clamp(16px, 2.5vw, 40px);
+        direction: rtl;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    @media (min-width: 1600px) {
+        .page-expert-cards .ec-wrap {
+            max-width: 1600px;
+        }
+    }
+
+    /* ============================================================
+       ★★★ هدر
+       ============================================================ */
+    .page-expert-cards .ec-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: clamp(18px, 2vw, 26px) clamp(20px, 2.5vw, 32px);
+        background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 50%, #ecfdf5 100%);
+        border: 1.5px solid #e0f2fe;
+        border-radius: var(--ec-radius-lg);
+        margin-bottom: clamp(18px, 2vw, 28px);
+        overflow: hidden;
+        box-shadow: var(--ec-shadow-sm);
+    }
+
+    .page-expert-cards .ec-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 340px;
+        height: 340px;
+        background: radial-gradient(circle, rgba(27, 105, 139, .08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-expert-cards .ec-header::after {
+        content: '';
+        position: absolute;
+        bottom: -60%;
+        left: -5%;
+        width: 280px;
+        height: 280px;
+        background: radial-gradient(circle, rgba(22, 122, 92, .08) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-expert-cards .ec-header-info {
+        display: flex;
+        align-items: center;
+        gap: clamp(12px, 1.5vw, 16px);
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-expert-cards .ec-header-icon {
+        width: clamp(52px, 6vw, 62px);
+        height: clamp(52px, 6vw, 62px);
+        min-width: clamp(52px, 6vw, 62px);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--ec-primary) 0%, var(--ec-primary-2) 100%);
+        color: #fff;
+        font-size: clamp(1.25rem, 1.7vw, 1.55rem);
+        box-shadow:
+            0 8px 20px rgba(27, 105, 139, .35),
+            inset 0 1px 0 rgba(255, 255, 255, .25);
+        position: relative;
+        flex-shrink: 0;
+        animation: ecFloat 3s ease-in-out infinite;
+    }
+
+    @keyframes ecFloat {
+        0%, 100% { transform: translateY(0); }
+        50%      { transform: translateY(-4px); }
+    }
+
+    .page-expert-cards .ec-header-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-expert-cards .ec-header-text h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.5vw, 1.4rem);
+        font-weight: 900;
+        color: var(--ec-text);
+        letter-spacing: -.01em;
+        line-height: 1.4;
+        background: linear-gradient(135deg, #0f172a, #1b698b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .page-expert-cards .ec-header-text p {
+        margin: 6px 0 0;
+        font-size: clamp(0.74rem, 0.88vw, 0.86rem);
+        color: var(--ec-text-2);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .page-expert-cards .ec-header-text p::before {
+        content: '\f0c0';
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+        font-size: .78rem;
+        color: var(--ec-text-3);
+    }
+
+    .page-expert-cards .ec-header-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================================
+       دکمه‌ها
+       ============================================================ */
+    .page-expert-cards .ec-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 18px;
+        border-radius: var(--ec-radius-sm);
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--ec-transition);
+        border: 1.5px solid;
+        white-space: nowrap;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-expert-cards .ec-btn i {
+        font-size: .9rem;
+        transition: transform var(--ec-transition);
+    }
+
+    .page-expert-cards .ec-btn:hover i {
+        transform: scale(1.15);
+    }
+
+    .page-expert-cards .ec-btn-outline {
+        background: #fff;
+        color: var(--ec-text-2);
+        border-color: var(--ec-border);
+        box-shadow: var(--ec-shadow-xs);
+    }
+
+    .page-expert-cards .ec-btn-outline:hover {
+        color: var(--ec-primary);
+        border-color: var(--ec-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(27, 105, 139, .15);
+    }
+
+    /* ★ دکمه بنفش سوابق من */
+    .page-expert-cards .ec-btn-mine {
+        background: linear-gradient(135deg, #faf5ff, #f3e8ff);
+        color: var(--ec-accent);
+        border-color: #ddd6fe;
+        box-shadow: 0 2px 8px rgba(124, 58, 237, .12);
+    }
+
+    .page-expert-cards .ec-btn-mine:hover {
+        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(124, 58, 237, .4);
+    }
+
+    /* ============================================================
+       ★★★ گرید کارت‌ها
+       ============================================================ */
+    .page-expert-cards .ec-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: clamp(12px, 1.5vw, 18px);
+    }
+
+    /* ============================================================
+       ★★★ کارت کارشناس
+       ============================================================ */
+    .page-expert-cards .ec-card {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        padding: clamp(16px, 1.8vw, 20px);
+        background: #fff;
+        border: 1.5px solid var(--ec-border);
+        border-radius: var(--ec-radius-md);
+        text-decoration: none;
+        color: inherit;
+        transition: all var(--ec-transition);
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--ec-shadow-xs);
+    }
+
+    .page-expert-cards .ec-card::before {
+        content: '';
+        position: absolute;
+        top: 12px;
+        bottom: 12px;
+        right: 0;
+        width: 3px;
+        border-radius: 3px 0 0 3px;
+        background: linear-gradient(180deg, var(--ec-primary), var(--ec-primary-2));
+        opacity: 0;
+        transition: opacity var(--ec-transition);
+    }
+
+    /* ★ کادر قرمز برای کارشناس دارای نوتیف نخوانده */
+    .page-expert-cards .ec-card.has-unread {
+        border: 2px solid var(--ec-danger);
+        box-shadow:
+            0 0 0 3px rgba(220, 38, 38, .1),
+            0 4px 12px rgba(220, 38, 38, .12);
+        background: linear-gradient(180deg, #fff 0%, #fef2f2 100%);
+    }
+
+    .page-expert-cards .ec-card.has-unread::before {
+        background: linear-gradient(180deg, var(--ec-danger), var(--ec-danger-dark));
+        opacity: 1;
+    }
+
+    .page-expert-cards .ec-card.has-unread:hover {
+        box-shadow:
+            0 0 0 3px rgba(220, 38, 38, .18),
+            0 12px 28px rgba(220, 38, 38, .2);
+        border-color: var(--ec-danger-dark);
+        transform: translateY(-4px);
+    }
+
+    .page-expert-cards .ec-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(27, 105, 139, .15);
+        border-color: var(--ec-primary);
+    }
+
+    .page-expert-cards .ec-card:hover::before {
+        opacity: 1;
+    }
+
+    /* ============================================================
+       بالای کارت (آواتار + نام + badge)
+       ============================================================ */
+    .page-expert-cards .ec-card-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-expert-cards .ec-avatar {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid var(--ec-border);
+        background: #f1f5f9;
+    }
+
+    .page-expert-cards .ec-card.has-unread .ec-avatar {
+        border-color: var(--ec-danger);
+    }
+
+    .page-expert-cards .ec-avatar-placeholder {
+        width: 54px;
+        height: 54px;
+        min-width: 54px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--ec-primary), var(--ec-primary-2));
+        color: #fff;
+        font-size: 1.2rem;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .page-expert-cards .ec-card.has-unread .ec-avatar-placeholder {
+        background: linear-gradient(135deg, var(--ec-danger), var(--ec-danger-dark));
+    }
+
+    .page-expert-cards .ec-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-expert-cards .ec-name {
+        font-size: clamp(0.88rem, 1vw, 0.96rem);
+        font-weight: 800;
+        color: var(--ec-text);
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .page-expert-cards .ec-username {
+        font-size: clamp(0.68rem, 0.8vw, 0.76rem);
+        color: var(--ec-text-2);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* ★ badge قرمز برای تعداد نخوانده */
+    .page-expert-cards .ec-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 34px;
+        height: 34px;
+        padding: 0 10px;
+        border-radius: 17px;
+        background: linear-gradient(135deg, var(--ec-danger), var(--ec-danger-dark));
+        color: #fff;
+        font-size: .85rem;
+        font-weight: 800;
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(220, 38, 38, .5);
+        animation: ecPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes ecPulse {
+        0%, 100% { transform: scale(1); }
+        50%      { transform: scale(1.06); }
+    }
+
+    /* ============================================================
+       ★★★ آمار
+       ============================================================ */
+    .page-expert-cards .ec-stats {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .page-expert-cards .ec-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 10px;
+        border-radius: 8px;
+        background: #f8fafc;
+        border: 1px solid var(--ec-border-soft);
+        font-size: clamp(0.66rem, 0.78vw, 0.74rem);
+        color: var(--ec-text-2);
+        font-weight: 600;
+    }
+
+    .page-expert-cards .ec-stat i {
+        font-size: .7rem;
+    }
+
+    .page-expert-cards .ec-stat.unread {
+        background: #fef2f2;
+        border: 1.5px solid var(--ec-danger);
+        color: var(--ec-danger);
+        font-weight: 800;
+    }
+
+    /* ============================================================
+       ★★★ آخرین فعالیت
+       ============================================================ */
+    .page-expert-cards .ec-latest {
+        padding-top: 12px;
+        border-top: 1px dashed var(--ec-border);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .page-expert-cards .ec-card.has-unread .ec-latest {
+        border-top-color: #fecaca;
+    }
+
+    .page-expert-cards .ec-latest-title {
+        font-size: clamp(0.72rem, 0.85vw, 0.8rem);
+        color: var(--ec-text);
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .page-expert-cards .ec-latest-time {
+        font-size: clamp(0.64rem, 0.76vw, 0.72rem);
+        color: var(--ec-text-3);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .page-expert-cards .ec-latest-time i {
+        font-size: .68rem;
+    }
+
+    /* ============================================================
+       ★★★ حالت خالی
+       ============================================================ */
+    .page-expert-cards .ec-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: clamp(50px, 8vw, 80px) clamp(20px, 4vw, 40px);
+        background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+        border: 2px dashed var(--ec-border);
+        border-radius: var(--ec-radius-lg);
+        color: var(--ec-text-2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-expert-cards .ec-empty::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: radial-gradient(circle, rgba(27, 105, 139, .06) 0%, transparent 70%);
+    }
+
+    .page-expert-cards .ec-empty i {
+        font-size: clamp(3rem, 6vw, 4rem);
+        color: #cbd5e0;
+        display: block;
+        margin-bottom: 18px;
+        animation: ecFloat 3s ease-in-out infinite;
+    }
+
+    .page-expert-cards .ec-empty h3 {
+        margin: 0 0 10px;
+        color: var(--ec-text);
+        font-weight: 800;
+        font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+    }
+
+    .page-expert-cards .ec-empty p {
+        margin: 0;
+        font-size: clamp(0.8rem, 0.92vw, 0.88rem);
+    }
+
+    /* ============================================================
+       Responsive Breakpoints
+       ============================================================ */
+    @media (max-width: 767px) {
+        .page-expert-cards .ec-header {
+            padding: 18px 20px;
+            gap: 14px;
+        }
+
+        .page-expert-cards .ec-header-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1.3rem;
+            border-radius: 16px;
+        }
+
+        .page-expert-cards .ec-header-actions {
+            width: 100%;
+        }
+
+        .page-expert-cards .ec-header-actions .ec-btn {
+            flex: 1;
+            justify-content: center;
+        }
+
+        .page-expert-cards .ec-grid {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-expert-cards .ec-wrap {
+            padding: 0 clamp(8px, 2vw, 12px);
+        }
+
+        .page-expert-cards .ec-header {
+            padding: 14px 16px;
+            margin-bottom: 14px;
+            border-radius: var(--ec-radius-md);
+        }
+
+        .page-expert-cards .ec-header-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.15rem;
+            border-radius: 14px;
+        }
+
+        .page-expert-cards .ec-header-text h1 {
+            font-size: 1rem;
+        }
+
+        .page-expert-cards .ec-header-text p {
+            font-size: .72rem;
+        }
+
+        .page-expert-cards .ec-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-expert-cards .ec-card {
+            padding: 14px;
+        }
+
+        .page-expert-cards .ec-avatar,
+        .page-expert-cards .ec-avatar-placeholder {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            font-size: 1.05rem;
+        }
+
+        .page-expert-cards .ec-name {
+            font-size: 0.88rem;
+        }
+
+        .page-expert-cards .ec-badge {
+            min-width: 30px;
+            height: 30px;
+            padding: 0 8px;
+            font-size: .78rem;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .page-expert-cards .ec-header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 1.05rem;
+        }
+
+        .page-expert-cards .ec-header-text h1 {
+            font-size: .92rem;
+        }
+
+        .page-expert-cards .ec-card {
+            padding: 12px;
+            gap: 12px;
+        }
+
+        .page-expert-cards .ec-avatar,
+        .page-expert-cards .ec-avatar-placeholder {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            font-size: 1rem;
+        }
+    }
+
+    /* حالت افقی موبایل */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .page-expert-cards .ec-header {
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+
+        .page-expert-cards .ec-card {
+            padding: 12px;
+        }
+    }
+
+    /* کاهش انیمیشن */
+    @media (prefers-reduced-motion: reduce) {
+        .page-expert-cards * {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+
+    /* ============================================================
+       دارک مود
+       ============================================================ */
+    @media (prefers-color-scheme: dark) {
+        .page-expert-cards {
+            --ec-text: #f1f5f9;
+            --ec-text-2: #94a3b8;
+            --ec-text-3: #64748b;
+            --ec-border: #334155;
+            --ec-border-soft: #1e293b;
+            --ec-bg: #0f172a;
+            --ec-bg-card: #1e293b;
+        }
+
+        .page-expert-cards .ec-header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+
+        .page-expert-cards .ec-header-text h1 {
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-expert-cards .ec-btn-outline {
+            background: #1e293b;
+            color: #cbd5e1;
+            border-color: #334155;
+        }
+
+        .page-expert-cards .ec-btn-mine {
+            background: linear-gradient(135deg, #2e1065 0%, #4c1d95 100%);
+            color: #d8b4fe;
+            border-color: #4c1d95;
+        }
+
+        .page-expert-cards .ec-card {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .page-expert-cards .ec-card.has-unread {
+            background: linear-gradient(180deg, #1e293b 0%, #2a1519 100%);
+            border-color: #7f1d1d;
+        }
+
+        .page-expert-cards .ec-name {
+            color: #f1f5f9;
+        }
+
+        .page-expert-cards .ec-stat {
+            background: #0f172a;
+            border-color: #334155;
+            color: #94a3b8;
+        }
+
+        .page-expert-cards .ec-stat.unread {
+            background: rgba(220, 38, 38, .15);
+            border-color: #dc2626;
+            color: #fca5a5;
+        }
+
+        .page-expert-cards .ec-latest {
+            border-top-color: #334155;
+        }
+
+        .page-expert-cards .ec-card.has-unread .ec-latest {
+            border-top-color: #7f1d1d;
+        }
+
+        .page-expert-cards .ec-latest-title {
+            color: #f1f5f9;
+        }
+
+        .page-expert-cards .ec-empty {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border-color: #334155;
+        }
+
+        .page-expert-cards .ec-empty h3 {
+            color: #f1f5f9;
+        }
+
+        .page-expert-cards .ec-avatar {
+            border-color: #334155;
+        }
+
+        .page-expert-cards .ec-card.has-unread .ec-avatar {
+            border-color: #dc2626;
+        }
+    }

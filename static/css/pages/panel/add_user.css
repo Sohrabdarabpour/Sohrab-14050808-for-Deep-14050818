@@ -1,0 +1,405 @@
+/* استایل صفحه: panel/add_user.html */
+
+    /* ============================================
+       SCOPE: .page-add-user
+       ============================================ */
+
+    .page-add-user {
+        --au-primary: #1b698b;
+        --au-primary-light: #167a5c;
+        --au-primary-dark: #14506a;
+        --au-shadow-sm: 0 4px 20px rgba(65, 151, 201, .08);
+        --au-shadow-md: 0 12px 35px rgba(65, 151, 201, .16);
+        --au-transition: .3s cubic-bezier(.25, .46, .45, .94);
+        --au-radius-lg: 20px;
+        --au-radius-md: 14px;
+        --au-radius-sm: 10px;
+    }
+
+    .page-add-user .au-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 48px;
+        padding: 11px 15px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 12px;
+        background: #ffffff;
+        transition: all var(--au-transition);
+    }
+
+    .page-add-user .au-checkbox-wrapper:hover {
+        border-color: #b8ccd2;
+    }
+
+    .page-add-user .au-checkbox-wrapper:focus-within {
+        border-color: var(--au-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .10);
+    }
+
+    .page-add-user .au-checkbox {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        accent-color: var(--au-primary);
+        cursor: pointer;
+    }
+
+    .page-add-user .au-checkbox-text {
+        color: #3d484b;
+        font-size: clamp(.75rem, .88vw, .82rem);
+        font-weight: 600;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .page-add-user .au-wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+    }
+
+    .page-add-user .au-wrap *,
+    .page-add-user .au-wrap *::before,
+    .page-add-user .au-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    .page-add-user .au-card {
+        position: relative;
+        overflow: hidden;
+        padding: clamp(20px, 2.4vw, 32px);
+        background: linear-gradient(180deg, #ffffff 0%, #fafcfd 100%);
+        border: 1px solid #e8eff3;
+        border-radius: var(--au-radius-lg);
+        box-shadow: var(--au-shadow-sm);
+        isolation: isolate;
+    }
+
+    .page-add-user .au-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 6px;
+        height: 100%;
+        background: linear-gradient(180deg,
+                var(--au-primary) 0%,
+                var(--au-primary-light) 100%);
+        z-index: 2;
+    }
+
+    .page-add-user .au-card::after {
+        content: "";
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: var(--au-primary);
+        opacity: .04;
+        transition: all .6s ease;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-add-user .au-card:hover::after {
+        transform: scale(1.4);
+        opacity: .06;
+    }
+
+    .page-add-user .au-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 26px;
+        padding-bottom: 22px;
+        border-bottom: 1px solid #eef3f6;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-add-user .au-header-icon {
+        width: clamp(52px, 5vw, 64px);
+        height: clamp(52px, 5vw, 64px);
+        min-width: clamp(52px, 5vw, 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 16px;
+        background: linear-gradient(135deg,
+                var(--au-primary) 0%,
+                var(--au-primary-light) 100%);
+        color: #ffffff;
+        font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .28);
+        transition: transform var(--au-transition);
+    }
+
+    .page-add-user .au-card:hover .au-header-icon {
+        transform: scale(1.06) rotate(-6deg);
+    }
+
+    .page-add-user .au-header-icon i {
+        color: inherit;
+        line-height: 1;
+    }
+
+    .page-add-user .au-header-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-add-user .au-header-title {
+        margin: 0;
+        color: #183b4d;
+        font-size: clamp(1rem, 1.3vw, 1.2rem);
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .page-add-user .au-header-description {
+        margin: 5px 0 0;
+        color: #7c909b;
+        font-size: clamp(.72rem, .85vw, .82rem);
+        line-height: 1.6;
+    }
+
+    .page-add-user .au-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-add-user .au-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .page-add-user .au-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #3d484b;
+        font-size: clamp(.75rem, .88vw, .82rem);
+        font-weight: 700;
+    }
+
+    .page-add-user .au-label i {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--au-primary);
+        font-size: .82rem;
+        flex-shrink: 0;
+    }
+
+    .page-add-user .au-input,
+    .page-add-user .au-select {
+        width: 100%;
+        min-height: 48px;
+        padding: 11px 15px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 12px;
+        outline: none;
+        background: #ffffff;
+        color: #2d3436;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .9vw, .85rem);
+        transition: all var(--au-transition);
+    }
+
+    .page-add-user .au-input::placeholder {
+        color: #a0a8aa;
+    }
+
+    .page-add-user .au-input:hover,
+    .page-add-user .au-select:hover {
+        border-color: #b8ccd2;
+    }
+
+    .page-add-user .au-input:focus,
+    .page-add-user .au-select:focus {
+        border-color: var(--au-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .10);
+        background: #ffffff;
+    }
+
+    .page-add-user .au-select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b698b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        background-size: 16px;
+        padding-left: 40px;
+    }
+
+    .page-add-user .au-error {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 2px;
+        color: #e17055;
+        font-size: clamp(.65rem, .78vw, .74rem);
+        font-weight: 600;
+    }
+
+    .page-add-user .au-error::before {
+        content: "\f06a";
+        font-family: "Font Awesome 6 Free", "Font Awesome 6 Pro";
+        font-weight: 900;
+        font-size: .72rem;
+        flex-shrink: 0;
+    }
+
+    .page-add-user .au-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #eef3f6;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-add-user .au-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 10px 22px;
+        border-radius: 12px;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .9vw, .86rem);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--au-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-add-user .au-btn i {
+        font-size: .95rem;
+    }
+
+    .page-add-user .au-btn-primary {
+        background: linear-gradient(135deg,
+                var(--au-primary) 0%,
+                var(--au-primary-light) 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .28);
+        border-color: transparent;
+    }
+
+    .page-add-user .au-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(27, 105, 139, .38);
+        color: #ffffff;
+    }
+
+    .page-add-user .au-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .page-add-user .au-btn-secondary {
+        background: #ffffff;
+        border-color: #d8e2e5;
+        color: #596568;
+    }
+
+    .page-add-user .au-btn-secondary:hover {
+        background: #f7fafb;
+        border-color: var(--au-primary);
+        color: var(--au-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .12);
+    }
+
+    .page-add-user .au-btn-secondary:active {
+        transform: translateY(0);
+    }
+
+    @media (max-width: 768px) {
+        .page-add-user .au-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .page-add-user .au-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .page-add-user .au-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-add-user .au-card {
+            padding: 18px;
+            border-radius: 16px;
+        }
+
+        .page-add-user .au-header {
+            gap: 12px;
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+        }
+
+        .page-add-user .au-header-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 13px;
+            font-size: 1.15rem;
+        }
+
+        .page-add-user .au-input,
+        .page-add-user .au-select {
+            min-height: 46px;
+            padding: 10px 13px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .page-add-user .au-wrap {
+            padding: 8px;
+        }
+
+        .page-add-user .au-card {
+            padding: 14px;
+        }
+
+        .page-add-user .au-header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 1rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .page-add-user .au-wrap *,
+        .page-add-user .au-wrap *::before,
+        .page-add-user .au-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

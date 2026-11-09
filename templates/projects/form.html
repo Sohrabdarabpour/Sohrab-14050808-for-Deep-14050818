@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'add' %}افزودن پروژه{% else %}ویرایش پروژه{% endif %}{% endblock %}
+{% block body_class %}page-project-form{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/projects/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pf-wrap">
+    <div class="pf-card">
+
+        <!-- هدر -->
+        <div class="pf-header">
+            <div class="pf-header-info">
+                <div class="pf-header-icon">
+                    <i class="fa-solid {% if mode == 'add' %}fa-plus{% else %}fa-pen{% endif %}"></i>
+                </div>
+                <div>
+                    <h1 class="pf-title">
+                        {% if mode == 'add' %}افزودن پروژه جدید{% else %}ویرایش پروژه{% endif %}
+                    </h1>
+                    <p class="pf-subtitle">
+                        {% if mode == 'add' %}
+                            اطلاعات پروژه جدید را وارد کنید
+                        {% else %}
+                            {{ project.get('name', '') or 'ویرایش اطلاعات' }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            <a href="{{ url_for('projects.list_projects') }}" class="pf-back-btn">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به لیست
+            </a>
+        </div>
+
+        <!-- فرم -->
+        <form method="POST" id="projectForm" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="pf-body">
+
+                {% for section in form.get_sections() %}
+                <div class="pf-section">
+                    <div class="pf-section-head">
+                        <div class="pf-section-icon">
+                            <i class="fa-solid {{ section.icon }}"></i>
+                        </div>
+                        <h2 class="pf-section-title">{{ section.title }}</h2>
+                    </div>
+
+                    <div class="pf-grid">
+                        {% for f in section.fields %}
+                        <div class="pf-field pf-col-{{ f.col or 6 }}">
+                            {% if f.type == 'checkbox' %}
+                            <label class="pf-switch-wrap" for="field_{{ f.name }}">
+                                <div class="pf-switch-info">
+                                    <i class="fa-solid {{ f.icon or 'fa-check' }}"></i>
+                                    <div class="pf-switch-text">
+                                        <strong>{{ f.label }}</strong>
+                                        {% if f.description %}
+                                        <small>{{ f.description }}</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="pf-switch">
+                                    <input type="checkbox"
+                                           id="field_{{ f.name }}"
+                                           name="{{ f.name }}"
+                                           value="1"
+                                           {% if project.get(f.name) %}checked{% endif %}>
+                                    <span class="pf-switch-slider"></span>
+                                </div>
+                            </label>
+
+                            {% else %}
+                            <label for="field_{{ f.name }}" class="pf-label">
+                                {% if f.required %}<span class="req">*</span>{% endif %}
+                                <i class="fa-solid {{ f.icon or 'fa-circle' }}"></i>
+                                {{ f.label }}
+                            </label>
+
+                            {% if f.type == 'textarea' %}
+                                <textarea id="field_{{ f.name }}"
+                                          name="{{ f.name }}"
+                                          class="pf-textarea"
+                                          rows="{{ f.rows or 3 }}"
+                                          placeholder="{{ f.placeholder or '' }}">{{ project.get(f.name, '') or '' }}</textarea>
+
+                            {% elif f.type == 'select' %}
+                                <select id="field_{{ f.name }}"
+                                        name="{{ f.name }}"
+                                        class="pf-select">
+                                    {% if f.options %}
+                                        {% for opt in f.options %}
+                                        <option value="{{ opt.value }}"
+                                                {% if project.get(f.name)|string == opt.value|string %}selected{% endif %}>
+                                            {{ opt.label }}
+                                        </option>
+                                        {% endfor %}
+                                    {% elif f.source %}
+                                        <option value="">{{ f.empty_label or '— انتخاب کنید —' }}</option>
+                                        {% for item in (contractors if f.source == 'contractors'
+                                            else contract_types if f.source == 'contract_types'
+                                            else areas if f.source == 'areas'
+                                            else []) %}
+                                        <option value="{{ item.id }}"
+                                                {% if project.get(f.name)|string == item.id|string %}selected{% endif %}>
+                                            {{ item.name or item.title }}
+                                        </option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+
+                            {% else %}
+                                <input type="{{ f.type or 'text' }}"
+                                       id="field_{{ f.name }}"
+                                       name="{{ f.name }}"
+                                       class="pf-input {% if f.ltr %}ltr{% endif %}"
+                                       value="{{ project.get(f.name, '') or '' }}"
+                                       placeholder="{{ f.placeholder or '' }}"
+                                       {% if f.min is defined %}min="{{ f.min }}"{% endif %}
+                                       {% if f.max is defined %}max="{{ f.max }}"{% endif %}
+                                       {% if f.required %}required{% endif %}>
+                            {% endif %}
+
+                            <span class="pf-error" data-error-for="{{ f.name }}">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span></span>
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- اکشن‌ها -->
+            <div class="pf-actions">
+                <div class="pf-actions-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    فیلدهای دارای <span style="color:#dc2626;font-weight:900;">*</span> الزامی هستند
+                </div>
+                <div class="pf-actions-buttons">
+                    <a href="{{ url_for('projects.list_projects') }}"
+                       class="pf-btn pf-btn-cancel">
+                        <i class="fa-solid fa-xmark"></i>
+                        انصراف
+                    </a>
+                    <button type="submit" class="pf-btn pf-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {% if mode == 'add' %}ذخیره پروژه{% else %}ذخیره تغییرات{% endif %}
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<button type="submit" form="projectForm" class="pf-mobile-save">
+    <i class="fa-solid fa-floppy-disk"></i>
+    {% if mode == 'add' %}ذخیره پروژه{% else %}ذخیره تغییرات{% endif %}
+</button>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/projects/form.js') }}"></script>{% endblock %}

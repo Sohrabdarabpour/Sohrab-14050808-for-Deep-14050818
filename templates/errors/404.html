@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}صفحه پیدا نشد{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/errors/404.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="ep-card">
+        <div class="ep-icon">
+            <i class="fa-solid fa-map-location-dot"></i>
+        </div>
+
+        <div class="ep-code">404</div>
+
+        <h1 class="ep-title">صفحه پیدا نشد</h1>
+
+        <p class="ep-text">
+            صفحه‌ای که به دنبال آن هستید وجود ندارد یا حذف شده است.<br>
+            لطفاً آدرس را بررسی کنید یا به صفحه اصلی بازگردید.
+        </p>
+
+        <div class="ep-actions">
+            <a href="{{ url_for('main.index') }}" class="ep-btn ep-btn-primary">
+                <i class="fa-solid fa-house"></i>
+                <span>بازگشت به صفحه اصلی</span>
+            </a>
+            <a href="javascript:history.back()" class="ep-btn ep-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>صفحه قبل</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

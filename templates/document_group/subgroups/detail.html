@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block title %}جزئیات زیرگروه: {{ subgroup.title }}{% endblock %}
+
+{% block body_class %}page-document-subgroup-detail{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/subgroups/detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="sd-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="sd-header">
+        <div class="sd-header-title">
+            <div class="sd-header-icon"
+                 style="background: linear-gradient(135deg, {{ subgroup.color or '#167a5c' }}, {{ subgroup.color or '#2aa07a' }});">
+                <i class="fa-solid fa-tag"></i>
+            </div>
+            <div class="sd-header-text">
+                <h1>{{ subgroup.title }}</h1>
+                <p>
+                    {% if subgroup.code %}کد: {{ subgroup.code }} — {% endif %}
+                    {% if subgroup.is_active %}
+                    <span style="color:#276749;font-weight:700;">فعال</span>
+                    {% else %}
+                    <span style="color:#c53030;font-weight:700;">غیرفعال</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="sd-header-actions">
+            <a href="{{ url_for('document_group.subgroup_list') }}"
+               class="sd-btn sd-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت
+            </a>
+
+            <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=subgroup.id) }}"
+               class="sd-btn sd-btn-primary">
+                <i class="fa-solid fa-pen"></i>
+                ویرایش
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== اطلاعات ===== -->
+    <section class="sd-info-card">
+        <div class="sd-info-grid">
+            <div class="sd-info-item">
+                <span class="sd-info-label">عنوان زیرگروه</span>
+                <span class="sd-info-value">{{ subgroup.title }}</span>
+            </div>
+
+            <div class="sd-info-item">
+                <span class="sd-info-label">کد</span>
+                <span class="sd-info-value" style="direction:ltr;">
+                    {{ subgroup.code or '—' }}
+                </span>
+            </div>
+
+            <div class="sd-info-item">
+                <span class="sd-info-label">رنگ</span>
+                <span class="sd-info-value">
+                    <span class="sd-color-swatch">
+                        <span class="sd-color-box"
+                              style="background:{{ subgroup.color or '#3D8499' }};"></span>
+                        <span style="direction:ltr;">{{ subgroup.color or '—' }}</span>
+                    </span>
+                </span>
+            </div>
+
+            <div class="sd-info-item">
+                <span class="sd-info-label">بازه بررسی</span>
+                <span class="sd-info-value">
+                    <span class="sd-badge sd-badge-days">
+                        <i class="fa-solid fa-clock"></i>
+                        {{ subgroup.days_review }} روز
+                    </span>
+                </span>
+            </div>
+
+            <div class="sd-info-item">
+                <span class="sd-info-label">تعداد اسناد</span>
+                <span class="sd-info-value">{{ subgroup.documents_count or 0 }}</span>
+            </div>
+
+            <div class="sd-info-item">
+                <span class="sd-info-label">وضعیت</span>
+                <span class="sd-info-value">
+                    {% if subgroup.is_active %}
+                    <span class="sd-badge sd-badge-active">
+                        <i class="fa-solid fa-circle"></i>
+                        فعال
+                    </span>
+                    {% else %}
+                    <span class="sd-badge sd-badge-inactive">
+                        <i class="fa-solid fa-circle"></i>
+                        غیرفعال
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        {% if subgroup.description %}
+        <div style="margin-top:18px;padding-top:18px;border-top:1px solid #eef3f6;">
+            <span class="sd-info-label">توضیحات</span>
+            <p style="margin:6px 0 0;color:#3d484b;font-size:.85rem;line-height:1.7;">
+                {{ subgroup.description }}
+            </p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- ===== گروه‌های مرتبط (M:N) ===== -->
+    <section class="sd-section">
+        <div class="sd-section-header">
+            <div class="sd-section-title">
+                <i class="fa-solid fa-layer-group"></i>
+                گروه‌های مرتبط
+                <span class="sd-count-badge">{{ subgroup.groups|length }}</span>
+            </div>
+
+            <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=subgroup.id) }}"
+               class="sd-btn sd-btn-primary"
+               style="min-height:34px;padding:6px 12px;font-size:.75rem;">
+                <i class="fa-solid fa-pen"></i>
+                ویرایش ارتباط‌ها
+            </a>
+        </div>
+
+        <div class="sd-section-body">
+            {% if subgroup.groups %}
+            <div class="sd-grid">
+                {% for g in subgroup.groups %}
+                <a href="{{ url_for('document_group.group_detail', group_id=g.id) }}"
+                   class="sd-item-card">
+                    <div class="sd-item-icon">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div class="sd-item-info">
+                        <div class="sd-item-name">{{ g.title }}</div>
+                        <div class="sd-item-meta">
+                            {% if g.code %}
+                            <span class="sd-item-badge" style="direction:ltr;">{{ g.code }}</span>
+                            {% endif %}
+                            {% if g.link_sort_order is defined %}
+                            <span class="sd-item-badge">
+                                ترتیب: {{ g.link_sort_order }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sd-empty">
+                <i class="fa-solid fa-inbox"></i>
+                این زیرگروه به هیچ گروهی متصل نیست.
+                <br>
+                <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=subgroup.id) }}"
+                   style="color:#167a5c;font-weight:700;margin-top:8px;display:inline-block;">
+                    <i class="fa-solid fa-plus"></i>
+                    اتصال به گروه
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- ===== دپارتمان‌های متولی (M:N) ===== -->
+    <section class="sd-section">
+        <div class="sd-section-header">
+            <div class="sd-section-title">
+                <i class="fa-solid fa-building"></i>
+                دپارتمان‌های متولی
+                <span class="sd-count-badge">{{ subgroup.departments|length }}</span>
+            </div>
+
+            <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=subgroup.id) }}"
+               class="sd-btn sd-btn-primary"
+               style="min-height:34px;padding:6px 12px;font-size:.75rem;">
+                <i class="fa-solid fa-pen"></i>
+                ویرایش ارتباط‌ها
+            </a>
+        </div>
+
+        <div class="sd-section-body">
+            {% if subgroup.departments %}
+            <div class="sd-grid">
+                {% for d in subgroup.departments %}
+                <div class="sd-item-card" style="cursor:default;">
+                    <div class="sd-item-icon dept">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div class="sd-item-info">
+                        <div class="sd-item-name">{{ d.title }}</div>
+                        <div class="sd-item-meta">
+                            {% if d.code %}
+                            <span class="sd-item-badge" style="direction:ltr;">{{ d.code }}</span>
+                            {% endif %}
+                            {# ★ حذف بج primary #}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="sd-empty">
+                <i class="fa-solid fa-inbox"></i>
+                این زیرگروه دپارتمان متولی ندارد.
+                <br>
+                <a href="{{ url_for('document_group.subgroup_edit', subgroup_id=subgroup.id) }}"
+                   style="color:#167a5c;font-weight:700;margin-top:8px;display:inline-block;">
+                    <i class="fa-solid fa-plus"></i>
+                    تعیین دپارتمان متولی
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+</div>
+{% endblock %}

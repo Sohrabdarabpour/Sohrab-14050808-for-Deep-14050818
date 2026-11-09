@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+{% block title %}{{ doc.subject or 'مشاهده سند' }}{% endblock %}
+{% block body_class %}page-document-view{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+
+<div class="dv-shell">
+
+    <!-- ============================================
+         BREADCRUMB
+         ============================================ -->
+    <nav class="dv-breadcrumb">
+        <a href="{{ url_for('main.index') }}">
+            <i class="fa-solid fa-house"></i> خانه
+        </a>
+        <i class="fa-solid fa-angle-left"></i>
+        <a href="{{ url_for('main.index') }}">
+            <i class="fa-solid fa-gauge-high"></i> داشبورد
+        </a>
+        <i class="fa-solid fa-angle-left"></i>
+        <span>{{ (doc.subject or 'سند')[:50] }}{% if doc.subject and doc.subject|length > 50 %}...{% endif %}</span>
+    </nav>
+
+    <!-- ============================================
+         HEADER
+         ============================================ -->
+    <div class="dv-head">
+        <div class="dv-head-icon">
+            <i class="fa-solid fa-file-lines"></i>
+        </div>
+        <div class="dv-head-info">
+            <div class="dv-head-title">{{ doc.subject or 'بدون موضوع' }}</div>
+            <div class="dv-head-meta">
+                {% if doc.code_dfc %}
+                <span><i class="fa-solid fa-hashtag"></i> {{ doc.code_dfc }}</span>
+                {% endif %}
+                {% if doc.status_title %}
+                <span><i class="fa-solid fa-circle-dot"></i> {{ doc.status_title }}</span>
+                {% endif %}
+                {% if doc.department_title %}
+                <span><i class="fa-solid fa-building-user"></i> {{ doc.department_title }}</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="dv-head-actions">
+            <button class="dv-head-btn" onclick="window.print()" title="چاپ">
+                <i class="fa-solid fa-print"></i> چاپ
+            </button>
+            <button class="dv-head-btn" onclick="window.history.back()">
+                <i class="fa-solid fa-arrow-right"></i> بازگشت
+            </button>
+            {% if can_add_note(doc.id) %}
+            <button type="button" class="dv-head-btn" onclick="openNoteModal()">
+                <i class="fa-solid fa-note-sticky"></i> ثبت یادداشت
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ============================================
+         QUICK STATS
+         ============================================ -->
+    <div class="dv-stats">
+        {% if doc.date_received %}
+        <div class="dv-stat">
+            <div class="dv-stat-icon p"><i class="fa-solid fa-calendar-plus"></i></div>
+            <div class="dv-stat-content">
+                <div class="dv-stat-label">تاریخ دریافت</div>
+                <div class="dv-stat-value">{{ doc.date_received|jalali_date or '—' }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if doc.deadline %}
+        <div class="dv-stat">
+            <div class="dv-stat-icon w"><i class="fa-solid fa-hourglass-half"></i></div>
+            <div class="dv-stat-content">
+                <div class="dv-stat-label">مهلت</div>
+                <div class="dv-stat-value">{{ doc.deadline|jalali_date or '—' }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if doc.user_full_name %}
+        <div class="dv-stat">
+            <div class="dv-stat-icon i"><i class="fa-solid fa-user"></i></div>
+            <div class="dv-stat-content">
+                <div class="dv-stat-label">کارشناس</div>
+                <div class="dv-stat-value">{{ doc.user_full_name }}</div>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if doc.contractor %}
+        <div class="dv-stat">
+            <div class="dv-stat-icon s"><i class="fa-solid fa-user-tie"></i></div>
+            <div class="dv-stat-content">
+                <div class="dv-stat-label">پیمانکار</div>
+                <div class="dv-stat-value">{{ doc.contractor }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ============================================
+         SECTIONS GRID
+         ============================================ -->
+    <div class="dv-sections-grid">
+
+        <!-- ===== اطلاعات اصلی ===== -->
+        <!-- <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-circle-info"></i></div>
+                <div class="dv-section-title">اطلاعات اصلی</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-hashtag"></i> کد DFC</div>
+                    <div class="dv-field-value {% if not doc.code_dfc %}empty{% endif %}">
+                        {{ doc.code_dfc or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-heading"></i> موضوع</div>
+                    <div class="dv-field-value {% if not doc.subject %}empty{% endif %}">
+                        {{ doc.subject or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-barcode"></i> شماره اتوماسیون</div>
+                    <div class="dv-field-value ltr {% if not doc.automation_number %}empty{% endif %}">
+                        {{ doc.automation_number or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-envelope"></i> شماره نامه پیمانکار</div>
+                    <div class="dv-field-value ltr {% if not doc.contractor_letter_number %}empty{% endif %}">
+                        {{ doc.contractor_letter_number or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-calendar-day"></i> تاریخ نامه</div>
+                    <div class="dv-field-value {% if not doc.date_letter %}empty{% endif %}">
+                        {{ doc.date_letter|jalali_date or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-circle-dot"></i> وضعیت</div>
+                    <div class="dv-field-value">
+                        {% if doc.status_title %}
+                        {% set color = doc.status_color or '#1b698b' %}
+                        <span class="dv-status-badge"
+                            style="background:{{ color }}15;color:{{ color }};border-color:{{ color }}30;">
+                            {{ doc.status_title }}
+                        </span>
+                        {% else %}
+                        <span class="empty">ثبت نشده</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- ===== پروژه و پیمان ===== -->
+        <!-- <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                <div class="dv-section-title">اطلاعات پروژه و پیمان</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-building"></i> نام پروژه</div>
+                    <div class="dv-field-value {% if not doc.project_name %}empty{% endif %}">
+                        {{ doc.project_name or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-user-tie"></i> پیمانکار</div>
+                    <div class="dv-field-value {% if not doc.contractor %}empty{% endif %}">
+                        {{ doc.contractor or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-file-contract"></i> شماره قرارداد</div>
+                    <div class="dv-field-value ltr {% if not doc.contract_number %}empty{% endif %}">
+                        {{ doc.contract_number or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-map-location-dot"></i> ناحیه</div>
+                    <div class="dv-field-value {% if not doc.area_title %}empty{% endif %}">
+                        {{ doc.area_title or 'ثبت نشده' }}
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- ===== طبقه‌بندی ===== -->
+        <!-- <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="dv-section-title">طبقه‌بندی</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-folder-tree"></i> گروه سند</div>
+                    <div class="dv-field-value {% if not doc.group_title %}empty{% endif %}">
+                        {{ doc.group_title or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-sitemap"></i> زیرگروه سند</div>
+                    <div class="dv-field-value {% if not doc.subgroup_title %}empty{% endif %}">
+                        {{ doc.subgroup_title or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-building-user"></i> دپارتمان</div>
+                    <div class="dv-field-value {% if not doc.department_title %}empty{% endif %}">
+                        {{ doc.department_title or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-warehouse"></i> واحد</div>
+                    <div class="dv-field-value {% if not doc.unit %}empty{% endif %}">
+                        {{ doc.unit or 'ثبت نشده' }}
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- ===== زمان‌بندی ===== -->
+        <!-- <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-clock"></i></div>
+                <div class="dv-section-title">زمان‌بندی</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-calendar-plus"></i> تاریخ دریافت</div>
+                    <div class="dv-field-value {% if not doc.date_received %}empty{% endif %}">
+                        {{ doc.date_received|jalali_date or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-calendar-check"></i> تاریخ ارجاع</div>
+                    <div class="dv-field-value {% if not doc.date_referral %}empty{% endif %}">
+                        {{ doc.date_referral|jalali_date or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-hourglass-half"></i> مهلت</div>
+                    <div class="dv-field-value {% if not doc.deadline %}empty{% endif %}">
+                        {{ doc.deadline|jalali_date or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-calendar-day"></i> تاریخ اعلام پاسخ</div>
+                    <div class="dv-field-value {% if not doc.response_announce_date %}empty{% endif %}">
+                        {{ doc.response_announce_date|jalali_date or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-clock-rotate-left"></i> تاخیر نهایی</div>
+                    <div class="dv-field-value {% if not doc.final_delay %}empty{% endif %}">
+                        {{ doc.final_delay or 'ثبت نشده' }}
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- ===== مسئولیت و پیگیری ===== -->
+        <!-- <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-user-check"></i></div>
+                <div class="dv-section-title">مسئولیت و پیگیری</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-user"></i> کارشناس</div>
+                    <div class="dv-field-value {% if not doc.user_full_name %}empty{% endif %}">
+                        {{ doc.user_full_name or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-user-group"></i> کارشناس همکار</div>
+                    <div class="dv-field-value {% if not doc.colleague %}empty{% endif %}">
+                        {{ doc.colleague or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-handshake"></i> طرف مسئول</div>
+                    <div class="dv-field-value {% if not doc.Responsible_Party %}empty{% endif %}">
+                        {{ doc.Responsible_Party or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-comment-dots"></i> وضعیت پاسخ</div>
+                    <div class="dv-field-value {% if not doc.doc_response_status %}empty{% endif %}">
+                        {{ doc.doc_response_status or 'ثبت نشده' }}
+                    </div>
+                </div>
+            </div>
+        </div> -->
+
+        <!-- ===== درخواست و پاسخ ===== -->
+        <!-- {% if doc.request_complete_docs or doc.complete_docs_by_contractor or doc.final_letter_number %}
+        <div class="dv-section">
+            <div class="dv-section-header">
+                <div class="dv-section-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                <div class="dv-section-title">درخواست و پاسخ</div>
+            </div>
+            <div class="dv-grid">
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-file-circle-plus"></i> درخواست تکمیل مدارک</div>
+                    <div class="dv-field-value {% if not doc.request_complete_docs %}empty{% endif %}">
+                        {{ doc.request_complete_docs or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-file-circle-check"></i> تکمیل مدارک پیمانکار</div>
+                    <div class="dv-field-value {% if not doc.complete_docs_by_contractor %}empty{% endif %}">
+                        {{ doc.complete_docs_by_contractor or 'ثبت نشده' }}
+                    </div>
+                </div>
+                <div class="dv-field">
+                    <div class="dv-field-label"><i class="fa-solid fa-file-signature"></i> شماره نامه نهایی</div>
+                    <div class="dv-field-value ltr {% if not doc.final_letter_number %}empty{% endif %}">
+                        {{ doc.final_letter_number or 'ثبت نشده' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %} -->
+
+    </div>
+
+    <!-- ============================================
+         ★ تاریخچه یادداشت‌ها (تمام‌عرض)
+         ============================================ -->
+    {% if doc.id %}
+    <div class="dv-section dv-section-full" style="margin-top: 18px;" id="workflowHistorySection">
+        <div class="dv-section-header">
+            <div class="dv-section-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="dv-section-title">
+                تاریخچه یادداشت‌ها
+                <span class="dv-count-badge" id="historyCount" style="display:none;"></span>
+            </div>
+        </div>
+
+        <div id="workflowHistory" data-document-id="{{ doc.id }}">
+            <div class="dv-timeline-loading">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                در حال بارگذاری...
+            </div>
+        </div>
+    </div>
+
+<script src="{{ url_for('static', filename='js/pages/documents/view.js') }}"></script>
+    <!-- ★ استایل اضافی برای steps -->
+    {% endif %}
+
+    <!-- ============================================
+         ACTIONS
+         ============================================ -->
+    <div class="dv-actions">
+        {% if can_add_note(doc.id) %}
+        <button type="button" class="dv-action-btn primary" onclick="openNoteModal()">
+            <i class="fa-solid fa-note-sticky"></i> ثبت یادداشت
+        </button>
+        {% endif %}
+        <button class="dv-action-btn secondary" onclick="window.print()">
+            <i class="fa-solid fa-print"></i> چاپ سند
+        </button>
+        <button class="dv-action-btn secondary" onclick="window.history.back()">
+            <i class="fa-solid fa-arrow-right"></i> بازگشت
+        </button>
+    </div>
+
+</div>
+
+<!-- ★ Modal ثبت یادداشت -->
+{% if doc.id %}
+{% set document_id = doc.id %}
+{% include "workflow/_note_modal.html" %}
+{% endif %}
+
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/documents/view.css') }}">
+{% endblock %}

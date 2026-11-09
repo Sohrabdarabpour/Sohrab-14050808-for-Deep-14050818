@@ -1,0 +1,315 @@
+{% extends "base.html" %}
+
+{% block title %}جزئیات کاربر - {{ user.full_name }}{% endblock %}
+
+{% block body_class %}page-user-detail{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-user-detail" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/panel/user_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ud-wrap">
+
+    <!-- هدر -->
+    <div class="ud-header">
+        <div class="ud-header-info">
+            <div class="ud-header-icon">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="ud-header-text">
+                <h1>جزئیات کاربر</h1>
+                <p>مشاهده اطلاعات کامل و آخرین فعالیت‌ها</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('panel.users') }}" class="ud-back-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            بازگشت به لیست
+        </a>
+    </div>
+
+    <!-- کارت پروفایل -->
+    <div class="ud-profile">
+        <div class="ud-avatar">
+            <!-- ★★★ حلقه‌های چرخان ★★★ -->
+            <span class="ud-avatar-ring"></span>
+            <span class="ud-avatar-ring ring-2"></span>
+
+            {% if user.avatar and user.avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                {# آواتار اختصاصی کاربر #}
+                <img src="{{ url_for('static', filename='uploads/avatar/' + user.avatar) }}"
+                    alt="{{ user.full_name or 'کاربر' }}"
+                    onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+            {% elif user.gender == 'female' %}
+                {# آواتار پیش‌فرض خانم #}
+                <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                    alt="{{ user.full_name or 'کاربر' }}" />
+            {% else %}
+                {# آواتار پیش‌فرض آقا #}
+                <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                    alt="{{ user.full_name or 'کاربر' }}" />
+            {% endif %}
+
+            <span class="ud-status-dot {{ 'online' if is_online else 'offline' }}"
+                title="{{ 'آنلاین' if is_online else 'آفلاین' }}"></span>
+        </div>
+
+        <div class="ud-profile-info">
+            <h2 class="ud-profile-name">{{ user.full_name }}</h2>
+            <span class="ud-profile-username">
+                <i class="fa-solid fa-at"></i>
+                {{ user.username }}
+            </span>
+
+            <div>
+                {% if user.role == 'admin' %}
+                <span class="ud-profile-role ud-role-admin">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    مدیر نرم افزار
+                </span>
+                {% elif user.role == 'manager' %}
+                <span class="ud-profile-role ud-role-manager">
+                    <i class="fa-solid fa-user-tie"></i>
+                    مدیر
+                </span>
+                {% elif user.role == 'supervisor' %}
+                <span class="ud-profile-role ud-role-supervisor">
+                    <i class="fa-solid fa-user-check"></i>
+                    سرپرست
+                </span>
+                {% else %}
+                <span class="ud-profile-role ud-role-expert">
+                    <i class="fa-solid fa-user-gear"></i>
+                    کارشناس
+                </span>
+                {% endif %}
+
+                <!-- ★★★ جنسیت در کنار نقش ★★★ -->
+                {% if user.gender == 'female' %}
+                <span class="ud-profile-role ud-gender-female">
+                    <i class="fa-solid fa-venus"></i>
+                    خانم
+                </span>
+                {% else %}
+                <span class="ud-profile-role ud-gender-male">
+                    <i class="fa-solid fa-mars"></i>
+                    آقا
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ★★★ آخرین ورود و آخرین فعالیت (شمسی) ★★★ -->
+    <div class="ud-section">
+        <h3 class="ud-section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            وضعیت ورود و فعالیت
+        </h3>
+
+        <div class="ud-row">
+            <span class="ud-label">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                آخرین ورود:
+            </span>
+            <span class="ud-value">
+                {% if last_login %}
+                {{ last_login }}
+                {% else %}
+                <span class="ud-muted">— هرگز وارد نشده —</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="ud-row">
+            <span class="ud-label">
+                <i class="fa-solid fa-eye"></i>
+                آخرین فعالیت:
+            </span>
+            <span class="ud-value">
+                {% if last_seen %}
+                {{ last_seen }}
+                {% else %}
+                <span class="ud-muted">— ثبت نشده —</span>
+                {% endif %}
+            </span>
+        </div>
+
+        <div class="ud-row">
+            <span class="ud-label">
+                <i class="fa-solid fa-signal"></i>
+                وضعیت فعلی:
+            </span>
+            <span class="ud-value">
+                {% if is_online %}
+                <span class="ud-badge ud-badge-online">
+                    <i class="fa-solid fa-circle"></i>
+                    آنلاین
+                </span>
+                {% else %}
+                <span class="ud-badge ud-badge-offline">
+                    <i class="fa-solid fa-circle"></i>
+                    آفلاین
+                </span>
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- اطلاعات حساب + تماس -->
+    <div class="ud-grid-2">
+        <div class="ud-section">
+            <h3 class="ud-section-title">
+                <i class="fa-solid fa-id-card"></i>
+                اطلاعات حساب
+            </h3>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-hashtag"></i>
+                    شناسه:
+                </span>
+                <span class="ud-value ltr">{{ user.id }}</span>
+            </div>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-user"></i>
+                    نام کاربری:
+                </span>
+                <span class="ud-value ltr">{{ user.username }}</span>
+            </div>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-circle-check"></i>
+                    وضعیت حساب:
+                </span>
+                <span class="ud-value">
+                    {% if user.is_active == 1 %}
+                    <span class="ud-badge ud-badge-active">
+                        <i class="fa-solid fa-circle"></i>
+                        فعال
+                    </span>
+                    {% else %}
+                    <span class="ud-badge ud-badge-inactive">
+                        <i class="fa-solid fa-circle"></i>
+                        غیرفعال
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+
+            <!-- ★★★ جنسیت ★★★ -->
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-venus-mars"></i>
+                    جنسیت:
+                </span>
+                <span class="ud-value">
+                    {% if user.gender == 'female' %}
+                    <span class="ud-badge ud-gender-female">
+                        <i class="fa-solid fa-venus"></i>
+                        خانم
+                    </span>
+                    {% else %}
+                    <span class="ud-badge ud-gender-male">
+                        <i class="fa-solid fa-mars"></i>
+                        آقا
+                    </span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="ud-section">
+            <h3 class="ud-section-title">
+                <i class="fa-solid fa-address-book"></i>
+                اطلاعات تماس
+            </h3>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-envelope"></i>
+                    ایمیل:
+                </span>
+                <span class="ud-value ltr">
+                    {% if user.email %}{{ user.email }}{% else %}<span class="ud-muted">—</span>{% endif %}
+                </span>
+            </div>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-phone"></i>
+                    تلفن:
+                </span>
+                <span class="ud-value ltr">
+                    {% if user.phone %}{{ user.phone }}{% else %}<span class="ud-muted">—</span>{% endif %}
+                </span>
+            </div>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-id-badge"></i>
+                    کد ملی:
+                </span>
+                <span class="ud-value ltr">
+                    {% if user.national_code %}{{ user.national_code }}{% else %}<span class="ud-muted">—</span>{% endif %}
+                </span>
+            </div>
+
+            <div class="ud-row">
+                <span class="ud-label">
+                    <i class="fa-solid fa-briefcase"></i>
+                    سمت:
+                </span>
+                <span class="ud-value">
+                    {% if user.position %}{{ user.position }}{% else %}<span class="ud-muted">—</span>{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- اطلاعات سیستمی -->
+    <div class="ud-section">
+        <h3 class="ud-section-title">
+            <i class="fa-solid fa-database"></i>
+            اطلاعات سیستمی
+        </h3>
+
+        <div class="ud-row">
+            <span class="ud-label">
+                <i class="fa-solid fa-calendar-plus"></i>
+                تاریخ ایجاد:
+            </span>
+            <span class="ud-value">
+                {% if created_at_jalali %}{{ created_at_jalali }}{% else %}<span class="ud-muted">—</span>{% endif %}
+            </span>
+        </div>
+
+        <div class="ud-row">
+            <span class="ud-label">
+                <i class="fa-solid fa-calendar-check"></i>
+                آخرین بروزرسانی:
+            </span>
+            <span class="ud-value">
+                {% if updated_at_jalali %}{{ updated_at_jalali }}{% else %}<span class="ud-muted">—</span>{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <!-- دکمه‌های عملیات -->
+    <div class="ud-actions">
+        <a href="{{ url_for('panel.edit_user', user_id=user.id) }}" class="ud-edit-btn">
+            <i class="fa-solid fa-pen"></i>
+            ویرایش کاربر
+        </a>
+    </div>
+
+</div>
+{% endblock %}

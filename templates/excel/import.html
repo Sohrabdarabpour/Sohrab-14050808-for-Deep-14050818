@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+
+{% block title %}
+مدیریت فایل اکسل
+{% endblock %}
+
+{% block body_class %}
+page-excel
+{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-excel" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/excel/import.css') }}">
+{% endblock %}
+
+{% block content %}
+<div id="page-excel-wrapper">
+
+    <!-- ===== عنوان صفحه ===== -->
+    <div class="xl-heading">
+        <div class="xl-heading-icon">
+            <i class="fa-solid fa-file-excel"></i>
+        </div>
+        <div class="xl-heading-text">
+            <h1>مدیریت فایل اکسل</h1>
+            <p>ورود و خروج اطلاعات اسناد با قالب استاندارد سامانه</p>
+        </div>
+    </div>
+
+    <div class="xl-actions">
+
+        <!-- ============================================
+             ۱. دریافت قالب اکسل
+             ============================================ -->
+        <div class="xl-card template">
+            <div class="xl-card-header">
+                <div class="xl-card-icon">
+                    <i class="fa-solid fa-file-arrow-down"></i>
+                </div>
+                <div>
+                    <h2 class="xl-card-title">دریافت قالب اکسل</h2>
+                    <p class="xl-card-description">قالب خالی استاندارد برای ورود اطلاعات</p>
+                </div>
+            </div>
+            <div class="xl-card-body">
+                <div class="xl-info">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <div>
+                        <strong>این فایل شامل:</strong>
+                        <ul class="xl-info-list">
+                            <li>تمام ستون‌های جدول اسناد</li>
+                            <li>عنوان‌های فارسی</li>
+                            <li>ساختار آماده برای پر کردن</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="{{ url_for('excel.export_excel') }}" class="xl-button">
+                    <i class="fa-solid fa-download"></i>
+                    دانلود قالب خالی
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================
+             ۲. خروجی اکسل داده‌ها (★ جدید)
+             ============================================ -->
+        <div class="xl-card export">
+            <div class="xl-card-header">
+                <div class="xl-card-icon">
+                    <i class="fa-solid fa-file-export"></i>
+                </div>
+                <div>
+                    <h2 class="xl-card-title">خروجی اکسل داده‌ها</h2>
+                    <p class="xl-card-description">دریافت اطلاعات موجود به صورت Excel</p>
+                </div>
+            </div>
+            <div class="xl-card-body">
+                <div class="xl-info">
+                    <i class="fa-solid fa-database"></i>
+                    <div>
+                        <strong>{{ document_count }} سند در دیتابیس</strong>
+                        <ul class="xl-info-list">
+                            <li>خروجی کامل با تمام اطلاعات</li>
+                            <li>قابل ویرایش در Excel</li>
+                            <li>مناسب برای بکاپ و گزارش‌گیری</li>
+                        </ul>
+                    </div>
+                </div>
+                <a href="{{ url_for('excel.export_data') }}" class="xl-button">
+                    <i class="fa-solid fa-file-export"></i>
+                    خروجی اکسل داده‌ها
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================
+             ۳. ورود اطلاعات اکسل
+             ============================================ -->
+        <div class="xl-card import">
+            <div class="xl-card-header">
+                <div class="xl-card-icon">
+                    <i class="fa-solid fa-file-import"></i>
+                </div>
+                <div>
+                    <h2 class="xl-card-title">ورود اطلاعات اکسل</h2>
+                    <p class="xl-card-description">فایل تکمیل‌شده را انتخاب و Import کنید</p>
+                </div>
+            </div>
+            <div class="xl-card-body">
+                <form method="POST" action="{{ url_for('excel.import_excel') }}" enctype="multipart/form-data"
+                    id="xlImportForm">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="xl-file-wrapper">
+                        <label class="xl-file-label" for="excelFile" id="xlFileLabel">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span class="xl-file-label-title">فایل Excel را اینجا رها کنید</span>
+                            <span class="xl-file-label-hint">یا کلیک کنید (xlsx, xls)</span>
+                        </label>
+
+                        <input class="xl-file-input" type="file" id="excelFile" name="file" accept=".xlsx,.xls"
+                            required>
+
+                        <div class="xl-file-selected" id="xlFileSelected">
+                            <div class="xl-file-selected-info">
+                                <div class="xl-file-selected-icon">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                </div>
+                                <div class="xl-file-selected-text">
+                                    <span class="xl-file-selected-name" id="xlFileName"></span>
+                                    <span class="xl-file-selected-size" id="xlFileSize"></span>
+                                </div>
+                            </div>
+                            <button type="button" class="xl-file-remove" id="xlFileRemove" title="حذف فایل"
+                                aria-label="حذف فایل">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="xl-import-mode" style="margin-top:14px;">
+                        <div class="xl-mode-title">
+                            <i class="fa-solid fa-database"></i>
+                            نوع ورود اطلاعات
+                        </div>
+
+                        <label class="xl-mode-option">
+                            <input type="radio" name="mode" value="append" checked>
+                            <span>
+                                <strong>افزودن</strong>
+                                <small>به رکوردهای موجود اضافه می‌شود</small>
+                            </span>
+                        </label>
+
+                        <label class="xl-mode-option">
+                            <input type="radio" name="mode" value="replace">
+                            <span>
+                                <strong>جایگزینی</strong>
+                                <small>حذف همه و درج اطلاعات جدید</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="xl-button" id="xlSubmitBtn" disabled style="margin-top:14px;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        شروع Import
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== Notice ===== -->
+    <div class="xl-notice">
+        <i class="fa-solid fa-shield-halved"></i>
+        <span>پس از انتخاب فایل، اطلاعات بر اساس قالب استاندارد سامانه خوانده و در دیتابیس ثبت می‌شوند. برای فایل‌های
+            بزرگ، عملیات ممکن است چند لحظه طول بکشد.</span>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/excel/import.js') }}"></script>{% endblock %}

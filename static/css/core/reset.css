@@ -1,0 +1,29 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background: var(--page-bg);
+    font-family: "IRANSans", "Tahoma", sans-serif;
+    color: var(--dark);
+}
+
+a {
+    text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+img {
+    max-width: 100%;
+}

@@ -1,0 +1,904 @@
+/* استایل صفحه: panel/users.html */
+
+    /* ★ گروه دکمه‌های هدر */
+    .page-users .usr-heading-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    /* ★ دکمه خروجی اکسل */
+    .page-users .usr-export-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 20px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #1d6f42 0%, #2e8b57 100%);
+        color: #fff;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .84rem);
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 3px 12px rgba(29, 111, 66, .20);
+        transition: all var(--usr-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .page-users .usr-export-btn i {
+        font-size: .9rem;
+    }
+
+    .page-users .usr-export-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(29, 111, 66, .30);
+        color: #fff;
+    }
+
+    /* ★★★ دکمه ورود از اکسل ★★★ */
+    .page-users .usr-import-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 20px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+        color: #fff;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .84rem);
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 3px 12px rgba(43, 108, 176, .20);
+        transition: all var(--usr-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .page-users .usr-import-btn i {
+        font-size: .9rem;
+    }
+
+    .page-users .usr-import-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(43, 108, 176, .30);
+        color: #fff;
+    }
+
+    .page-users .usr-import-btn:disabled {
+        opacity: .7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (max-width: 768px) {
+        .page-users .usr-heading-actions {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .page-users .usr-export-btn,
+        .page-users .usr-import-btn,
+        .page-users .usr-add-btn {
+            width: 100%;
+        }
+    }
+
+    /* ============================================
+       SCOPE: .page-users
+       ============================================ */
+    .page-users {
+        --usr-primary: #5b9bb5;
+        --usr-primary-light: #7ab5a0;
+        --usr-primary-dark: #4a7f94;
+        --usr-text-primary: #2d3e4a;
+        --usr-text-secondary: #6b7d8a;
+        --usr-text-muted: #a0aeb8;
+        --usr-border-soft: #e8eef2;
+        --usr-bg-soft: #f7fafc;
+        --usr-radius-lg: 18px;
+        --usr-radius-md: 12px;
+        --usr-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --usr-shadow-md: 0 8px 24px rgba(91, 155, 181, .12);
+        --usr-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-users .usr-wrap {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+    }
+
+    .page-users .usr-wrap *,
+    .page-users .usr-wrap *::before,
+    .page-users .usr-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       عنوان صفحه
+       ============================================ */
+    .page-users .usr-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .page-users .usr-heading-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .page-users .usr-heading-icon {
+        width: clamp(46px, 4.5vw, 54px);
+        height: clamp(46px, 4.5vw, 54px);
+        min-width: clamp(46px, 4.5vw, 54px);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e8f2f7 0%, #dceee8 100%);
+        color: var(--usr-primary);
+        font-size: clamp(1.1rem, 1.4vw, 1.3rem);
+        border: 1px solid rgba(91, 155, 181, .15);
+        flex-shrink: 0;
+    }
+
+    .page-users .usr-heading-text h1 {
+        margin: 0;
+        color: #2d3e4a;
+        font-size: clamp(1.05rem, 1.5vw, 1.3rem);
+        font-weight: 800;
+        word-break: break-word;
+    }
+
+    .page-users .usr-heading-text p {
+        margin: 4px 0 0;
+        color: var(--usr-text-secondary);
+        font-size: clamp(.72rem, .88vw, .82rem);
+    }
+
+    /* ============================================
+       دکمه افزودن کاربر
+       ============================================ */
+    .page-users .usr-add-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 20px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, #5b9bb5 0%, #7ab5a0 100%);
+        color: #fff;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .84rem);
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 3px 12px rgba(91, 155, 181, .20);
+        transition: all var(--usr-transition);
+        border: none;
+        cursor: pointer;
+    }
+
+    .page-users .usr-add-btn i {
+        font-size: .9rem;
+    }
+
+    .page-users .usr-add-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(91, 155, 181, .30);
+        color: #fff;
+    }
+
+    /* ============================================
+       کادر جستجو
+       ============================================ */
+    .page-users .usr-search-box {
+        margin-bottom: 22px;
+    }
+
+    .page-users .usr-search-wrapper {
+        display: flex;
+        align-items: center;
+        background: #fff;
+        border: 1.5px solid #eaf0f4;
+        border-radius: 14px;
+        padding: 4px 18px;
+        box-shadow: var(--usr-shadow-sm);
+        transition: all var(--usr-transition);
+    }
+
+    .page-users .usr-search-wrapper:focus-within {
+        border-color: var(--usr-primary);
+        box-shadow: 0 4px 16px rgba(91, 155, 181, .12);
+    }
+
+    .page-users .usr-search-icon {
+        color: var(--usr-text-muted);
+        margin-left: 10px;
+        font-size: 15px;
+    }
+
+    .page-users .usr-search-wrapper:focus-within .usr-search-icon {
+        color: var(--usr-primary);
+    }
+
+    .page-users .usr-search-wrapper input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        padding: 14px 0;
+        font-family: inherit;
+        font-size: 15px;
+        color: var(--usr-text-primary);
+        min-width: 0;
+    }
+
+    .page-users .usr-search-wrapper input::placeholder {
+        color: var(--usr-text-muted);
+    }
+
+    .page-users .usr-search-clear {
+        color: var(--usr-text-muted);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+        transition: all var(--usr-transition);
+        font-size: 18px;
+    }
+
+    .page-users .usr-search-clear.visible {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .page-users .usr-search-clear:hover {
+        background: #f1f5f9;
+        color: #ef4444;
+    }
+
+    .page-users .usr-search-info {
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--usr-text-secondary);
+        display: none;
+    }
+
+    .page-users .usr-search-info.visible {
+        display: block;
+    }
+
+    .page-users .usr-search-info strong {
+        color: var(--usr-primary);
+    }
+
+    /* ============================================
+       گرید
+       ============================================ */
+    .page-users .usr-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    /* ============================================
+       کارت کاربر
+       ============================================ */
+    .page-users .usr-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border: 1.5px solid #e8eef2;
+        border-radius: var(--usr-radius-lg);
+        box-shadow:
+            0 2px 12px rgba(91, 155, 181, .06),
+            inset 0 0 0 1px rgba(255, 255, 255, .8);
+        overflow: hidden;
+        transition: transform var(--usr-transition), box-shadow var(--usr-transition), border-color var(--usr-transition);
+        isolation: isolate;
+        min-width: 0;
+        cursor: pointer;
+    }
+
+    .page-users .usr-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--usr-shadow-md);
+        border-color: rgba(91, 155, 181, .25);
+    }
+
+    .page-users .usr-card:focus-visible {
+        outline: 2px solid var(--usr-primary);
+        outline-offset: 3px;
+    }
+
+    .page-users .usr-card-top {
+        position: relative;
+        padding: 20px 22px 18px;
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        border-bottom: 1px solid #eaf0f4;
+        overflow: visible;
+        z-index: 1;
+    }
+
+    .page-users .usr-card-top-content {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    /* ============================================
+       آواتار + حلقه‌ها + بج وضعیت
+       ============================================ */
+    .page-users .usr-avatar {
+        position: relative;
+        width: 62px;
+        height: 62px;
+        min-width: 62px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: #ffffff;
+        color: var(--usr-primary);
+        font-size: 1.25rem;
+        border: 2px solid #ffffff;
+        box-shadow: 0 3px 10px rgba(91, 155, 181, .15);
+        flex-shrink: 0;
+        overflow: visible;
+        transition: transform var(--usr-transition), box-shadow var(--usr-transition);
+        z-index: 2;
+    }
+
+    .page-users .usr-card:hover .usr-avatar {
+        transform: scale(1.06);
+        box-shadow: 0 6px 18px rgba(91, 155, 181, .25);
+    }
+
+    .page-users .usr-avatar img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 50%;
+        display: block;
+        z-index: 1;
+    }
+
+    .page-users .usr-avatar>i {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-users .usr-avatar .usr-avatar-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: calc(100% + 10px);
+        height: calc(100% + 10px);
+        margin-top: calc((100% + 10px) / -2);
+        margin-left: calc((100% + 10px) / -2);
+        border-radius: 50%;
+        border: 1.5px dashed var(--usr-primary);
+        opacity: 0.55;
+        animation: usrAvatarRingRotate 12s linear infinite;
+        pointer-events: none;
+        z-index: 3;
+        transition: opacity .3s ease, border-color .3s ease;
+    }
+
+    .page-users .usr-avatar .usr-avatar-ring.ring-2 {
+        width: calc(100% + 20px);
+        height: calc(100% + 20px);
+        margin-top: calc((100% + 20px) / -2);
+        margin-left: calc((100% + 20px) / -2);
+        border: 1.5px dotted var(--usr-primary-light);
+        opacity: 0.45;
+        animation: usrAvatarRingRotateReverse 18s linear infinite;
+    }
+
+    .page-users .usr-avatar .usr-status-dot {
+        position: absolute;
+        bottom: 2px;
+        left: 2px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2.5px solid #ffffff;
+        z-index: 4;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, .15);
+        transition: transform var(--usr-transition), box-shadow var(--usr-transition);
+    }
+
+    .page-users .usr-avatar .usr-status-dot.online {
+        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+        animation: usrStatusPulse 2s ease-in-out infinite;
+    }
+
+    .page-users .usr-avatar .usr-status-dot.offline {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+
+    @keyframes usrStatusPulse {
+
+        0%,
+        100% {
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, .55), 0 2px 6px rgba(0, 0, 0, .15);
+        }
+
+        50% {
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0), 0 2px 6px rgba(0, 0, 0, .15);
+        }
+    }
+
+    .page-users .usr-card:hover .usr-status-dot {
+        transform: scale(1.15);
+    }
+
+    @keyframes usrAvatarRingRotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @keyframes usrAvatarRingRotateReverse {
+        from {
+            transform: rotate(360deg);
+        }
+
+        to {
+            transform: rotate(0deg);
+        }
+    }
+
+    .page-users .usr-card:hover .usr-avatar-ring {
+        opacity: 0.85;
+        border-color: var(--usr-primary-dark);
+    }
+
+    .page-users .usr-card:hover .usr-avatar-ring.ring-2 {
+        opacity: 0.65;
+    }
+
+    .page-users .usr-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-users .usr-name {
+        display: block;
+        margin: 0;
+        color: #2d3e4a;
+        font-size: clamp(.9rem, 1vw, 1rem);
+        font-weight: 800;
+        line-height: 1.4;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .page-users .usr-username {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 5px;
+        padding: 2px 10px;
+        font-size: clamp(.68rem, .78vw, .74rem);
+        font-weight: 600;
+        background: #ffffff;
+        color: var(--usr-text-secondary);
+        border: 1px solid #e8eef2;
+        border-radius: 20px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+
+    .page-users .usr-username i {
+        color: var(--usr-primary);
+        font-size: .72rem;
+    }
+
+    /* ============================================
+       بدنه کارت (نقش + فعالیت)
+       ============================================ */
+    .page-users .usr-card-body {
+        padding: 16px 22px;
+        background: #ffffff;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-users .usr-role-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: clamp(.75rem, .85vw, .82rem);
+        width: 100%;
+    }
+
+    .page-users .usr-role-row>i {
+        color: var(--usr-text-muted);
+        font-size: .85rem;
+    }
+
+    .page-users .usr-role-row .label {
+        color: var(--usr-text-secondary);
+        font-weight: 500;
+    }
+
+    .page-users .usr-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: clamp(.68rem, .78vw, .75rem);
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+
+    .page-users .usr-role-badge i {
+        font-size: .72rem;
+    }
+
+    .page-users .usr-role-admin {
+        background: #fdf0ec;
+        color: #c05621;
+        border-color: #f8d9cc;
+    }
+
+    .page-users .usr-role-manager {
+        background: #fdf6e3;
+        color: #b7791f;
+        border-color: #f4e4b8;
+    }
+
+    .page-users .usr-role-supervisor {
+        background: #eaf4fb;
+        color: #2b6cb0;
+        border-color: #cce2f3;
+    }
+
+    .page-users .usr-role-expert {
+        background: #eaf6f1;
+        color: #276749;
+        border-color: #c8e6d8;
+    }
+
+    /* ============================================ */
+    /* ★★★ ردیف جنسیت و وضعیت ★★★ */
+    /* ============================================ */
+    .page-users .usr-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        padding-top: 10px;
+        border-top: 1px dashed #eef3f6;
+        width: 100%;
+    }
+
+    .page-users .usr-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: clamp(.72rem, .82vw, .79rem);
+        color: var(--usr-text-secondary);
+        flex-wrap: wrap;
+    }
+
+    .page-users .usr-meta-item > i {
+        color: var(--usr-text-muted);
+        font-size: .8rem;
+        width: 14px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .page-users .usr-meta-label {
+        color: var(--usr-text-secondary);
+        font-weight: 600;
+    }
+
+    /* ----- بج جنسیت ----- */
+    .page-users .usr-gender-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: clamp(.66rem, .76vw, .73rem);
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid transparent;
+        line-height: 1.4;
+    }
+
+    .page-users .usr-gender-badge i {
+        font-size: .7rem;
+    }
+
+    .page-users .usr-gender-male {
+        background: #eef4fb;
+        color: #1565c0;
+        border-color: #cce2f3;
+    }
+
+    .page-users .usr-gender-female {
+        background: #fdf0f5;
+        color: #c2185b;
+        border-color: #f8d7e5;
+    }
+
+    /* ----- بج وضعیت فعال/غیرفعال ----- */
+    .page-users .usr-active-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: clamp(.66rem, .76vw, .73rem);
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid transparent;
+        line-height: 1.4;
+    }
+
+    .page-users .usr-active-badge i {
+        font-size: .7rem;
+    }
+
+    .page-users .usr-active-yes {
+        background: #eaf6f1;
+        color: #276749;
+        border-color: #c8e6d8;
+    }
+
+    .page-users .usr-active-no {
+        background: #fdecea;
+        color: #c53030;
+        border-color: #f8d0cc;
+    }
+
+    /* ★★★ بخش آخرین ورود و آخرین فعالیت ★★★ */
+    .page-users .usr-activity-row {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px dashed #eef3f6;
+        width: 100%;
+    }
+
+    .page-users .usr-activity-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: clamp(.7rem, .8vw, .78rem);
+        color: var(--usr-text-secondary);
+        flex-wrap: wrap;
+    }
+
+    .page-users .usr-activity-item>i {
+        color: var(--usr-text-muted);
+        font-size: .78rem;
+        width: 14px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+
+    .page-users .usr-activity-label {
+        color: var(--usr-text-secondary);
+        font-weight: 600;
+    }
+
+    .page-users .usr-activity-value {
+        color: var(--usr-text-primary);
+        font-weight: 700;
+        font-size: clamp(.68rem, .78vw, .75rem);
+    }
+
+    .page-users .usr-activity-value.ltr {
+        direction: ltr;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .page-users .usr-muted {
+        color: var(--usr-text-muted);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       فوتر کارت
+       ============================================ */
+    .page-users .usr-card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        padding: 12px 22px 16px;
+        border-top: 1px solid #f0f4f7;
+        background: #fafcfd;
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-users .usr-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 32px;
+        padding: 5px 14px;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: clamp(.68rem, .78vw, .74rem);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--usr-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+        line-height: 1;
+        position: relative;
+        z-index: 3;
+    }
+
+    .page-users .usr-btn i {
+        font-size: .72rem;
+    }
+
+    .page-users .usr-btn-edit {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        color: #5b6b78;
+    }
+
+    .page-users .usr-btn-edit:hover {
+        background: #eaf4fb;
+        border-color: #cce2f3;
+        color: #2b6cb0;
+        transform: translateY(-1px);
+    }
+
+    .page-users .usr-btn-delete {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        color: #5b6b78;
+    }
+
+    .page-users .usr-btn-delete:hover {
+        background: #fdf0ec;
+        border-color: #f8d9cc;
+        color: #c05621;
+        transform: translateY(-1px);
+    }
+
+    .page-users .usr-empty {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        background: #ffffff;
+        border-radius: var(--usr-radius-lg);
+        box-shadow: var(--usr-shadow-sm);
+        border: 2px dashed var(--usr-border-soft);
+    }
+
+    .page-users .usr-empty i {
+        font-size: 3rem;
+        color: var(--usr-text-muted);
+        display: block;
+        margin-bottom: 14px;
+    }
+
+    .page-users .usr-empty p {
+        margin: 0;
+        color: var(--usr-text-secondary);
+        font-size: .95rem;
+    }
+
+    @media (max-width: 1024px) {
+        .page-users .usr-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-users .usr-heading {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-users .usr-add-btn {
+            width: 100%;
+        }
+
+        .page-users .usr-grid {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .page-users .usr-search-wrapper {
+            padding: 4px 14px;
+        }
+
+        .page-users .usr-search-wrapper input {
+            font-size: 14px;
+            padding: 12px 0;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-users .usr-wrap {
+            padding: 10px;
+        }
+
+        .page-users .usr-grid {
+            gap: 12px;
+        }
+
+        .page-users .usr-card-top {
+            padding: 16px 18px 14px;
+        }
+
+        .page-users .usr-card-body {
+            padding: 14px 18px;
+        }
+
+        .page-users .usr-card-footer {
+            padding: 10px 18px 14px;
+        }
+
+        .page-users .usr-avatar {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: 1.1rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .page-users .usr-wrap *,
+        .page-users .usr-wrap *::before,
+        .page-users .usr-wrap *::after,
+        .page-users .usr-avatar-ring,
+        .page-users .usr-status-dot {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

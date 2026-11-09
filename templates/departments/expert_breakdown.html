@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}کارهای در دست بررسی - {{ expert.full_name }}{% endblock %}
+
+{% block body_class %}page-expert-breakdown{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-breakdown" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/departments/expert_breakdown.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="bd-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="bd-header">
+        <div class="bd-header-info">
+            <div class="bd-avatar">
+                {% set ex_av = expert.avatar %}
+                {% set ex_gen = expert.gender or 'male' %}
+
+                {% if ex_av and ex_av not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                    <img src="{{ url_for('static', filename='uploads/avatar/' + ex_av) }}"
+                        alt="{{ expert.full_name }}"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                {% elif ex_gen == 'female' %}
+                    <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                        alt="{{ expert.full_name }}" />
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                        alt="{{ expert.full_name }}" />
+                {% endif %}
+            </div>
+            <div class="bd-header-text">
+                <h1>کارهای در دست بررسی {{ expert.full_name }}</h1>
+                <p>
+                    دپارتمان: {{ department['title'] }}
+                    {% if selected_year != "all" %}
+                    — سال {{ selected_year }}
+                    {% endif %}
+                    {% if selected_month != "all" %}
+                    — ماه {{ selected_month }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('departments.view_department',
+                            department_id=department['id'],
+                            year=selected_year,
+                            month=selected_month) }}"
+           class="bd-back-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            بازگشت به دپارتمان
+        </a>
+    </header>
+
+    <!-- ===== کارت کل ===== -->
+    <div class="bd-total-card">
+        <div class="bd-total-icon">
+            <i class="fa-solid fa-hourglass-half"></i>
+        </div>
+        <div class="bd-total-content">
+            <span class="bd-total-label">تعداد کارهای در دست بررسی</span>
+            <span class="bd-total-value">{{ breakdown_data.total }}</span>
+        </div>
+    </div>
+
+    {% if breakdown_data.total > 0 %}
+
+    <!-- ===== گرید نمودارها ===== -->
+    <div class="bd-charts-grid">
+
+        <!-- نمودار گروه‌ها -->
+        <div class="bd-chart-card">
+            <h2 class="bd-chart-title">
+                <i class="fa-solid fa-layer-group"></i>
+                توزیع بر اساس گروه سند
+            </h2>
+            <div class="bd-chart-wrapper">
+                <canvas id="groupChart"></canvas>
+            </div>
+        </div>
+
+        <!-- نمودار زیرگروه‌ها -->
+        <div class="bd-chart-card">
+            <h2 class="bd-chart-title">
+                <i class="fa-solid fa-sitemap"></i>
+                توزیع بر اساس زیرگروه سند
+            </h2>
+            <div class="bd-chart-wrapper">
+                <canvas id="subgroupChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ===== لیست گروه‌ها و زیرگروه‌ها ===== -->
+    <div class="bd-groups-list">
+        {% for group in breakdown_data.groups %}
+        {% if group.count > 0 %}
+        <div class="bd-group-item">
+            <div class="bd-group-header">
+                <div class="bd-group-title">
+                    <i class="fa-solid fa-folder-open"></i>
+                    {{ group.title }}
+                </div>
+                <span class="bd-group-count">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    {{ group.count }} کار در جریان
+                </span>
+            </div>
+
+            {% set has_subgroups = group.subgroups|selectattr('count', 'greaterthan', 0)|list|length > 0 %}
+            {% if has_subgroups %}
+            <div class="bd-subgroups">
+                {% for sg in group.subgroups %}
+                {% if sg.count > 0 %}
+                <span class="bd-subgroup-chip">
+                    <i class="fa-solid fa-tag"></i>
+                    {{ sg.title }}
+                    <strong>{{ sg.count }}</strong>
+                </span>
+                {% endif %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="margin:0;color:#94a3b8;font-size:.78rem;">
+                زیرگروهی برای این گروه ثبت نشده است.
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endfor %}
+
+        {% if breakdown_data.ungrouped.count > 0 %}
+        <div class="bd-group-item">
+            <div class="bd-group-header">
+                <div class="bd-group-title">
+                    <i class="fa-solid fa-folder"></i>
+                    {{ breakdown_data.ungrouped.title }}
+                </div>
+                <span class="bd-group-count">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    {{ breakdown_data.ungrouped.count }} کار در جریان
+                </span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {% else %}
+
+    <div class="bd-empty">
+        <i class="fa-solid fa-mug-hot"></i>
+        <p>هیچ کار در دست بررسی‌ای برای این کارشناس در بازه انتخاب‌شده وجود ندارد.</p>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- ★ Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<!-- ★ Chart.js DataLabels Plugin -->
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+<script src="{{ url_for('static', filename='js/pages/departments/expert_breakdown.js') }}"></script>
+<!-- ★★★ داده JSON برای نمودارها ★★★ -->
+<script type="application/json" id="breakdownDataJson">{{ breakdown_data | tojson }}</script>
+{% endblock %}

@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}نقش‌های پروژه{% endblock %}
+{% block body_class %}page-project-roles{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/project_roles/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pr-wrap">
+
+    <!-- ============================================
+         هدر صفحه
+         ============================================ -->
+    <div class="pr-header">
+        <div class="pr-header-info">
+            <div class="pr-header-icon">
+                <i class="fa-solid fa-user-tag"></i>
+            </div>
+            <div class="pr-header-text">
+                <h1 class="pr-title">نقش‌های پروژه</h1>
+                <p class="pr-subtitle">مدیریت نقش‌های تیم پروژه (مدیر، کنترل پروژه، ناظر و ...)</p>
+            </div>
+        </div>
+
+        <div class="pr-header-actions">
+            <a href="{{ url_for('project_roles.add_role') }}"
+               class="pr-btn pr-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                افزودن نقش
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================
+         لیست کارت‌ها
+         ============================================ -->
+    {% if roles %}
+    <div class="pr-grid" id="rolesGrid">
+        {% for r in roles %}
+        <article class="pr-card {% if not r.is_active %}is-inactive{% endif %}"
+                 data-pr-index="{{ loop.index0 }}"
+                 style="--pr-index: {{ loop.index0 }};
+                        --pr-color: {{ r.color or '#1b698b' }};
+                        --pr-color-light: {{ r.color or '#1b698b' }};">
+
+            <!-- ★ ستون ۱: هدر (آیکون + عنوان) -->
+            <div class="pr-card-header">
+                <div class="pr-card-title-group">
+                    <div class="pr-card-avatar">
+                        <i class="fa-solid fa-user-tag"></i>
+                    </div>
+                    <div class="pr-card-title-content">
+                        <h2 class="pr-card-name" title="{{ r.title }}">
+                            {{ r.title }}
+                        </h2>
+                        {% if r.code %}
+                        <span class="pr-card-subtitle">
+                            <i class="fa-solid fa-barcode"></i>
+                            {{ r.code }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۲: بدنه (ویژگی‌ها + توضیحات) -->
+            <div class="pr-card-body">
+                <div class="pr-card-badges">
+                    {% if r.is_exclusive %}
+                    <span class="pr-badge exclusive">
+                        <i class="fa-solid fa-user-lock"></i>
+                        انحصاری
+                    </span>
+                    {% endif %}
+                    {% if r.is_required %}
+                    <span class="pr-badge required">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        اجباری
+                    </span>
+                    {% endif %}
+                    {% if not r.is_exclusive and not r.is_required %}
+                    <span class="pr-badge optional">
+                        <i class="fa-solid fa-circle-info"></i>
+                        اختیاری
+                    </span>
+                    {% endif %}
+                </div>
+
+                {% if r.description %}
+                <p class="pr-card-description">{{ r.description }}</p>
+                {% endif %}
+            </div>
+
+            <!-- ★ ستون ۳: ساید (وضعیت + اکشن‌ها) -->
+            <div class="pr-card-side">
+
+                <div class="pr-status-card"
+                     style="--status-color: {{ '#16a34a' if r.is_active else '#dc2626' }};">
+                    <div class="pr-status-icon">
+                        <i class="fa-solid {{ 'fa-circle-check' if r.is_active else 'fa-circle-xmark' }}"></i>
+                    </div>
+                    <div class="pr-status-text">
+                        <span class="pr-status-label">وضعیت</span>
+                        <span class="pr-status-value">
+                            {{ 'فعال' if r.is_active else 'غیرفعال' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pr-actions">
+                    <a href="{{ url_for('project_roles.edit_role', role_id=r.id) }}"
+                       class="pr-action-btn edit"
+                       title="ویرایش">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('project_roles.delete_role', role_id=r.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('از حذف «{{ r.title }}» مطمئن هستید؟')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                                class="pr-action-btn delete"
+                                title="حذف">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <!-- ===== حالت خالی ===== -->
+    <div class="pr-empty">
+        <div class="pr-empty-icon">
+            <i class="fa-solid fa-user-tag"></i>
+        </div>
+        <h3>هنوز نقشی ثبت نشده است</h3>
+        <p>برای شروع، اولین نقش پروژه را اضافه کنید</p>
+        <a href="{{ url_for('project_roles.add_role') }}"
+           class="pr-btn pr-btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            افزودن اولین نقش
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/project_roles/list.js') }}"></script>{% endblock %}

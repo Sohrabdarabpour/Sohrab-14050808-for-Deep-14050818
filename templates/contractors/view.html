@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+{% block title %}{{ contractor.name }}{% endblock %}
+{% block body_class %}page-contractor-view{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contractors/view.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="cv-wrap">
+    <div class="cv-card" id="contractorCard">
+
+        <!-- ============================================
+             ★ هدر (آواتار + نام + کد + وضعیت + اکشن‌ها)
+             ============================================ -->
+        <div class="cv-header">
+            <div class="cv-avatar">
+                {{ contractor.name[0] if contractor.name else '?' }}
+            </div>
+
+            <div class="cv-title-group">
+                <h1 class="cv-name">{{ contractor.name }}</h1>
+                <div class="cv-meta">
+                    {% if contractor.code %}
+                    <span class="cv-code-badge">
+                        <i class="fa-solid fa-barcode"></i>
+                        {{ contractor.code }}
+                    </span>
+                    {% endif %}
+
+                    <span class="cv-status {{ 'active' if contractor.is_active else 'inactive' }}">
+                        <i class="fa-solid fa-circle"></i>
+                        {{ 'فعال' if contractor.is_active else 'غیرفعال' }}
+                    </span>
+
+                    {% if contractor.grade %}
+                    <span class="cv-code-badge" style="direction:rtl;">
+                        <i class="fa-solid fa-ranking-star"></i>
+                        رتبه {{ contractor.grade }}
+                    </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="cv-header-actions">
+                <a href="{{ url_for('contractors.edit_contractor', contractor_id=contractor.id) }}"
+                   class="cv-btn cv-btn-edit">
+                    <i class="fa-solid fa-pen"></i>
+                    ویرایش
+                </a>
+                <form method="POST"
+                      action="{{ url_for('contractors.delete_contractor', contractor_id=contractor.id) }}"
+                      style="display:inline"
+                      onsubmit="return confirm('از حذف «{{ contractor.name }}» مطمئن هستید؟')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="cv-btn cv-btn-delete">
+                        <i class="fa-solid fa-trash"></i>
+                        حذف
+                    </button>
+                </form>
+                <a href="{{ url_for('contractors.list_contractors') }}"
+                   class="cv-btn cv-btn-back">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت
+                </a>
+            </div>
+        </div>
+
+        <!-- ============================================
+             ★ بدنه (بخش‌های اطلاعات)
+             ============================================ -->
+        <div class="cv-body">
+
+            <!-- ============ اطلاعات هویتی ============ -->
+            <section class="cv-section">
+                <div class="cv-section-header">
+                    <div class="cv-section-icon">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <h2 class="cv-section-title">اطلاعات هویتی</h2>
+                </div>
+
+                <div class="cv-info-grid">
+                    {% if contractor.name %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">نام پیمانکار</span>
+                            <span class="cv-info-value">{{ contractor.name }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.code %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-barcode"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">کد پیمانکار</span>
+                            <span class="cv-info-value ltr">{{ contractor.code }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.national_id %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-fingerprint"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">کد ملی / شناسه ملی</span>
+                            <span class="cv-info-value ltr">{{ contractor.national_id }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.economic_code %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-hashtag"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">کد اقتصادی</span>
+                            <span class="cv-info-value ltr">{{ contractor.economic_code }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.registration_number %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-file-signature"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">شماره ثبت</span>
+                            <span class="cv-info-value ltr">{{ contractor.registration_number }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.manager_name %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">مدیرعامل</span>
+                            <span class="cv-info-value">{{ contractor.manager_name }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.grade %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-ranking-star"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">رتبه / گرید</span>
+                            <span class="cv-info-value">{{ contractor.grade }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.contract_type %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-file-contract"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">نوع قرارداد</span>
+                            <span class="cv-info-value">{{ contractor.contract_type }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ============ اطلاعات تماس ============ -->
+            {% if contractor.phone or contractor.mobile or contractor.email %}
+            <section class="cv-section">
+                <div class="cv-section-header">
+                    <div class="cv-section-icon">
+                        <i class="fa-solid fa-address-book"></i>
+                    </div>
+                    <h2 class="cv-section-title">اطلاعات تماس</h2>
+                </div>
+
+                <div class="cv-info-grid">
+                    {% if contractor.phone %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">تلفن ثابت</span>
+                            <span class="cv-info-value ltr">{{ contractor.phone }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.mobile %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-mobile-screen"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">موبایل</span>
+                            <span class="cv-info-value ltr">{{ contractor.mobile }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.email %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">ایمیل</span>
+                            <span class="cv-info-value ltr">{{ contractor.email }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- ============ اطلاعات مکانی ============ -->
+            {% if contractor.province or contractor.city or contractor.address or contractor.postal_code %}
+            <section class="cv-section">
+                <div class="cv-section-header">
+                    <div class="cv-section-icon">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h2 class="cv-section-title">اطلاعات مکانی</h2>
+                </div>
+
+                <div class="cv-info-grid">
+                    {% if contractor.province %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-map"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">استان</span>
+                            <span class="cv-info-value">{{ contractor.province }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.city %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-city"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">شهر</span>
+                            <span class="cv-info-value">{{ contractor.city }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.postal_code %}
+                    <div class="cv-info-item">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-mail-bulk"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">کد پستی</span>
+                            <span class="cv-info-value ltr">{{ contractor.postal_code }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.address %}
+                    <div class="cv-info-item full">
+                        <div class="cv-info-icon">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div class="cv-info-content">
+                            <span class="cv-info-label">آدرس کامل</span>
+                            <span class="cv-info-value">{{ contractor.address }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+            {% endif %}
+
+            <!-- ============ وضعیت و زمان‌ها ============ -->
+            <section class="cv-section">
+                <div class="cv-section-header">
+                    <div class="cv-section-icon">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </div>
+                    <h2 class="cv-section-title">وضعیت و زمان‌ها</h2>
+                </div>
+
+                <div class="cv-status-card">
+                    <div class="cv-status-item" style="--status-color: {{ '#16a34a' if contractor.is_active else '#dc2626' }};">
+                        <div class="cv-status-icon">
+                            <i class="fa-solid {{ 'fa-circle-check' if contractor.is_active else 'fa-circle-xmark' }}"></i>
+                        </div>
+                        <span class="cv-status-label">وضعیت حساب</span>
+                        <span class="cv-status-value">
+                            {{ 'فعال' if contractor.is_active else 'غیرفعال' }}
+                        </span>
+                    </div>
+
+                    {% if contractor.created_at %}
+                    <div class="cv-status-item" style="--status-color: #1b698b;">
+                        <div class="cv-status-icon">
+                            <i class="fa-solid fa-calendar-plus"></i>
+                        </div>
+                        <span class="cv-status-label">تاریخ ایجاد</span>
+                        <span class="cv-status-value" style="font-size:.9rem;">
+                            {{ contractor.created_at | jalali_datetime }}
+                        </span>
+                    </div>
+                    {% endif %}
+
+                    {% if contractor.updated_at %}
+                    <div class="cv-status-item" style="--status-color: #d69e2e;">
+                        <div class="cv-status-icon">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                        <span class="cv-status-label">آخرین به‌روزرسانی</span>
+                        <span class="cv-status-value" style="font-size:.9rem;">
+                            {{ contractor.updated_at | jalali_datetime }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <!-- ============ توضیحات ============ -->
+            {% if contractor.description %}
+            <section class="cv-section">
+                <div class="cv-section-header">
+                    <div class="cv-section-icon">
+                        <i class="fa-solid fa-comment-dots"></i>
+                    </div>
+                    <h2 class="cv-section-title">توضیحات</h2>
+                </div>
+
+                <div class="cv-description-box">
+                    {{ contractor.description }}
+                </div>
+            </section>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    (function () {
+        'use strict';
+
+        // ============================================
+        // پالت ۱۰ رنگی هماهنگ
+        // ============================================
+        const CONTRACTOR_COLORS = [
+            {base: '#1b698b', light: '#3d8bb5'},
+            {base: '#167a5c', light: '#2aa07a'},
+            {base: '#d69e2e', light: '#e8b94a'},
+            {base: '#c05621', light: '#dd7a3d'},
+            {base: '#4a5568', light: '#6b7a8f'},
+            {base: '#2b6cb0', light: '#3d8ad4'},
+            {base: '#319795', light: '#4fc3c0'},
+            {base: '#805ad5', light: '#9f7ae8'},
+            {base: '#718096', light: '#8fa0b5'},
+            {base: '#2f855a', light: '#4aa876'}
+        ];
+
+        // ============================================
+        // انتخاب رنگ بر اساس id پیمانکار (پایدار)
+        // ============================================
+        function applyContractorColor() {
+            const card = document.getElementById('contractorCard');
+            if (!card) return;
+
+            const contractorId = {{ contractor.id or 0 }};
+            const colorIndex = contractorId % CONTRACTOR_COLORS.length;
+            const color = CONTRACTOR_COLORS[colorIndex];
+
+            card.style.setProperty('--cv-color', color.base);
+            card.style.setProperty('--cv-color-light', color.light);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyContractorColor);
+        } else {
+            applyContractorColor();
+        }
+    })();
+</script>
+{% endblock %}

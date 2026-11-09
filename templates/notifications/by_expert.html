@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}یادداشت‌های کارشناسان{% endblock %}
+{% block body_class %}page-expert-cards{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/notifications/by_expert.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ec-wrap">
+
+    <!-- ===== هدر ===== -->
+    <div class="ec-header">
+        <div class="ec-header-info">
+            <div class="ec-header-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="ec-header-text">
+                <h1>یادداشت‌های کارشناسان</h1>
+                <p>
+                    {{ experts|length }} کارشناس دارای فعالیت
+                    {% if total_unread is defined and total_unread > 0 %}
+                    — {{ total_unread }} نخوانده
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="ec-header-actions">
+            <a href="{{ url_for('notifications.list_notifications') }}"
+               class="ec-btn ec-btn-outline">
+                <i class="fa-solid fa-bell"></i>
+                همه نوتیف‌ها
+            </a>
+            <a href="{{ url_for('workflow.my_notes') }}"
+               class="ec-btn ec-btn-mine">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                سوابق یادداشت‌های من
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== گرید کارت‌ها ===== -->
+    <div class="ec-grid">
+        {% if experts %}
+            {% for e in experts %}
+            <a href="{{ url_for('notifications.expert_notifications', expert_id=e.expert.id) }}"
+               class="ec-card {% if e.unread > 0 %}has-unread{% endif %}">
+
+                <div class="ec-card-top">
+                    {% if e.expert.avatar %}
+                    <img src="{{ url_for('static', filename='uploads/avatar/' ~ e.expert.avatar) }}"
+                         alt="{{ e.expert.full_name }}"
+                         class="ec-avatar"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                    <div class="ec-avatar-placeholder" style="display:none;">
+                        {{ e.expert.full_name[0] if e.expert.full_name else '؟' }}
+                    </div>
+                    {% else %}
+                    <div class="ec-avatar-placeholder">
+                        {{ e.expert.full_name[0] if e.expert.full_name else '؟' }}
+                    </div>
+                    {% endif %}
+
+                    <div class="ec-info">
+                        <div class="ec-name">{{ e.expert.full_name }}</div>
+                        <div class="ec-username">@{{ e.expert.username }}</div>
+                    </div>
+
+                    {% if e.unread > 0 %}
+                    <div class="ec-badge">{{ e.unread }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- ★ آمار -->
+                <div class="ec-stats">
+                    <span class="ec-stat">
+                        <i class="fa-solid fa-bell"></i>
+                        {{ e.total }} نوتیف
+                    </span>
+
+                    {% if e.unread > 0 %}
+                    <span class="ec-stat unread">
+                        <i class="fa-solid fa-envelope"></i>
+                        {{ e.unread }} نخوانده
+                    </span>
+                    {% endif %}
+
+                    {% if e.types.get('success') %}
+                    <span class="ec-stat">
+                        <i class="fa-solid fa-check" style="color:#16a34a;"></i>
+                        {{ e.types.success }} تایید
+                    </span>
+                    {% endif %}
+
+                    {% if e.types.get('danger') %}
+                    <span class="ec-stat">
+                        <i class="fa-solid fa-xmark" style="color:#dc2626;"></i>
+                        {{ e.types.danger }} رد
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- ★ آخرین فعالیت -->
+                {% if e.latest_title %}
+                <div class="ec-latest">
+                    <div class="ec-latest-title">{{ e.latest_title }}</div>
+                    <div class="ec-latest-time">
+                        <i class="fa-regular fa-clock"></i>
+                        {{ e.latest_at }}
+                    </div>
+                </div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        {% else %}
+            <div class="ec-empty">
+                <i class="fa-solid fa-users-slash"></i>
+                <h3>هیچ کارشناسی فعالیتی ندارد</h3>
+                <p>وقتی روی یادداشت‌ها فعالیتی انجام بشه، اینجا نمایش داده می‌شه.</p>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

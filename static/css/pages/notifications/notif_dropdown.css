@@ -1,0 +1,497 @@
+/* استایل صفحه: notifications/notif_dropdown.html */
+
+    /* ============================================
+       ★★★ دکمه زنگ (در هدر)
+       ============================================ */
+    .app-header .nfd-wrapper {
+        position: relative;
+        display: inline-block;
+        flex-shrink: 0;
+        z-index: 10;
+    }
+
+    .app-header .nfd-bell {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+        font-size: 1.15rem;
+        cursor: pointer;
+        transition: all .3s;
+        flex-shrink: 0;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        padding: 0;
+        margin: 0;
+        outline: none;
+    }
+
+    .app-header .nfd-bell:hover {
+        background: rgba(255, 255, 255, 0.30);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .app-header .nfd-bell i {
+        color: #ffffff;
+        font-size: 1.15rem;
+        line-height: 1;
+    }
+
+    .app-header .nfd-badge {
+        position: absolute;
+        top: -6px;
+        left: -6px;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 6px;
+        border-radius: 10px;
+        background: #dc2626;
+        color: #fff;
+        font-size: .68rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(220, 38, 38, .4);
+        z-index: 2;
+    }
+
+    /* ============================================
+       ★★★ Backdrop (فقط موبایل)
+       ============================================ */
+    .nfd-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(3px);
+        -webkit-backdrop-filter: blur(3px);
+        z-index: 99998;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    .nfd-backdrop.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    /* ============================================
+       ★★★ پنل — دسکتاپ
+       ============================================ */
+    .nfd-panel {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        width: 440px;
+        max-width: calc(100vw - 40px);
+        background: #fff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 18px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
+        z-index: 99999;
+        display: none;
+        overflow: hidden;
+        direction: rtl;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    .nfd-panel.show {
+        display: block;
+        animation: nfdEnter .25s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    @keyframes nfdEnter {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .nfd-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #f0f7fa, #eaf5f0);
+        border-bottom: 1.5px solid #e2e8f0;
+        font-size: .95rem;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .nfd-head span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .nfd-head span i {
+        color: #1b698b;
+        font-size: 1.05rem;
+    }
+
+    .nfd-head-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 11px;
+        background: #dc2626;
+        color: #fff;
+        font-size: .7rem;
+        font-weight: 800;
+    }
+
+    .nfd-head-count:empty {
+        display: none;
+    }
+
+    .nfd-close {
+        display: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: none;
+        background: rgba(0, 0, 0, 0.06);
+        color: #64748b;
+        cursor: pointer;
+        font-size: .9rem;
+        align-items: center;
+        justify-content: center;
+        transition: all .2s;
+    }
+
+    .nfd-close:hover {
+        background: #dc2626;
+        color: #fff;
+    }
+
+    .nfd-list {
+        max-height: 60vh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .nfd-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .nfd-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
+    }
+
+    .nfd-empty {
+        padding: 50px 24px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .9rem;
+    }
+
+    .nfd-empty i {
+        display: block;
+        font-size: 2rem;
+        margin-bottom: 12px;
+        opacity: .5;
+    }
+
+    /* ============================================
+       ★★★ آیتم نوتیف
+       ============================================ */
+    .nfd-item {
+        display: flex;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #f1f5f9;
+        color: inherit;
+        transition: background .2s;
+        position: relative;
+    }
+
+    .nfd-item:last-child {
+        border-bottom: none;
+    }
+
+    .nfd-item:hover {
+        background: #f8fafc;
+    }
+
+    .nfd-item-link {
+        display: flex;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .nfd-item.unread {
+        background: #f0f9ff;
+        border-right: 3px solid #1b698b;
+        padding-right: 15px;
+    }
+
+    .nfd-item-icon {
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--ic, #1b698b) 12%, #fff);
+        color: var(--ic, #1b698b);
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .nfd-item-body {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .nfd-item-title {
+        font-size: .88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        line-height: 1.4;
+    }
+
+    .nfd-item-msg {
+        font-size: .78rem;
+        color: #64748b;
+        line-height: 1.6;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 5px;
+    }
+
+    .nfd-item-time {
+        font-size: .68rem;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* ============================================
+       ★★★ دکمه‌های عملیات
+       ============================================ */
+    .nfd-item-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-shrink: 0;
+        align-self: center;
+    }
+
+    .nfd-act-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 9px;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+        color: #64748b;
+        cursor: pointer;
+        font-size: .82rem;
+        transition: all .2s;
+        padding: 0;
+        outline: none;
+    }
+
+    .nfd-act-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(15, 23, 42, .08);
+    }
+
+    .nfd-act-btn.read:hover {
+        background: #16a34a;
+        border-color: #16a34a;
+        color: #fff;
+    }
+
+    .nfd-act-btn.dismiss:hover {
+        background: #dc2626;
+        border-color: #dc2626;
+        color: #fff;
+    }
+
+    .nfd-act-btn.loading {
+        opacity: .5;
+        pointer-events: none;
+    }
+
+    /* ============================================
+       ★★★ انیمیشن حذف آیتم
+       ============================================ */
+    .nfd-item.removing {
+        animation: nfdRemove .3s ease forwards;
+        overflow: hidden;
+    }
+
+    @keyframes nfdRemove {
+        from {
+            opacity: 1;
+            max-height: 200px;
+            padding-top: 14px;
+            padding-bottom: 14px;
+        }
+        to {
+            opacity: 0;
+            max-height: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+            border-bottom-width: 0;
+        }
+    }
+
+    .nfd-footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px;
+        background: #f8fafc;
+        color: #1b698b;
+        font-size: .85rem;
+        font-weight: 700;
+        text-decoration: none;
+        border-top: 1.5px solid #e2e8f0;
+        transition: background .3s;
+    }
+
+    .nfd-footer:hover {
+        background: #eff8fb;
+    }
+
+    /* ============================================
+       ★★★★★★ موبایل: Modal وسط صفحه ★★★★★★
+       ============================================ */
+    @media (max-width: 768px) {
+        .nfd-panel {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: translate(-50%, -50%) !important;
+            width: calc(100vw - 32px) !important;
+            max-width: 480px !important;
+            max-height: 80vh !important;
+            border-radius: 18px !important;
+            margin: 0 !important;
+        }
+
+        .nfd-panel.show {
+            display: flex !important;
+            flex-direction: column !important;
+            animation: nfdCenterIn .3s cubic-bezier(.25, .46, .45, .94) !important;
+        }
+
+        @keyframes nfdCenterIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .nfd-close {
+            display: inline-flex;
+        }
+
+        .nfd-list {
+            flex: 1;
+            max-height: none;
+            overflow-y: auto;
+        }
+
+        .nfd-head {
+            padding: 14px 18px;
+            font-size: .92rem;
+            flex-shrink: 0;
+            border-radius: 18px 18px 0 0;
+        }
+
+        .nfd-item {
+            padding: 12px 14px;
+            gap: 10px;
+        }
+
+        .nfd-item.unread {
+            padding-right: 11px;
+        }
+
+        .nfd-item-icon {
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            font-size: .9rem;
+            border-radius: 10px;
+        }
+
+        .nfd-item-title { font-size: .84rem; }
+        .nfd-item-msg { font-size: .74rem; }
+        .nfd-item-time { font-size: .64rem; }
+
+        .nfd-act-btn {
+            width: 32px;
+            height: 32px;
+            font-size: .78rem;
+        }
+
+        .nfd-footer {
+            padding: 12px;
+            font-size: .8rem;
+            flex-shrink: 0;
+            border-radius: 0 0 18px 18px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .nfd-panel {
+            width: calc(100vw - 24px) !important;
+            max-height: 85vh !important;
+            border-radius: 16px !important;
+        }
+
+        .nfd-head {
+            padding: 12px 16px;
+            font-size: .88rem;
+        }
+
+        .nfd-item {
+            padding: 10px 12px;
+        }
+
+        .nfd-item-icon {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
+            font-size: .82rem;
+        }
+
+        .nfd-item-title { font-size: .8rem; }
+        .nfd-item-msg { font-size: .72rem; }
+    }

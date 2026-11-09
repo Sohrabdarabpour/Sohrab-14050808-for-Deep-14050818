@@ -1,0 +1,437 @@
+{% extends "base.html" %}
+
+{% block title %}جستجوی پیشرفته{% endblock %}
+{% block body_class %}page-search{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/search/search2.css') }}">
+{% endblock %}
+
+
+{% block content %}
+<div class="search-container">
+
+    <!-- هدر -->
+    <div class="search-header">
+        <div class="search-header-icon">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+        </div>
+        <div class="search-header-content">
+            <h1>جستجوی پیشرفته اسناد</h1>
+        </div>
+    </div>
+
+    <!-- نوار جستجو -->
+    <div class="search-bar-row">
+        <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="searchQuery"
+                placeholder="عبارت جستجو را وارد کنید... (موضوع، کد DFC، شماره اتوماسیون، پیمانکار و ...)"
+                autocomplete="off" autofocus aria-label="عبارت جستجو">
+            <span class="input-spinner" id="inputSpinner"></span>
+            <button type="button" class="clear-input-btn" id="clearInputBtn" aria-label="پاک کردن">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="suggestions-box" id="suggestionsBox" role="listbox"></div>
+        </div>
+        <button type="button" class="btn-search-submit" id="btnSearch" aria-label="جستجو">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <span>جستجو</span>
+        </button>
+    </div>
+
+    <!-- نشانگر اعمال فیلترها -->
+    <div class="search-filter-hint" id="searchFilterHint">
+        <i class="fa-solid fa-filter-circle-dollar"></i>
+        <span>جستجو در محدوده <strong id="activeFilterCountHint">0</strong> فیلتر فعال</span>
+    </div>
+
+    <!-- چیپ‌های فیلتر فعال -->
+    <div class="active-filters-chips" id="activeFiltersChips">
+        <span class="chips-label">
+            <i class="fa-solid fa-filter"></i>
+            فیلترهای فعال:
+        </span>
+        <div id="chipsContainer" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;"></div>
+        <button type="button" class="chip-clear-all" id="chipClearAll">
+            <i class="fa-solid fa-trash-can"></i>
+            پاک کردن همه
+        </button>
+    </div>
+
+    <!-- دکمه تاگل فیلترها -->
+    <button type="button" class="filters-toggle" id="filtersToggle" aria-expanded="false">
+        <i class="fa-solid fa-sliders"></i>
+        فیلترهای پیشرفته
+        <span class="filters-badge" id="filtersBadge"></span>
+        <i class="fa-solid fa-chevron-down"></i>
+    </button>
+
+<!-- پنل فیلترهای پیشرفته -->
+<div class="filters-panel" id="filtersPanel">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         گروه ۱: مکان‌یابی و پروژه
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="filter-group">
+        <div class="filter-group-header">
+            <div class="filter-group-icon">
+                <i class="fa-solid fa-location-dot"></i>
+            </div>
+            <div class="filter-group-title">
+                <h3>مکان‌یابی و پروژه</h3>
+                <span>فیلتر بر اساس پیمانکار، پروژه و ناحیه</span>
+            </div>
+        </div>
+        <div class="filter-group-body">
+            <div class="filter-field">
+                <label for="filterContractor"><i class="fa-solid fa-helmet-safety"></i> پیمانکار</label>
+                <select id="filterContractor">
+                    <option value="">همه پیمانکاران</option>
+                    {% for c in contractors %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterProject"><i class="fa-solid fa-folder-tree"></i> پروژه</label>
+                <select id="filterProject">
+                    <option value="">همه پروژه‌ها</option>
+                    {% for p in projects %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterArea"><i class="fa-solid fa-map-location-dot"></i> ناحیه</label>
+                <select id="filterArea">
+                    <option value="">همه نواحی</option>
+                    {% for a in areas %}
+                    <option value="{{ a.id }}">{{ a.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         گروه ۲: ساختار سازمانی
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="filter-group">
+        <div class="filter-group-header">
+            <div class="filter-group-icon">
+                <i class="fa-solid fa-sitemap"></i>
+            </div>
+            <div class="filter-group-title">
+                <h3>ساختار سازمانی</h3>
+                <span>دپارتمان، گروه سند و زیرگروه</span>
+            </div>
+        </div>
+        <div class="filter-group-body">
+            <div class="filter-field">
+                <label for="filterDepartment"><i class="fa-solid fa-sitemap"></i> دپارتمان</label>
+                <select id="filterDepartment">
+                    <option value="">همه دپارتمان‌ها</option>
+                    {% for d in departments %}
+                    <option value="{{ d.id }}">{{ d.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterGroup"><i class="fa-solid fa-layer-group"></i> گروه سند</label>
+                <select id="filterGroup">
+                    <option value="">همه گروه‌ها</option>
+                    {% for g in groups %}
+                    <option value="{{ g.id }}">{{ g.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterSubgroup">
+                    <i class="fa-solid fa-diagram-project"></i> زیرگروه
+                    <span class="field-hint">(وابسته به گروه)</span>
+                </label>
+                <select id="filterSubgroup">
+                    <option value="">همه زیرگروه‌ها</option>
+                    {% for sg in subgroups %}
+                    <option value="{{ sg.id }}">{{ sg.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         گروه ۳: وضعیت و کاربر
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="filter-group">
+        <div class="filter-group-header">
+            <div class="filter-group-icon">
+                <i class="fa-solid fa-circle-dot"></i>
+            </div>
+            <div class="filter-group-title">
+                <h3>وضعیت</h3>
+                <span>وضعیت سند</span>
+            </div>
+        </div>
+        <div class="filter-group-body">
+            <div class="filter-field">
+                <label for="filterStatus"><i class="fa-solid fa-circle-dot"></i> وضعیت سند</label>
+                <select id="filterStatus">
+                    <option value="">همه وضعیت‌ها</option>
+                    {% for s in statuses %}
+                    <option value="{{ s.code }}">{{ s.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- <div class="filter-field">
+                <label for="filterUser"><i class="fa-solid fa-user"></i> کاربر ثبت‌کننده</label>
+                <select id="filterUser">
+                    <option value="">همه کاربران</option>
+                    {% for u in users %}
+                    <option value="{{ u.id }}">{{ u.full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div> -->
+
+            <div class="filter-field">
+                <label for="filterSortBy"><i class="fa-solid fa-sort"></i> مرتب‌سازی</label>
+                <select id="filterSortBy">
+                    <option value="id">جدیدترین</option>
+                    <option value="date_letter">تاریخ نامه</option>
+                    <option value="deadline">مهلت پاسخ</option>
+                    <option value="subject">موضوع</option>
+                    <option value="contractor">پیمانکار</option>
+                    <option value="project">پروژه</option>
+                    <option value="status">وضعیت</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         گروه ۴: بازه زمانی
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="filter-group">
+        <div class="filter-group-header">
+            <div class="filter-group-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </div>
+            <div class="filter-group-title">
+                <h3>بازه زمانی</h3>
+                <span>فیلتر بر اساس تاریخ (جلالی)</span>
+            </div>
+        </div>
+        <div class="filter-group-body filter-group-body-dates">
+            <div class="filter-field">
+                <label for="filterDateColumn">
+                    <i class="fa-solid fa-calendar-check"></i> نوع تاریخ
+                </label>
+                <select id="filterDateColumn">
+                    <option value="date_letter">تاریخ نامه</option>
+                    <option value="date_received">تاریخ دریافت</option>
+                    <option value="date_referral">تاریخ ارجاع</option>
+                    <option value="deadline">مهلت پاسخ</option>
+                    <option value="response_announce_date">تاریخ اعلام پاسخ</option>
+                    <option value="final_send_date">تاریخ ارسال نهایی</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterDateFrom">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    از <span id="dateFromLabel">تاریخ نامه</span>
+                </label>
+                <div class="date-input-wrap">
+                    <input type="text" id="filterDateFrom" placeholder="1403/01/01" dir="ltr">
+                    <i class="fa-solid fa-calendar-days date-icon"></i>
+                </div>
+            </div>
+
+            <div class="filter-field">
+                <label for="filterDateTo">
+                    <i class="fa-solid fa-calendar-minus"></i>
+                    تا <span id="dateToLabel">تاریخ نامه</span>
+                </label>
+                <div class="date-input-wrap">
+                    <input type="text" id="filterDateTo" placeholder="1403/12/29" dir="ltr">
+                    <i class="fa-solid fa-calendar-days date-icon"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         گروه ۵: جستجوی موضوعی (تمام عرض)
+         ═══════════════════════════════════════════════════════════ -->
+    <!-- ★ گروه ۵: جستجوی موضوعی -->
+    <div class="filter-group filter-group-wide">
+        <div class="filter-group-header">
+            <div class="filter-group-icon">
+                <i class="fa-solid fa-key"></i>
+            </div>
+            <div class="filter-group-title">
+                <h3>جستجوی موضوعی</h3>
+                <span>کلیدواژه‌ها در موضوع جستجو می‌شوند</span>
+            </div>
+        </div>
+        <div class="filter-group-body">
+            <div class="filter-field full-width">
+                <label for="filterSubjectKeywords">
+                    <i class="fa-solid fa-key"></i>
+                    کلیدواژه در موضوع
+                    <span class="field-hint">(با + جدا کنید)</span>
+                </label>
+                <div class="subject-keywords-wrapper">
+                    <div class="subject-keywords-input">
+                        <input type="text" id="filterSubjectKeywords"
+                            placeholder="مثال: قرارداد + تمدید + مهلت" autocomplete="off">
+                        <i class="fa-solid fa-key kw-icon"></i>
+                    </div>
+
+                    <!-- ★ Toggle AND / OR -->
+                    <div class="keywords-mode-toggle" id="keywordsModeToggle">
+                        <button type="button"
+                                class="kw-mode-btn active"
+                                data-mode="OR"
+                                title="حداقل یکی از کلیدواژه‌ها موجود باشد">
+                            <i class="fa-solid fa-code-branch"></i>
+                            <span>OR</span>
+                        </button>
+                        <button type="button"
+                                class="kw-mode-btn"
+                                data-mode="AND"
+                                title="همه کلیدواژه‌ها باید موجود باشند">
+                            <i class="fa-solid fa-code-merge"></i>
+                            <span>AND</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- راهنما — داینامیک -->
+                <span class="keywords-mode-hint" id="keywordsModeHint">
+                    نمایش اسنادی که <strong>حداقل یکی</strong> از کلیدواژه‌ها در موضوع دارند
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         اکشن‌های فیلتر
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="filter-actions">
+        <button type="button" class="btn-apply-filters" id="btnApplyFilters">
+            <i class="fa-solid fa-circle-check"></i>
+            اعمال فیلتر
+        </button>
+        <button type="button" class="btn-secondary" id="btnResetFilters">
+            <i class="fa-solid fa-rotate-left"></i>
+            پاک کردن فیلترها
+        </button>
+        <button type="button" class="btn-primary-outline btn-export" id="btnExport">
+            <i class="fa-solid fa-file-excel"></i>
+            خروجی اکسل
+        </button>
+    </div>
+</div>
+</div>
+
+<!-- نتایج -->
+<div class="results-section" id="resultsSection">
+
+    <div class="results-initial" id="resultsInitial">
+        <div class="results-initial-icon">
+            <i class="fa-solid fa-magnifying-glass-chart"></i>
+        </div>
+        <h3>آماده برای جستجو</h3>
+        <p>عبارت مورد نظر خود را در نوار بالا وارد کنید و Enter بزنید</p>
+    </div>
+
+    <div class="results-loader" id="resultsLoader" style="display:none;">
+        <div id="skeletonContainer"></div>
+    </div>
+
+    <div class="results-header" id="resultsHeader" style="display:none;">
+        <div class="results-header-info">
+            <span>نتایج:</span>
+            <span class="count-badge"><strong id="resultsCount">0</strong> سند</span>
+            <span id="resultsQueryLabel" style="color:#94a3b8;"></span>
+        </div>
+        <div class="results-header-actions">
+            <div class="quick-sort" id="quickSortWrapper">
+                <button type="button" class="quick-sort-trigger" id="quickSortTrigger" aria-haspopup="listbox"
+                    aria-expanded="false">
+                    <i class="fa-solid fa-arrow-down-wide-short"></i>
+                    <span class="quick-sort-label" id="quickSortLabel">جدیدترین</span>
+                    <i class="fa-solid fa-chevron-down quick-sort-arrow"></i>
+                </button>
+                <div class="quick-sort-menu" id="quickSortMenu" role="listbox">
+                    <button type="button" class="quick-sort-option selected" data-value="id" role="option">
+                        <i class="fa-solid fa-check"></i><span>جدیدترین</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="date_letter" role="option">
+                        <i class="fa-solid fa-check"></i><span>تاریخ نامه</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="deadline" role="option">
+                        <i class="fa-solid fa-check"></i><span>مهلت پاسخ</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="subject" role="option">
+                        <i class="fa-solid fa-check"></i><span>موضوع</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="contractor" role="option">
+                        <i class="fa-solid fa-check"></i><span>پیمانکار</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="project" role="option">
+                        <i class="fa-solid fa-check"></i><span>پروژه</span>
+                    </button>
+                    <button type="button" class="quick-sort-option" data-value="status" role="option">
+                        <i class="fa-solid fa-check"></i><span>وضعیت</span>
+                    </button>
+                </div>
+            </div>
+            <button type="button" class="btn-secondary" id="btnNewSearch">
+                <i class="fa-solid fa-xmark"></i> جستجوی جدید
+            </button>
+        </div>
+    </div>
+
+    <div class="document-grid" id="resultsGrid"></div>
+
+    <div class="results-empty" id="resultsEmpty" style="display:none;">
+        <div class="results-empty-icon">
+            <i class="fa-solid fa-file-circle-xmark"></i>
+        </div>
+        <h3>نتیجه‌ای یافت نشد</h3>
+        <p id="emptyMessage">لطفاً عبارت جستجو یا فیلترها را تغییر دهید</p>
+        <div class="empty-suggestions" id="emptySuggestions"></div>
+    </div>
+
+    <div class="results-pagination" id="resultsPagination" style="display:none;">
+        <button type="button" class="btn-load-more" id="btnLoadMore">
+            <i class="fa-solid fa-arrow-down"></i>
+            نمایش بیشتر
+        </button>
+        <span class="load-more-info" id="loadMoreInfo"></span>
+    </div>
+</div>
+
+<button type="button" class="scroll-top-btn" id="scrollTopBtn" aria-label="بازگشت به بالا">
+    <i class="fa-solid fa-arrow-up"></i>
+</button>
+
+<script id="url-templates" type="application/json">
+{
+    "documentView": "{{ url_for('documents.view_document', doc_id=0) }}"
+}
+</script>
+{% endblock %}
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/search/search2.js') }}"></script>{% endblock %}

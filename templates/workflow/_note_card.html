@@ -1,0 +1,99 @@
+{#
+    کارت یادداشت — برای نمایش در لیست‌ها
+    متغیرها:
+        note (دیکشنری یادداشت)
+        show_status (اختیاری، پیش‌فرض True)
+#}
+
+{% set show_status = show_status|default(True) %}
+
+<a href="{{ url_for('workflow.view_note', note_id=note.id) }}"
+   class="nc-card">
+
+    <!-- نوار وضعیت رنگی -->
+    {% if show_status %}
+    <div class="nc-status-bar
+        {% if note.status == 'in_review' %}nc-status-review
+        {% elif note.status == 'approved' %}nc-status-approved
+        {% elif note.status == 'rejected' %}nc-status-rejected
+        {% else %}nc-status-info{% endif %}">
+
+        <div class="nc-status-left">
+            {% if note.status == 'in_review' %}
+                <i class="fa-solid fa-hourglass-half"></i>
+                <span>در حال بررسی</span>
+            {% elif note.status == 'approved' %}
+                <i class="fa-solid fa-circle-check"></i>
+                <span>تایید شده</span>
+            {% elif note.status == 'rejected' %}
+                <i class="fa-solid fa-circle-xmark"></i>
+                <span>رد شده</span>
+            {% else %}
+                <i class="fa-solid fa-circle-info"></i>
+                <span>{{ note.status }}</span>
+            {% endif %}
+        </div>
+
+        <div class="nc-status-right">
+            <i class="fa-regular fa-clock"></i>
+            {{ note.created_at_jalali or '—' }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- بدنه کارت -->
+    <div class="nc-body">
+
+        <div class="nc-icon">
+            <i class="fa-solid fa-note-sticky"></i>
+        </div>
+
+        <div class="nc-content">
+
+            <!-- موضوع سند -->
+            {% if note.document_subject %}
+            <div class="nc-subject">
+                {{ note.document_subject }}
+            </div>
+            {% endif %}
+
+            <!-- کد سند -->
+            {% if note.document_code %}
+            <div class="nc-code">
+                <i class="fa-solid fa-hashtag"></i>
+                {{ note.document_code }}
+            </div>
+            {% endif %}
+
+            <!-- متن یادداشت (خلاصه) -->
+            {% if note.content %}
+            <div class="nc-snippet">{{ note.content }}</div>
+            {% endif %}
+
+            <!-- اطلاعات پایین -->
+            <div class="nc-meta">
+                {% if note.step_title %}
+                <span class="nc-step-badge">
+                    <i class="fa-solid fa-diagram-project"></i>
+                    {{ note.step_title }}
+                </span>
+                {% endif %}
+
+                {% if note.user_full_name %}
+                <span>
+                    <i class="fa-solid fa-user"></i>
+                    {{ note.user_full_name }}
+                </span>
+                {% endif %}
+
+                {% if note.assigned_to_name %}
+                <span>
+                    <i class="fa-solid fa-user-check"></i>
+                    {{ note.assigned_to_name }}
+                </span>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</a>

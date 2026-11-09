@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}مشاهده دپارتمان{% endblock %}
+
+{% block body_class %}page-report-department-documents{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-dept-view" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/departments/view.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dv-wrap">
+
+    <!-- ===== هدر صفحه ===== -->
+    <header class="dv-header">
+        <div class="dv-header-title">
+            <div class="dv-header-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div class="dv-header-text">
+                <h1>{{ department['title'] }}</h1>
+                <p>
+                    {% if department['code'] %}
+                    کد دپارتمان: {{ department['code'] }}
+                    {% else %}
+                    صفحه مشاهده و مدیریت کارشناسان دپارتمان
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="dv-header-actions">
+            <a href="{{ url_for('main.index') }}" class="dv-btn dv-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                داشبورد من
+            </a>
+
+            {% if session.get('role') in ['admin', 'manager', 'supervisor'] %}
+            <a href="{{ url_for('reports.department_documents',
+                                department_id=department['id'],
+                                year=selected_year if selected_year else 'all',
+                                month=selected_month if selected_month else 'all',
+                                from='view_department') }}" class="dv-btn dv-btn-secondary">
+                <i class="fa-solid fa-chart-pie"></i>
+                وضعیت توزیع اسناد
+            </a>
+            {% endif %}
+
+            {% if session.get('role') in ['admin','manager'] %}
+            <a href="{{ url_for('panel.users') }}" class="dv-btn dv-btn-primary">
+                <i class="fa-solid fa-user-shield"></i>
+                مدیریت کاربران
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- ===== کارت‌های آمار ===== -->
+    <section class="dv-info-grid">
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-users"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">تعداد کارشناسان</span>
+                <span class="dv-info-value" id="totalExperts">{{ experts|length }}</span>
+            </div>
+        </div>
+
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-file-lines"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">تعداد اسناد</span>
+                <span class="dv-info-value">{{ department['documents_count']|default(0) }}</span>
+            </div>
+        </div>
+
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-user-check"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">کارشناسان دارای سند</span>
+                <span class="dv-info-value">{{ department['active_experts_count']|default(0) }}</span>
+            </div>
+        </div>
+
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">وضعیت دپارتمان</span>
+                <span class="dv-info-value" style="font-size: 1.05rem;">
+                    {% if department['is_active'] %}فعال{% else %}غیرفعال{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-user-check"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">کاربران فعال</span>
+                <span class="dv-info-value" id="activeCount">{{ active_count|default(0) }}</span>
+            </div>
+        </div>
+
+        <div class="dv-info-card">
+            <div class="dv-info-icon"><i class="fa-solid fa-user-xmark"></i></div>
+            <div class="dv-info-content">
+                <span class="dv-info-label">کاربران غیرفعال</span>
+                <span class="dv-info-value" id="inactiveCount">{{ inactive_count|default(0) }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ★★★ پنل فیلتر — منتقل شد بالای نمودار ★★★ -->
+    <!-- ============================================ -->
+    <section class="dv-filter-panel">
+        <div class="dv-filter-heading">
+            <h2>
+                <i class="fa-solid fa-filter"></i>
+                فیلتر کارشناسان
+            </h2>
+            <span>با جستجو، انتخاب سال و ماه می‌توانید کارشناس موردنظر را پیدا کنید.</span>
+        </div>
+
+        <div class="dv-filters">
+            <div class="dv-field">
+                <label for="yearFilter">
+                    <i class="fa-solid fa-calendar"></i>
+                    سال دریافت
+                </label>
+                <select id="yearFilter">
+                    <option value="all" {% if selected_year=="all" %}selected{% endif %}>همه سال‌ها</option>
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="dv-field">
+                <label for="monthFilter">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    ماه دریافت
+                    {% if selected_year != "all" %}
+                    <span style="font-size:.7rem;color:#167a5c;font-weight:600;">(سال {{ selected_year }})</span>
+                    {% else %}
+                    <span style="font-size:.7rem;color:#805ad5;font-weight:600;">(همه سال‌ها)</span>
+                    {% endif %}
+                </label>
+                <select id="monthFilter">
+                    <option value="all" {% if selected_month=="all" %}selected{% endif %}>همه ماه‌ها</option>
+                    {% set month_names = {
+                        1: 'فروردین', 2: 'اردیبهشت', 3: 'خرداد',
+                        4: 'تیر', 5: 'مرداد', 6: 'شهریور',
+                        7: 'مهر', 8: 'آبان', 9: 'آذر',
+                        10: 'دی', 11: 'بهمن', 12: 'اسفند'
+                    } %}
+                    {% for m in available_months %}
+                    <option value="{{ m }}" {% if selected_month==m %}selected{% endif %}>{{ month_names.get(m, m) }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="dv-field">
+                <label for="expertStatusFilter">
+                    <i class="fa-solid fa-toggle-on"></i>
+                    وضعیت آنلاین
+                </label>
+                <select id="expertStatusFilter">
+                    <option value="all">همه</option>
+                    <option value="active">آنلاین</option>
+                    <option value="inactive">آفلاین</option>
+                </select>
+            </div>
+
+            <div class="dv-field">
+                <label for="activeStatusFilter">
+                    <i class="fa-solid fa-user-shield"></i>
+                    وضعیت حساب
+                </label>
+                <select id="activeStatusFilter">
+                    <option value="all">همه</option>
+                    <option value="active">فقط فعال</option>
+                    <option value="inactive">فقط غیرفعال</option>
+                </select>
+            </div>
+
+            <div class="dv-field">
+                <label for="expertSearch">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    جستجوی نام کارشناس
+                </label>
+                <input type="search" id="expertSearch" placeholder="نام یا نام کاربری کارشناس...">
+            </div>
+
+            <button type="button" class="dv-clear-btn" id="clearExpertFilters">
+                <i class="fa-solid fa-rotate-left"></i>
+                پاک کردن
+            </button>
+        </div>
+    </section>
+
+    <!-- ============================================ -->
+    <!-- ★★★ نمودار کارهای در دست بررسی — بعد از فیلترها ★★★ -->
+    <!-- ============================================ -->
+    <section class="dv-pending-chart-card">
+        <div class="dv-pending-chart-header">
+            <h2 class="dv-pending-chart-title">
+                <i class="fa-solid fa-list-check"></i>
+                کارهای در دست بررسی هر کارشناس
+                {% if selected_year != "all" %}
+                <span style="font-size:.75rem;font-weight:600;color:#6b7d8a;margin-right:6px;">
+                    (سال {{ selected_year }}{% if selected_month != "all" %} - ماه {{ selected_month }}{% endif %})
+                </span>
+                {% elif selected_month != "all" %}
+                <span style="font-size:.75rem;font-weight:600;color:#6b7d8a;margin-right:6px;">
+                    (ماه {{ selected_month }} در همه سال‌ها)
+                </span>
+                {% endif %}
+            </h2>
+
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <label class="dv-chart-toggle" id="showAllExpertsToggle" for="showAllExpertsCheckbox">
+                    <input type="checkbox" id="showAllExpertsCheckbox">
+                    <i class="fa-solid fa-users"></i>
+                    <span>نمایش همه کارشناسان</span>
+                </label>
+
+                <span class="dv-pending-chart-meta">
+                    <i class="fa-solid fa-hourglass-half"></i>
+                    <span id="pendingTotalCount">0</span>
+                    کار در جریان
+                </span>
+            </div>
+        </div>
+
+        <div class="dv-pending-chart-wrapper">
+            <canvas id="pendingChart"></canvas>
+        </div>
+    </section>
+
+    <!-- ===== بخش کارشناسان ===== -->
+    <section class="dv-experts-section">
+        <div class="dv-experts-header">
+            <h2 class="dv-experts-title">
+                <i class="fa-solid fa-user-tie"></i>
+                کارشناسان دپارتمان
+                {% if selected_year != "all" %}
+                <span style="font-size:.75rem;font-weight:600;color:#6b7d8a;margin-right:6px;">
+                    (سال {{ selected_year }}{% if selected_month != "all" %} - ماه {{ selected_month }}{% endif %})
+                </span>
+                {% elif selected_month != "all" %}
+                <span style="font-size:.75rem;font-weight:600;color:#6b7d8a;margin-right:6px;">
+                    (ماه {{ selected_month }} در همه سال‌ها)
+                </span>
+                {% endif %}
+            </h2>
+            <span class="dv-experts-count">
+                <i class="fa-solid fa-users"></i>
+                <span id="visibleExperts">{{ experts|length }}</span>
+                کارشناس
+            </span>
+        </div>
+
+        {% if experts %}
+        <div class="dv-experts-grid" id="expertsGrid">
+
+            {% for expert in experts %}
+            <article class="dv-expert-card" data-expert-index="{{ loop.index0 }}"
+                data-name="{{ (expert['full_name']|default('') ~ ' ' ~ expert['username']|default(''))|lower }}"
+                data-status="{% if expert.is_online %}active{% else %}inactive{% endif %}"
+                data-active="{% if expert.is_active %}active{% else %}inactive{% endif %}">
+
+                <!-- ===== هدر: آواتار + نام + وضعیت ===== -->
+                <div class="dv-expert-top">
+                    <div class="dv-expert-avatar">
+                        <span class="dv-avatar-ring"></span>
+                        <span class="dv-avatar-ring ring-2"></span>
+
+                        {% set ex_avatar = expert['avatar'] %}
+                        {% set ex_gender = expert['gender'] or 'male' %}
+
+                        {% if ex_avatar and ex_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                            <img src="{{ url_for('static', filename='uploads/avatar/' + ex_avatar) }}"
+                                alt="{{ expert['full_name'] }}"
+                                onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                        {% elif ex_gender == 'female' %}
+                            <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                                alt="{{ expert['full_name'] }}" />
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                                alt="{{ expert['full_name'] }}" />
+                        {% endif %}
+
+                        <span class="dv-expert-status {% if not expert.is_online %}offline{% endif %}"
+                            data-user-id="{{ expert['id'] }}"
+                            title="{% if expert.is_online %}آنلاین{% else %}آفلاین{% endif %}"></span>
+                    </div>
+
+                    <div class="dv-expert-main">
+                        <h3 class="dv-expert-name" title="{{ expert['full_name']|default('بدون نام') }}">
+                            {{ expert['full_name']|default('بدون نام') }}
+                        </h3>
+                        <div class="dv-expert-tags">
+                            <span class="dv-expert-username">
+                                <i class="fa-solid fa-at"></i>
+                                {{ expert['username']|default('-') }}
+                            </span>
+                            {% if expert.is_active %}
+                            <span class="dv-expert-account-badge active">
+                                <i class="fa-solid fa-circle-check"></i>
+                                فعال
+                            </span>
+                            {% else %}
+                            <span class="dv-expert-account-badge inactive">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                                غیرفعال
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== بدنه: تعداد اسناد + چیپ‌های وضعیت ===== -->
+                <div class="dv-expert-body">
+
+                    <div class="dv-expert-docs-row">
+                        <span class="dv-expert-docs-label">
+                            <i class="fa-solid fa-file-lines"></i>
+                            تعداد اسناد
+                        </span>
+                        <span class="dv-expert-docs-value">
+                            {{ expert['documents_count']|default(0) }}
+                            <small>سند</small>
+                        </span>
+                    </div>
+
+                    <div class="dv-expert-statuses">
+                        {% if expert.status_counts_nonzero %}
+                            {% for st in expert.status_counts_nonzero %}
+                            <div class="dv-status-chip" style="--st-color: {{ st.color or '#3D8499' }};"
+                                title="{{ st.title }}: {{ st.count }} سند">
+                                <span class="dv-status-chip-dot"></span>
+                                <span class="dv-status-chip-label">{{ st.title }}</span>
+                                <span class="dv-status-chip-count">{{ st.count }}</span>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                        <span class="dv-no-docs">
+                            <i class="fa-solid fa-inbox"></i>
+                            بدون سند
+                        </span>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <!-- ===== فوتر: دکمه‌ها ===== -->
+                <div class="dv-expert-actions">
+                    <a href="{{ url_for('reports.department_expert_documents',
+                                        department_id=department['id'],
+                                        expert_id=expert['id'],
+                                        year=selected_year,
+                                        month=selected_month,
+                                        from='view_department',
+                                        area_id='all') }}"
+                       class="dv-expert-btn dv-expert-btn-view">
+                        <i class="fa-solid fa-eye"></i>
+                        مشاهده اسناد
+                    </a>
+
+                    <a href="{{ url_for('departments.expert_breakdown',
+                                        department_id=department['id'],
+                                        expert_id=expert['id'],
+                                        year=selected_year,
+                                        month=selected_month) }}"
+                       class="dv-expert-btn dv-expert-btn-breakdown">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        تفکیک کارها
+                    </a>
+                </div>
+
+            </article>
+            {% endfor %}
+
+        </div>
+
+        <div class="dv-no-result" id="noFilterResult">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            کارشناسی با مشخصات جستجو‌شده پیدا نشد.
+        </div>
+
+        {% else %}
+
+        <div class="dv-empty">
+            <div class="dv-empty-icon"><i class="fa-solid fa-users-slash"></i></div>
+            <h3>کارشناسی برای این دپارتمان ثبت نشده است</h3>
+            <p>در حال حاضر هیچ کارشناس فعالی برای این دپارتمان وجود ندارد.</p>
+        </div>
+
+        {% endif %}
+    </section>
+
+    {% if session.get('role') in ['admin','manager'] %}
+    <footer class="dv-footer">
+        <span>
+            <i class="fa-solid fa-building"></i>
+            شناسه دپارتمان: {{ department['id'] }}
+        </span>
+        <a href="{{ url_for('departments.department_list') }}">
+            بازگشت به دپارتمان ها
+            <i class="fa-solid fa-arrow-left"></i>
+        </a>
+    </footer>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/pages/departments/view.js') }}"></script>
+<script type="application/json" id="expertsDataJson">{{ experts | tojson }}</script>
+{% endblock %}

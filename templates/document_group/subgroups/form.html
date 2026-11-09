@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if mode == 'add' %}افزودن زیرگروه سند{% else %}ویرایش زیرگروه سند{% endif %}
+{% endblock %}
+
+{% block body_class %}page-document-subgroup-form{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/subgroups/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="sf-wrap">
+
+    <div class="sf-card">
+
+        <!-- ===== هدر ===== -->
+        <div class="sf-header">
+            <div class="sf-header-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="sf-header-text">
+                <h1>
+                    {% if mode == 'add' %}
+                    ایجاد زیرگروه جدید
+                    {% else %}
+                    ویرایش: {{ subgroup.title }}
+                    {% endif %}
+                </h1>
+                <p>
+                    {% if mode == 'add' %}
+                    اطلاعات زیرگروه را وارد کنید و ارتباط‌های آن را مشخص کنید
+                    {% else %}
+                    اطلاعات زیرگروه و ارتباط‌های آن را ویرایش کنید
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== فرم ===== -->
+        <form method="POST" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="sf-body">
+
+                <!-- عنوان (ستون 2) -->
+                <div class="sf-field sf-col-2">
+                    <label class="sf-label" for="{{ form.title.id }}">
+                        <i class="fa-solid fa-tag"></i>
+                        <span>{{ form.title.label.text }}</span>
+                        <span class="required">*</span>
+                    </label>
+                    {{ form.title(class="sf-input", placeholder="مثال: استخدام") }}
+                    {% for error in form.title.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- کد -->
+                <div class="sf-field">
+                    <label class="sf-label" for="{{ form.code.id }}">
+                        <i class="fa-solid fa-hashtag"></i>
+                        <span>{{ form.code.label.text }}</span>
+                    </label>
+                    {{ form.code(class="sf-input", placeholder="HR-01", style="direction:ltr;") }}
+                    {% for error in form.code.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- بازه بررسی -->
+                <div class="sf-field">
+                    <label class="sf-label" for="{{ form.days_review.id }}">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>{{ form.days_review.label.text }}</span>
+                    </label>
+                    {{ form.days_review(class="sf-input", type="number") }}
+                    {% for error in form.days_review.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- ترتیب -->
+                <div class="sf-field">
+                    <label class="sf-label" for="{{ form.sort_order.id }}">
+                        <i class="fa-solid fa-sort"></i>
+                        <span>{{ form.sort_order.label.text }}</span>
+                    </label>
+                    {{ form.sort_order(class="sf-input", type="number") }}
+                    {% for error in form.sort_order.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- رنگ -->
+                <div class="sf-field">
+                    <label class="sf-label" for="{{ form.color.id }}">
+                        <i class="fa-solid fa-palette"></i>
+                        <span>{{ form.color.label.text }}</span>
+                    </label>
+                    <div class="sf-color-wrapper">
+                        <input type="color" class="sf-color-input"
+                               value="{{ form.color.data or '#3D8499' }}"
+                               onchange="document.getElementById('{{ form.color.id }}').value = this.value;">
+                        {{ form.color(class="sf-input sf-color-text",
+                                      placeholder="#3D8499",
+                                      style="direction:ltr;") }}
+                    </div>
+                    {% for error in form.color.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- فعال -->
+                <div class="sf-field sf-col-2">
+                    <label class="sf-checkbox-wrap">
+                        {{ form.is_active() }}
+                        <span class="sf-checkbox-text">زیرگروه فعال باشد</span>
+                    </label>
+                </div>
+
+                <!-- توضیحات -->
+                <div class="sf-field sf-full">
+                    <label class="sf-label" for="{{ form.description.id }}">
+                        <i class="fa-solid fa-align-right"></i>
+                        <span>{{ form.description.label.text }}</span>
+                    </label>
+                    {{ form.description(class="sf-textarea", placeholder="توضیحات اختیاری...") }}
+                    {% for error in form.description.errors %}
+                    <div class="sf-error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+
+                <!-- ★ گروه‌های مرتبط (M:N) -->
+                <div class="sf-multi-section">
+                    <div class="sf-multi-header">
+                        <div class="sf-multi-title">
+                            <i class="fa-solid fa-layer-group"></i>
+                            گروه‌های مرتبط
+                            <span class="sf-multi-counter" id="groupCounter">
+                                {{ form.group_ids.data|length if form.group_ids.data else 0 }}
+                            </span>
+                        </div>
+                        <div class="sf-multi-hint">
+                            می‌توانید این زیرگروه را به چند گروه متصل کنید
+                        </div>
+                    </div>
+
+                    <div class="sf-multi-search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text"
+                               class="sf-multi-search"
+                               id="groupsSearch"
+                               placeholder="جستجوی گروه...">
+                    </div>
+
+                    {% if form.group_ids.choices %}
+                    <div class="sf-multi-list" id="groupsList">
+                        {% for gid, gtitle in form.group_ids.choices %}
+                        <label class="sf-multi-item {% if form.group_ids.data and gid in form.group_ids.data %}selected{% endif %}"
+                               data-title="{{ gtitle|lower }}">
+                            <input type="checkbox"
+                                   name="{{ form.group_ids.name }}"
+                                   value="{{ gid }}"
+                                   {% if form.group_ids.data and gid in form.group_ids.data %}checked{% endif %}
+                                   onchange="updateGroupCounter(this)">
+                            <span class="sf-multi-item-text">{{ gtitle }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="sf-multi-empty">
+                        <i class="fa-solid fa-inbox"></i>
+                        هنوز گروهی در سیستم ثبت نشده است.
+                    </div>
+                    {% endif %}
+
+                    {{ form.group_sort_orders(id="groupSortOrders") }}
+                </div>
+
+                <!-- ★ دپارتمان‌های متولی (M:N) -->
+                <div class="sf-multi-section">
+                    <div class="sf-multi-header">
+                        <div class="sf-multi-title">
+                            <i class="fa-solid fa-building"></i>
+                            دپارتمان‌های متولی
+                            <span class="sf-multi-counter" id="deptCounter">
+                                {{ form.department_ids.data|length if form.department_ids.data else 0 }}
+                            </span>
+                        </div>
+                        <div class="sf-multi-hint">
+                            می‌توانید چند دپارتمان را به عنوان متولی انتخاب کنید
+                        </div>
+                    </div>
+
+                    <div class="sf-multi-search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text"
+                               class="sf-multi-search"
+                               id="deptsSearch"
+                               placeholder="جستجوی دپارتمان...">
+                    </div>
+
+                    {% if form.department_ids.choices %}
+                    <div class="sf-multi-list" id="deptsList">
+                        {% for did, dtitle in form.department_ids.choices %}
+                        <label class="sf-multi-item {% if form.department_ids.data and did in form.department_ids.data %}selected{% endif %}"
+                               data-title="{{ dtitle|lower }}">
+                            <input type="checkbox"
+                                   name="{{ form.department_ids.name }}"
+                                   value="{{ did }}"
+                                   {% if form.department_ids.data and did in form.department_ids.data %}checked{% endif %}
+                                   onchange="updateDeptCounter(this)">
+                            <span class="sf-multi-item-text">{{ dtitle }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="sf-multi-empty">
+                        <i class="fa-solid fa-inbox"></i>
+                        هنوز دپارتمانی ثبت نشده است.
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <!-- ===== دکمه‌ها ===== -->
+            <div class="sf-actions">
+                <a href="{{ url_for('document_group.subgroup_list') }}"
+                   class="sf-btn sf-btn-secondary">
+                    <i class="fa-solid fa-xmark"></i>
+                    انصراف
+                </a>
+
+                <button type="submit" class="sf-btn sf-btn-primary">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    {% if mode == 'add' %}ایجاد زیرگروه{% else %}ذخیره تغییرات{% endif %}
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/pages/document_group/subgroups/form.js') }}"></script>{% endblock %}

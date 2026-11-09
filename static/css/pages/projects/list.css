@@ -1,0 +1,1301 @@
+/* استایل صفحه: projects/list.html */
+
+    /* ============================================
+       SCOPE: .page-projects
+       ============================================ */
+    .page-projects {
+        --pj-primary: #1b698b;
+        --pj-primary-light: #167a5c;
+        --pj-primary-dark: #14506a;
+        --pj-text: #2d3e4a;
+        --pj-text-secondary: #6b7d8a;
+        --pj-text-muted: #a0aeb8;
+        --pj-border: #d8e6ed;
+        --pj-bg-soft: #f7fafc;
+        --pj-radius-lg: 20px;
+        --pj-radius-md: 12px;
+        --pj-radius-sm: 8px;
+        --pj-shadow-sm: 0 2px 10px rgba(91, 155, 181, .07);
+        --pj-transition: .35s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-projects .pj-wrap {
+        width: 100%;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+    .page-projects .pj-wrap * { box-sizing: border-box; }
+
+    /* انیمیشن‌ها */
+    @keyframes pjCardEnter {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pjHeaderEnter {
+        0% { opacity: 0; transform: translateY(-15px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pjShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @keyframes pjRingSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes pjPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .45; transform: scale(1.35); }
+    }
+    @keyframes pjEmptyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* ============================================
+       هدر صفحه
+       ============================================ */
+    .page-projects .pj-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+        padding-bottom: 18px;
+        position: relative;
+        animation: pjHeaderEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-projects .pj-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0; right: 0; left: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+                transparent 0%,
+                color-mix(in srgb, var(--pj-primary) 30%, transparent) 20%,
+                color-mix(in srgb, var(--pj-primary) 30%, transparent) 80%,
+                transparent 100%);
+        border-radius: 2px;
+    }
+
+    .page-projects .pj-header-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .page-projects .pj-header-icon {
+        position: relative;
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--pj-primary) 0%, var(--pj-primary-light) 100%);
+        color: #fff;
+        font-size: 1.2rem;
+        box-shadow:
+            0 8px 20px rgba(27, 105, 139, .3),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-projects .pj-header-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 20px;
+        border: 2px dashed rgba(27, 105, 139, .35);
+        opacity: 0;
+        transition: opacity .4s ease, transform .6s ease;
+    }
+
+    .page-projects .pj-header-icon:hover {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-projects .pj-header-icon:hover::before {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+
+    .page-projects .pj-header-text { min-width: 0; }
+
+    .page-projects .pj-title {
+        margin: 0;
+        font-size: clamp(1.1rem, 1.5vw, 1.35rem);
+        font-weight: 800;
+        color: var(--pj-text);
+        letter-spacing: -.3px;
+    }
+
+    .page-projects .pj-subtitle {
+        margin: 3px 0 0;
+        font-size: clamp(.72rem, .85vw, .8rem);
+        color: var(--pj-text-secondary);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       دکمه‌های هدر
+       ============================================ */
+    .page-projects .pj-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-projects .pj-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 42px;
+        padding: 9px 18px;
+        border-radius: 11px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: all var(--pj-transition);
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .page-projects .pj-btn i {
+        font-size: .85rem;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-projects .pj-btn-primary {
+        background: linear-gradient(135deg, var(--pj-primary) 0%, var(--pj-primary-light) 100%);
+        color: #fff;
+        box-shadow: 0 6px 18px rgba(27, 105, 139, .3);
+    }
+
+    .page-projects .pj-btn-primary::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg,
+                transparent 0%,
+                rgba(255, 255, 255, .3) 50%,
+                transparent 100%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .3s ease;
+        z-index: -1;
+    }
+
+    .page-projects .pj-btn-primary:hover::before {
+        opacity: 1;
+        animation: pjShimmer 1.5s linear infinite;
+    }
+
+    .page-projects .pj-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(27, 105, 139, .4);
+        color: #fff;
+    }
+
+    .page-projects .pj-btn-primary:hover i {
+        transform: rotate(180deg);
+    }
+
+    .page-projects .pj-btn-outline {
+        background: #fff;
+        color: var(--pj-text-secondary);
+        border-color: var(--pj-border);
+    }
+
+    .page-projects .pj-btn-outline:hover {
+        color: var(--pj-primary);
+        border-color: var(--pj-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(27, 105, 139, .12);
+    }
+
+    /* ★ دکمه موفق (اکسل) */
+    .page-projects .pj-btn-success {
+        background: #fff;
+        color: #15803d;
+        border-color: #bbf7d0;
+    }
+
+    .page-projects .pj-btn-success:hover {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: #fff;
+        border-color: transparent;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(22, 163, 74, .3);
+    }
+
+    .page-projects .pj-btn-success:hover i {
+        transform: scale(1.15);
+    }
+
+    /* ============================================
+       خلاصه آمار
+       ============================================ */
+    .page-projects .pj-summary {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+        animation: pjCardEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-projects .pj-summary-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: #fff;
+        border: 1.5px solid var(--pj-border);
+        border-radius: var(--pj-radius-md);
+        position: relative;
+        overflow: hidden;
+        transition: all var(--pj-transition);
+        min-width: 0;
+    }
+
+    .page-projects .pj-summary-item::before {
+        content: "";
+        position: absolute;
+        top: 0; right: 0;
+        width: 4px; height: 100%;
+        background: linear-gradient(180deg,
+                var(--sc, var(--pj-primary)) 0%,
+                color-mix(in srgb, var(--sc, var(--pj-primary)) 60%, #ffffff) 100%);
+    }
+
+    .page-projects .pj-summary-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px color-mix(in srgb, var(--sc, var(--pj-primary)) 18%, transparent);
+        border-color: color-mix(in srgb, var(--sc, var(--pj-primary)) 35%, #ffffff);
+    }
+
+    .page-projects .pj-summary-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--sc) 0%,
+                color-mix(in srgb, var(--sc) 65%, #ffffff) 100%);
+        color: #fff;
+        font-size: .95rem;
+        box-shadow: 0 5px 12px color-mix(in srgb, var(--sc) 28%, transparent);
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-projects .pj-summary-item:hover .pj-summary-icon {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-projects .pj-summary-content { min-width: 0; flex: 1; }
+
+    .page-projects .pj-summary-label {
+        display: block;
+        font-size: .72rem;
+        color: var(--pj-text-secondary);
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .page-projects .pj-summary-value {
+        display: block;
+        font-size: 1.25rem;
+        font-weight: 900;
+        color: var(--sc);
+        line-height: 1.1;
+        letter-spacing: -.5px;
+    }
+
+    /* ============================================
+       فیلتر
+       ============================================ */
+    .page-projects .pj-filter {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr 1fr;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 18px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--pj-primary) 4%, #fff),
+                color-mix(in srgb, var(--pj-primary) 1%, #fff));
+        border-radius: var(--pj-radius-md);
+        border: 1.5px solid color-mix(in srgb, var(--pj-primary) 15%, #fff);
+        animation: pjCardEnter .45s cubic-bezier(.25, .46, .45, .94) both;
+        animation-delay: .1s;
+    }
+
+    .page-projects .pj-filter-actions {
+        grid-column: 1 / -1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        padding-top: 6px;
+        border-top: 1px dashed color-mix(in srgb, var(--pj-primary) 15%, #fff);
+    }
+
+    .page-projects .pj-search-wrap {
+        position: relative;
+        min-width: 0;
+    }
+
+    .page-projects .pj-search-wrap i {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--pj-text-muted);
+        pointer-events: none;
+        font-size: .85rem;
+        transition: color .3s ease;
+    }
+
+    .page-projects .pj-search-wrap:focus-within i {
+        color: var(--pj-primary);
+    }
+
+    .page-projects .pj-input,
+    .page-projects .pj-select {
+        width: 100%;
+        padding: 10px 13px;
+        border: 1.5px solid var(--pj-border);
+        border-radius: 10px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .82rem;
+        color: var(--pj-text);
+        outline: none;
+        transition: all var(--pj-transition);
+    }
+
+    .page-projects .pj-search-wrap .pj-input {
+        padding-right: 38px;
+    }
+
+    .page-projects .pj-input:focus,
+    .page-projects .pj-select:focus {
+        border-color: var(--pj-primary);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--pj-primary) 12%, transparent);
+    }
+
+    .page-projects .pj-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7d8a' stroke-width='3'><polyline points='6 9 12 15 18 9'/></svg>");
+        background-repeat: no-repeat;
+        background-position: left 12px center;
+        padding-left: 32px;
+    }
+
+    .page-projects .pj-checkbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .8rem;
+        color: var(--pj-text-secondary);
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 10px;
+        border-radius: 8px;
+        transition: background .3s ease;
+        user-select: none;
+    }
+
+    .page-projects .pj-checkbox:hover {
+        background: color-mix(in srgb, var(--pj-primary) 6%, #ffffff);
+    }
+
+    .page-projects .pj-checkbox input {
+        accent-color: var(--pj-primary);
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+    }
+
+    .page-projects .pj-filter-buttons {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    /* ============================================
+       گرید
+       ============================================ */
+    .page-projects .pj-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    /* ============================================
+       ★ کارت پروژه — بهینه
+       ============================================ */
+    .page-projects .pj-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1.5fr) auto;
+        align-items: stretch;
+        gap: 0;
+        background: #ffffff;
+        border: 1.5px solid var(--pj-border);
+        border-radius: var(--pj-radius-lg);
+        box-shadow: var(--pj-shadow-sm);
+        overflow: hidden;
+        transition:
+            transform .35s cubic-bezier(.25, .46, .45, .94),
+            box-shadow .35s ease,
+            border-color .3s ease;
+        isolation: isolate;
+        min-width: 0;
+        animation: pjCardEnter .55s cubic-bezier(.25, .46, .45, .94) both;
+        animation-delay: calc(var(--pj-index, 0) * 50ms + 60ms);
+    }
+
+    .page-projects .pj-card::before {
+        content: "";
+        position: absolute;
+        top: 0; bottom: 0; right: 0;
+        width: 5px;
+        background: linear-gradient(180deg,
+                var(--pj-color, var(--pj-primary)) 0%,
+                var(--pj-color-light, var(--pj-primary-light)) 100%);
+        z-index: 3;
+        transition: width .3s ease;
+    }
+
+    .page-projects .pj-card:hover::before {
+        width: 6px;
+    }
+
+    .page-projects .pj-card:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 16px 40px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 20%, transparent),
+            0 4px 12px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 10%, transparent);
+        border-color: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 35%, #ffffff);
+    }
+
+    .page-projects .pj-card.is-inactive {
+        opacity: .65;
+        filter: grayscale(.35);
+    }
+
+    /* ============================================
+       ★ ستون ۱: هدر (فشرده)
+       ============================================ */
+    .page-projects .pj-card-header {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px 18px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--pj-color, var(--pj-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--pj-color, var(--pj-primary)) 2%, #ffffff) 100%);
+        border-left: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 15%, #ffffff);
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    /* ردیف بالا: آواتار + نام + وضعیت */
+    .page-projects .pj-card-head-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .page-projects .pj-card-avatar {
+        position: relative;
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--pj-color, var(--pj-primary)) 0%,
+                var(--pj-color-light, var(--pj-primary-light)) 100%);
+        color: #fff;
+        font-size: 1.15rem;
+        box-shadow:
+            0 5px 14px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 35%, transparent),
+            inset 0 -2px 5px rgba(0, 0, 0, .1);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-projects .pj-card-avatar::before {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        border: 1.5px dashed color-mix(in srgb, var(--pj-color, var(--pj-primary)) 40%, transparent);
+        opacity: 0;
+        transition: opacity .4s ease;
+        animation: pjRingSpin 12s linear infinite;
+        animation-play-state: paused;
+    }
+
+    .page-projects .pj-card:hover .pj-card-avatar {
+        transform: scale(1.08) rotate(-8deg);
+    }
+
+    .page-projects .pj-card:hover .pj-card-avatar::before {
+        opacity: 1;
+        animation-play-state: running;
+    }
+
+    .page-projects .pj-card-title-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-projects .pj-card-name {
+        margin: 0 0 3px;
+        color: var(--pj-text);
+        font-size: .92rem;
+        font-weight: 800;
+        line-height: 1.35;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        transition: color .3s ease;
+    }
+
+    .page-projects .pj-card:hover .pj-card-name {
+        color: var(--pj-color, var(--pj-primary));
+    }
+
+    .page-projects .pj-card-subtitle {
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--pj-color, var(--pj-primary));
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        direction: ltr;
+        background: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 10%, #ffffff);
+        padding: 2px 7px;
+        border-radius: 6px;
+        border: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 22%, #ffffff);
+        transition: all .3s ease;
+    }
+
+    /* ★ پیشرفت کلی — نوار باریک */
+    .page-projects .pj-card-overall {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 10px;
+        background: rgba(255, 255, 255, .8);
+        border: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 22%, #ffffff);
+        border-radius: 8px;
+        transition: all .3s ease;
+    }
+
+    .page-projects .pj-card:hover .pj-card-overall {
+        background: #fff;
+        border-color: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 40%, #ffffff);
+        box-shadow: 0 3px 10px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, transparent);
+    }
+
+    .page-projects .pj-card-overall-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: .68rem;
+        font-weight: 700;
+        color: var(--pj-color, var(--pj-primary));
+        flex-shrink: 0;
+    }
+
+    .page-projects .pj-card-overall-label i {
+        font-size: .68rem;
+    }
+
+    .page-projects .pj-card-overall-bar {
+        flex: 1;
+        height: 6px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 10%, #ffffff);
+        overflow: hidden;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, .04);
+        min-width: 40px;
+    }
+
+    .page-projects .pj-card-overall-fill {
+        height: 100%;
+        border-radius: 8px;
+        background: linear-gradient(90deg,
+                var(--pj-color, var(--pj-primary)) 0%,
+                var(--pj-color-light, var(--pj-primary-light)) 100%);
+        transition: width 1s cubic-bezier(.25, .46, .45, .94);
+        box-shadow: 0 0 6px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 40%, transparent);
+    }
+
+    .page-projects .pj-card-overall-value {
+        font-size: .82rem;
+        font-weight: 900;
+        color: var(--pj-color, var(--pj-primary));
+        letter-spacing: -.3px;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+
+    /* بج وضعیت */
+    .page-projects .pj-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 16px;
+        font-size: .66rem;
+        font-weight: 700;
+        white-space: nowrap;
+        flex-shrink: 0;
+        transition: all .3s ease;
+    }
+
+    .page-projects .pj-status i { font-size: .42rem; }
+
+    .page-projects .pj-status.active {
+        color: #15803d;
+        background: rgba(22, 163, 74, .12);
+        border: 1px solid rgba(22, 163, 74, .25);
+    }
+
+    .page-projects .pj-status.active i {
+        animation: pjPulse 2s ease-in-out infinite;
+    }
+
+    .page-projects .pj-status.completed {
+        color: #1d4ed8;
+        background: rgba(59, 130, 246, .12);
+        border: 1px solid rgba(59, 130, 246, .25);
+    }
+
+    .page-projects .pj-status.paused {
+        color: #b45309;
+        background: rgba(245, 158, 11, .12);
+        border: 1px solid rgba(245, 158, 11, .25);
+    }
+
+    .page-projects .pj-status.cancelled {
+        color: #b91c1c;
+        background: rgba(220, 38, 38, .1);
+        border: 1px solid rgba(220, 38, 38, .22);
+    }
+
+    .page-projects .pj-status.pending {
+        color: #4b5563;
+        background: rgba(107, 114, 128, .12);
+        border: 1px solid rgba(107, 114, 128, .22);
+    }
+
+    /* ============================================
+       ★ ستون ۲: بدنه (فشرده)
+       ============================================ */
+    .page-projects .pj-card-body {
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-projects .pj-info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: .78rem;
+        min-width: 0;
+        padding: 5px 0;
+        border-bottom: 1px dashed color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, transparent);
+        transition: all .3s ease;
+    }
+
+    .page-projects .pj-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .page-projects .pj-info-row:hover {
+        padding-right: 3px;
+    }
+
+    .page-projects .pj-info-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--pj-text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .page-projects .pj-info-label i {
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, #ffffff);
+        color: var(--pj-color, var(--pj-primary));
+        border-radius: 6px;
+        font-size: .72rem;
+        flex-shrink: 0;
+        transition: all .3s ease;
+    }
+
+    .page-projects .pj-card:hover .pj-info-label i {
+        background: var(--pj-color, var(--pj-primary));
+        color: #fff;
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-projects .pj-info-value {
+        color: var(--pj-text);
+        font-weight: 700;
+        text-align: left;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        min-width: 0;
+        font-size: .8rem;
+    }
+
+    .page-projects .pj-info-value.muted {
+        color: var(--pj-text-muted);
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* ============================================
+       ★ ستون ۳: ساید (همه پیشرفت‌ها در یک کارت)
+       ============================================ */
+    .page-projects .pj-card-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: linear-gradient(180deg, #ffffff 0%, var(--pj-bg-soft) 100%);
+        border-right: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, #ffffff);
+        padding: 14px 18px;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+        min-width: 240px;
+    }
+
+    /* کارت پیشرفت‌های ترکیبی */
+    .page-projects .pj-progress-block {
+        padding: 10px 12px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--pj-color, var(--pj-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--pj-color, var(--pj-primary)) 2%, #ffffff) 100%);
+        border: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 18%, #ffffff);
+        border-radius: 10px;
+        transition: all .3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-projects .pj-progress-block::before {
+        content: "";
+        position: absolute;
+        bottom: -25px; right: -25px;
+        width: 60px; height: 60px;
+        border-radius: 50%;
+        background: var(--pj-color, var(--pj-primary));
+        opacity: .06;
+        transition: all .7s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-projects .pj-progress-block:hover::before {
+        transform: scale(1.8);
+        opacity: .14;
+    }
+
+    .page-projects .pj-progress-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 18%, transparent);
+    }
+
+    /* هر ردیف پیشرفت */
+    .page-projects .pj-progress-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-projects .pj-progress-row + .pj-progress-row {
+        border-top: 1px dashed color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, transparent);
+        margin-top: 2px;
+        padding-top: 6px;
+    }
+
+    .page-projects .pj-progress-row-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: .7rem;
+        font-weight: 700;
+        color: var(--pj-text-secondary);
+        flex-shrink: 0;
+        min-width: 72px;
+    }
+
+    .page-projects .pj-progress-row-label i {
+        color: var(--pj-color, var(--pj-primary));
+        font-size: .68rem;
+    }
+
+    .page-projects .pj-progress-row-bar {
+        flex: 1;
+        height: 5px;
+        border-radius: 8px;
+        background: #eef2f7;
+        overflow: hidden;
+        min-width: 30px;
+    }
+
+    .page-projects .pj-progress-row-fill {
+        height: 100%;
+        border-radius: 8px;
+        background: linear-gradient(90deg,
+                var(--pj-color, var(--pj-primary)) 0%,
+                var(--pj-color-light, var(--pj-primary-light)) 100%);
+        transition: width .8s ease;
+    }
+
+    .page-projects .pj-progress-row-value {
+        font-size: .78rem;
+        font-weight: 900;
+        color: var(--pj-color, var(--pj-primary));
+        letter-spacing: -.3px;
+        flex-shrink: 0;
+        min-width: 34px;
+        text-align: left;
+    }
+
+    /* اطلاعات تکمیلی */
+    .page-projects .pj-card-stats {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: .7rem;
+        color: var(--pj-text-secondary);
+        font-weight: 600;
+    }
+
+    .page-projects .pj-card-stat {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .page-projects .pj-card-stat i {
+        color: var(--pj-color, var(--pj-primary));
+        flex-shrink: 0;
+        font-size: .7rem;
+    }
+
+    .page-projects .pj-card-stat span {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* اکشن‌ها */
+    .page-projects .pj-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .page-projects .pj-action-btn {
+        position: relative;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        min-height: 32px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .72rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .3s cubic-bezier(.25, .46, .45, .94);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+        background: transparent;
+    }
+
+    .page-projects .pj-action-btn i {
+        font-size: .74rem;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* مشاهده */
+    .page-projects .pj-action-btn.view {
+        background: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 10%, #ffffff);
+        color: var(--pj-color, var(--pj-primary));
+        border-color: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 32%, transparent);
+    }
+
+    .page-projects .pj-action-btn.view::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--pj-color, var(--pj-primary));
+        transform: scaleX(0);
+        transform-origin: right center;
+        transition: transform .4s cubic-bezier(.25, .46, .45, .94);
+        z-index: -1;
+        border-radius: inherit;
+    }
+
+    .page-projects .pj-action-btn.view:hover::before {
+        transform: scaleX(1);
+    }
+
+    .page-projects .pj-action-btn.view:hover {
+        color: #ffffff;
+        border-color: var(--pj-color, var(--pj-primary));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px color-mix(in srgb, var(--pj-color, var(--pj-primary)) 35%, transparent);
+    }
+
+    .page-projects .pj-action-btn.view:hover i {
+        transform: scale(1.15);
+    }
+
+    /* ویرایش */
+    .page-projects .pj-action-btn.edit {
+        background: #ffffff;
+        color: var(--pj-text-secondary);
+        border-color: var(--pj-border);
+    }
+
+    .page-projects .pj-action-btn.edit:hover {
+        background: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 8%, #ffffff);
+        color: var(--pj-color, var(--pj-primary));
+        border-color: color-mix(in srgb, var(--pj-color, var(--pj-primary)) 35%, transparent);
+        transform: translateY(-2px);
+    }
+
+    .page-projects .pj-action-btn.edit:hover i {
+        transform: rotate(-12deg) scale(1.1);
+    }
+
+    /* حذف */
+    .page-projects .pj-action-btn.delete {
+        flex: 0 0 34px;
+        background: #ffffff;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .page-projects .pj-action-btn.delete:hover {
+        background: #dc2626;
+        color: #fff;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 14px rgba(220, 38, 38, .35);
+    }
+
+    .page-projects .pj-action-btn.delete:hover i {
+        transform: scale(1.15);
+    }
+
+    /* ============================================
+       حالت خالی
+       ============================================ */
+    .page-projects .pj-empty {
+        background: #ffffff;
+        border: 2px dashed var(--pj-border);
+        border-radius: var(--pj-radius-lg);
+        padding: clamp(40px, 6vw, 70px) 24px;
+        text-align: center;
+        box-shadow: var(--pj-shadow-sm);
+        animation: pjCardEnter .5s cubic-bezier(.25, .46, .45, .94) both;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-projects .pj-empty::before {
+        content: "";
+        position: absolute;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 350px; height: 350px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                rgba(27, 105, 139, .08) 0%,
+                transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-projects .pj-empty-icon {
+        position: relative;
+        width: 88px; height: 88px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .12), rgba(22, 122, 92, .12));
+        color: var(--pj-primary);
+        font-size: 2.2rem;
+        animation: pjEmptyFloat 4s ease-in-out infinite;
+    }
+
+    .page-projects .pj-empty-icon::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px dashed rgba(27, 105, 139, .3);
+        animation: pjRingSpin 20s linear infinite;
+    }
+
+    .page-projects .pj-empty h3 {
+        margin: 0 0 8px;
+        color: var(--pj-text);
+        font-size: 1.1rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .page-projects .pj-empty p {
+        margin: 0 0 22px;
+        color: var(--pj-text-secondary);
+        font-size: .85rem;
+        position: relative;
+    }
+
+    /* ============================================
+       ★ Modal Import
+       ============================================ */
+    .page-projects .pj-modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .5);
+        z-index: 9999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+        padding: 16px;
+    }
+
+    .page-projects .pj-modal-backdrop.show {
+        display: flex;
+    }
+
+    .page-projects .pj-modal-box {
+        background: #fff;
+        border-radius: 18px;
+        padding: 24px;
+        max-width: 480px;
+        width: 100%;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, .3);
+        animation: pjCardEnter .4s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-projects .pj-modal-box h3 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--pj-text);
+        margin: 0 0 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .page-projects .pj-modal-box h3 i {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        color: #fff;
+        font-size: .9rem;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, .3);
+    }
+
+    .page-projects .pj-modal-file-input {
+        display: block;
+        width: 100%;
+        padding: 14px;
+        border: 2px dashed var(--pj-border);
+        border-radius: 11px;
+        background: var(--pj-bg-soft);
+        cursor: pointer;
+        font-family: inherit;
+        font-size: .82rem;
+        transition: all var(--pj-transition);
+        margin-bottom: 12px;
+    }
+
+    .page-projects .pj-modal-file-input:hover {
+        border-color: var(--pj-primary);
+        background: color-mix(in srgb, var(--pj-primary) 3%, #ffffff);
+    }
+
+    .page-projects .pj-modal-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 16px;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+
+    @media (max-width: 1200px) {
+        .page-projects .pj-filter {
+            grid-template-columns: 2fr 1fr 1fr;
+        }
+        .page-projects .pj-card {
+            grid-template-columns: minmax(0, 1.4fr) auto;
+        }
+        .page-projects .pj-card-header {
+            grid-column: 1 / -1;
+            border-left: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 15%, #ffffff);
+        }
+        .page-projects .pj-card-side {
+            min-width: 220px;
+        }
+        .page-projects .pj-summary {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 900px) {
+        .page-projects .pj-filter {
+            grid-template-columns: 1fr 1fr;
+        }
+        .page-projects .pj-card {
+            grid-template-columns: 1fr;
+        }
+        .page-projects .pj-card-header {
+            border-bottom: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 15%, #ffffff);
+        }
+        .page-projects .pj-card-side {
+            border-right: none;
+            border-top: 1px solid color-mix(in srgb, var(--pj-color, var(--pj-primary)) 12%, #ffffff);
+            min-width: 0;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-projects .pj-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .page-projects .pj-header-actions { width: 100%; }
+        .page-projects .pj-btn { flex: 1; justify-content: center; }
+
+        .page-projects .pj-filter {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .page-projects .pj-filter-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+        .page-projects .pj-filter-buttons { width: 100%; }
+        .page-projects .pj-filter-buttons .pj-btn { flex: 1; }
+
+        .page-projects .pj-summary {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .page-projects .pj-summary-item {
+            flex-direction: column;
+            text-align: center;
+            padding: 12px 8px;
+        }
+        .page-projects .pj-summary-icon { margin: 0 auto; }
+
+        .page-projects .pj-card-head-top {
+            flex-wrap: wrap;
+        }
+        .page-projects .pj-actions {
+            flex-wrap: wrap;
+        }
+        .page-projects .pj-action-btn.view,
+        .page-projects .pj-action-btn.edit {
+            flex: 1 1 calc(50% - 4px);
+        }
+        .page-projects .pj-action-btn.delete {
+            flex: 1 1 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-projects .pj-wrap { padding: 10px; }
+        .page-projects .pj-card-avatar {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            font-size: 1rem;
+        }
+        .page-projects .pj-actions { flex-direction: column; }
+        .page-projects .pj-action-btn {
+            width: 100%;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-projects .pj-wrap *,
+        .page-projects .pj-wrap *::before,
+        .page-projects .pj-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

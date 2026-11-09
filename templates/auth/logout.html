@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>خروج از حساب</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/auth/logout.css') }}">
+</head>
+<body>
+
+    <div class="logout-card">
+
+        <!-- آیکون با حلقه چرخان -->
+        <div class="logout-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+        </div>
+
+        <!-- عنوان -->
+        <h2>در حال خروج از حساب</h2>
+        <p>لطفاً چند لحظه صبر کنید...</p>
+
+        <!-- نقطه‌های انیمیشنی -->
+        <div class="logout-dots">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <!-- پیام موفقیت -->
+        <div class="logout-success" id="successMsg">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>با موفقیت خارج شدید</span>
+        </div>
+
+        <!-- نوار پیشرفت زمان (3 ثانیه) -->
+        <div class="logout-progress">
+            <div class="logout-progress-bar"></div>
+        </div>
+
+    </div>
+
+    <script>
+    (function() {
+        'use strict';
+
+        // ============================================
+        // ★ پاکسازی localStorage از داده‌های دستیار
+        // ============================================
+        try {
+            // حذف هیستوری چت‌های دستیار
+            localStorage.removeItem('assistant_chat_history');
+
+            // حذف همه session های چت (session_xxx و chat_xxx)
+            var keysToRemove = [];
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (key && (key.indexOf('session_') === 0 || key.indexOf('chat_') === 0)) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(function(key) {
+                localStorage.removeItem(key);
+            });
+
+            console.log('✅ localStorage پاک شد. حذف شد:', keysToRemove.length, 'کلید');
+        } catch (e) {
+            console.warn('⚠️ خطا در پاکسازی:', e);
+        }
+
+        // ============================================
+        // ★ نمایش پیام موفقیت بعد از 2 ثانیه
+        // ============================================
+        setTimeout(function() {
+            document.getElementById('successMsg').classList.add('show');
+        }, 2000);
+
+        // ============================================
+        // ★ ریدایرکت به login بعد از 3 ثانیه
+        // ============================================
+        setTimeout(function() {
+            window.location.replace('{{ url_for("auth.login") }}');
+        }, 3000);
+
+    })();
+    </script>
+
+</body>
+</html>

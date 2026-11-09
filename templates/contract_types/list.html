@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}انواع قرارداد{% endblock %}
+{% block body_class %}page-contract-types{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contract_types/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ct-wrap">
+
+    <!-- ============================================
+         هدر صفحه
+         ============================================ -->
+    <div class="ct-header">
+        <div class="ct-header-info">
+            <div class="ct-header-icon">
+                <i class="fa-solid fa-file-contract"></i>
+            </div>
+            <div class="ct-header-text">
+                <h1 class="ct-title">انواع قرارداد</h1>
+                <p class="ct-subtitle">مدیریت انواع قراردادهای پروژه‌ها</p>
+            </div>
+        </div>
+
+        <div class="ct-header-actions">
+            <a href="{{ url_for('contract_types.add_type') }}"
+               class="ct-btn ct-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                افزودن نوع قرارداد
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================
+         لیست کارت‌ها
+         ============================================ -->
+    {% if types %}
+    <div class="ct-grid" id="typesGrid">
+        {% for t in types %}
+        <article class="ct-card {% if not t.is_active %}is-inactive{% endif %}"
+                 data-ct-index="{{ loop.index0 }}"
+                 style="--ct-index: {{ loop.index0 }};
+                        --ct-color: {{ t.color or '#1b698b' }};
+                        --ct-color-light: {{ t.color or '#1b698b' }};">
+
+            <!-- ★ ستون ۱: هدر (کد + عنوان) -->
+            <div class="ct-card-header">
+                <div class="ct-card-title-group">
+                    <div class="ct-card-code-icon">
+                        {{ t.code or '?' }}
+                    </div>
+                    <div class="ct-card-title-content">
+                        <h2 class="ct-card-name" title="{{ t.title }}">
+                            {{ t.title }}
+                        </h2>
+                        {% if t.code %}
+                        <span class="ct-card-subtitle">
+                            <i class="fa-solid fa-barcode"></i>
+                            {{ t.code }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۲: بدنه (توضیحات + ترتیب) -->
+            <div class="ct-card-body">
+                <div class="ct-info-row">
+                    <span class="ct-info-label">
+                        <i class="fa-solid fa-align-right"></i>
+                        توضیحات
+                    </span>
+                    <span class="ct-info-value {{ 'muted' if not t.description else '' }}">
+                        {{ t.description or 'ثبت نشده' }}
+                    </span>
+                </div>
+
+                <div class="ct-info-row">
+                    <span class="ct-info-label">
+                        <i class="fa-solid fa-sort-numeric-down"></i>
+                        ترتیب نمایش
+                    </span>
+                    <span class="ct-info-value">
+                        {{ t.sort_order or 0 }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۳: ساید (وضعیت + اکشن‌ها) -->
+            <div class="ct-card-side">
+
+                <div class="ct-status-card"
+                     style="--status-color: {{ '#16a34a' if t.is_active else '#dc2626' }};">
+                    <div class="ct-status-icon">
+                        <i class="fa-solid {{ 'fa-circle-check' if t.is_active else 'fa-circle-xmark' }}"></i>
+                    </div>
+                    <div class="ct-status-text">
+                        <span class="ct-status-label">وضعیت</span>
+                        <span class="ct-status-value">
+                            {{ 'فعال' if t.is_active else 'غیرفعال' }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="ct-actions">
+                    <a href="{{ url_for('contract_types.edit_type', type_id=t.id) }}"
+                       class="ct-action-btn edit"
+                       title="ویرایش">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('contract_types.delete_type', type_id=t.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('از حذف «{{ t.title }}» مطمئن هستید؟')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                                class="ct-action-btn delete"
+                                title="حذف">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <!-- ===== حالت خالی ===== -->
+    <div class="ct-empty">
+        <div class="ct-empty-icon">
+            <i class="fa-solid fa-file-contract"></i>
+        </div>
+        <h3>هنوز نوع قراردادی ثبت نشده است</h3>
+        <p>برای شروع، اولین نوع قرارداد را اضافه کنید</p>
+        <a href="{{ url_for('contract_types.add_type') }}"
+           class="ct-btn ct-btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            افزودن اولین نوع قرارداد
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/contract_types/list.js') }}"></script>{% endblock %}

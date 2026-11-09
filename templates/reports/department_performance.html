@@ -1,0 +1,772 @@
+{% extends "base.html" %}
+
+{% block title %}
+تحلیل عملکرد دپارتمان‌ها
+{% endblock %}
+
+{% block body_class %}
+page-dept-performance
+{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-dept-performance" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/department_performance.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dp-wrap">
+
+    <header class="dp-header">
+        <div class="dp-header-title">
+            <div class="dp-header-icon">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="dp-header-text">
+                <h1>تحلیل عملکرد دپارتمان‌ها</h1>
+                <p>روند ماهانه اسناد، نرخ تکمیل و رتبه‌بندی دپارتمان‌ها</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filters -->
+    <section class="dp-filters">
+        <div class="dp-filter-section">
+            <div class="dp-filter-label">
+                <i class="fa-solid fa-calendar"></i>
+                سال شمسی
+            </div>
+            <div class="dp-filter-buttons" id="yearButtons">
+                <button type="button" class="dp-filter-btn {% if filters.year == 'all' %}active{% endif %}"
+                    data-year="all">
+                    <i class="fa-solid fa-layer-group"></i>
+                    همه سال‌ها
+                </button>
+                {% for y in available_years %}
+                <button type="button" class="dp-filter-btn {% if filters.year|string == y|string %}active{% endif %}"
+                    data-year="{{ y }}">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    {{ y }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dp-filter-section">
+            <div class="dp-filter-label">
+                <i class="fa-solid fa-building"></i>
+                دپارتمان
+            </div>
+            <div class="dp-filter-buttons" id="departmentButtons">
+                <button type="button" class="dp-filter-btn {% if not filters.department_id %}active{% endif %}"
+                    data-dept="all">
+                    <i class="fa-solid fa-layer-group"></i>
+                    همه دپارتمان‌ها
+                </button>
+                {% for dep in departments %}
+                <button type="button" class="dp-filter-btn {% if filters.department_id == dep.id %}active{% endif %}"
+                    data-dept="{{ dep.id }}">
+                    <i class="fa-solid fa-sitemap"></i>
+                    {{ dep.title }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <!-- Method Box -->
+    <section class="dp-method-box">
+        <i class="fa-solid fa-lightbulb"></i>
+        <div>
+            <strong>روش محاسبه آمار و امتیاز عملکرد</strong>
+            <p style="margin: 6px 0 4px 0;">در این تحلیل، اسناد به سه دسته تقسیم می‌شوند:</p>
+            <div class="dp-method-badges">
+                <span class="dp-method-badge included">
+                    <i class="fa-solid fa-check"></i>
+                    تکمیل‌شده + باقی‌مانده فعال → در امتیاز لحاظ می‌شوند
+                </span>
+                <span class="dp-method-badge excluded">
+                    <i class="fa-solid fa-xmark"></i>
+                    حذف‌شده + متوقف + جهت اطلاع → خارج از محاسبه
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <div id="dpContent">
+
+        <!-- Summary -->
+        <section class="dp-summary-grid">
+            <div class="dp-summary-card c-total">
+                <div class="dp-summary-icon"><i class="fa-solid fa-file-lines"></i></div>
+                <div class="dp-summary-content">
+                    <span class="dp-summary-label">کل اسناد</span>
+                    <span class="dp-summary-value" id="summaryTotal">0</span>
+                </div>
+            </div>
+
+            <div class="dp-summary-card c-completed">
+                <div class="dp-summary-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="dp-summary-content">
+                    <span class="dp-summary-label">تکمیل‌شده</span>
+                    <span class="dp-summary-value" id="summaryCompleted">0</span>
+                </div>
+            </div>
+
+            <div class="dp-summary-card c-pending" id="pendingCard" role="button" tabindex="0">
+                <div class="dp-summary-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <div class="dp-summary-content">
+                    <span class="dp-summary-label">باقی‌مانده</span>
+                    <span class="dp-summary-value" id="summaryPending">0</span>
+                </div>
+            </div>
+
+            <div class="dp-summary-card c-rate">
+                <div class="dp-summary-icon"><i class="fa-solid fa-percent"></i></div>
+                <div class="dp-summary-content">
+                    <span class="dp-summary-label">نرخ تکمیل</span>
+                    <span class="dp-summary-value" id="summaryRate">0<small>%</small></span>
+                </div>
+            </div>
+
+            <div class="dp-summary-card c-excluded" id="excludedCard" role="button" tabindex="0">
+                <div class="dp-summary-icon"><i class="fa-solid fa-circle-minus"></i></div>
+                <div class="dp-summary-content">
+                    <span class="dp-summary-label">خارج از محاسبه</span>
+                    <span class="dp-summary-value" id="summaryExcluded">0</span>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- نمودار خطی -->
+        <section class="dp-chart-card">
+            <div class="dp-chart-header">
+                <h2 class="dp-chart-title">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>روند ماهانه اسناد</span>
+                    <small id="trendSubtitle">همه سال‌ها</small>
+                </h2>
+            </div>
+
+            <div class="dp-chart-wrapper">
+                <canvas id="monthlyTrendChart"></canvas>
+            </div>
+
+            <div class="dp-info-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <strong>راهنمای نمودار روند ماهانه</strong>
+                    این نمودار روند اسناد را در طول ماه‌های شمسی نشان می‌دهد:
+                    <br>
+                    • <strong>کل اسناد مؤثر</strong> = مجموع تکمیل‌شده + باقی‌مانده فعال
+                    <br>
+                    • <strong>تکمیل‌شده</strong> = اسنادی که دپارتمان کارشان را تمام کرده
+                    <br>
+                    • <strong>باقی‌مانده فعال</strong> = اسنادی که در حال بررسی هستند
+                    <br>
+                    <span class="dp-note">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        با کشیدن دستگیره‌های نوار، می‌توانید بازه زمانی دلخواه را انتخاب کنید
+                        و رتبه‌بندی دپارتمان‌ها به‌صورت لحظه‌ای بر اساس همان بازه محاسبه می‌شود.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+
+                <!-- Time Range Slider -->
+                <section class="dp-chart-card">
+                    <div class="dp-chart-header">
+                        <h2 class="dp-chart-title">
+                            <i class="fa-solid fa-sliders"></i>
+                            <span>انتخاب بازه زمانی</span>
+                            <small>با کشیدن دستگیره‌ها، هر دو نمودار و رتبه‌بندی به‌روز می‌شوند</small>
+                        </h2>
+                    </div>
+                
+                    <div class="dp-time-range-section" id="timeRangeSection" style="display: none;">
+                        <div class="dp-time-range-header">
+                            <span class="dp-time-range-label">
+                                <i class="fa-solid fa-calendar-check"></i>
+                                <span>بازه فعال:</span>
+                                <span class="dp-brush-count-badge">
+                                    <i class="fa-solid fa-calendar"></i>
+                                    <span id="brushCountText">— ماه</span>
+                                </span>
+                            </span>
+                
+                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                <span class="dp-time-range-values">
+                                    <span id="brushValueFrom">—</span>
+                                    <span class="dp-range-sep">←</span>
+                                    <span id="brushValueTo">—</span>
+                                </span>
+                                <button type="button" class="dp-time-range-reset" id="brushResetBtn">
+                                    <i class="fa-solid fa-rotate-right"></i>
+                                    <span>بازنشانی</span>
+                                </button>
+                            </div>
+                        </div>
+                
+                        <div class="dp-brush" id="dpBrush">
+                            <div class="dp-brush-track"></div>
+                            <div class="dp-brush-range" id="dpBrushRange"></div>
+                            <div class="dp-brush-thumb" id="dpBrushThumbFrom"></div>
+                            <div class="dp-brush-thumb" id="dpBrushThumbTo"></div>
+                            <div class="dp-brush-ticks" id="dpBrushTicks"></div>
+                            <div class="dp-brush-labels" id="dpBrushLabels"></div>
+                        </div>
+                    </div>
+                
+                    <div class="dp-trend-filter-info" id="trendFilterInfo" style="display: none;">
+                        <div class="dp-trend-filter-item" id="trendFilterYearItem" style="display: none;">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            <span class="dp-trend-filter-label">سال:</span>
+                            <strong class="dp-trend-filter-value" id="trendFilterYear">—</strong>
+                        </div>
+                        <div class="dp-trend-filter-item" id="trendFilterDeptItem" style="display: none;">
+                            <i class="fa-solid fa-building"></i>
+                            <span class="dp-trend-filter-label">دپارتمان:</span>
+                            <strong class="dp-trend-filter-value" id="trendFilterDept">—</strong>
+                        </div>
+                        <div class="dp-trend-filter-item" id="trendFilterRangeItem" style="display: none;">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span class="dp-trend-filter-label">بازه:</span>
+                            <strong class="dp-trend-filter-value" id="trendFilterRange">—</strong>
+                        </div>
+                    </div>
+                </section>
+
+
+        <!-- رتبه‌بندی -->
+        <section class="dp-chart-card">
+            <div class="dp-chart-header">
+                <h2 class="dp-chart-title">
+                    <i class="fa-solid fa-ranking-star"></i>
+                    <span>رتبه‌بندی دپارتمان‌ها</span>
+                    <small id="rankingSubtitle">بر اساس امتیاز عملکرد (کل دوره)</small>
+                </h2>
+            </div>
+
+            <div class="dp-ranking-wrapper">
+                <div class="dp-ranking-list" id="rankingList"></div>
+            </div>
+
+            <div class="dp-info-box">
+                <i class="fa-solid fa-circle-info"></i>
+                <div>
+                    <strong>چطور بهترین دپارتمان انتخاب می‌شود؟</strong>
+                    امتیاز هر دپارتمان از ترکیب دو معیار محاسبه می‌شود:
+                    <span class="dp-formula">امتیاز = (نرخ تکمیل × 60٪) + (حجم کار × 40٪)</span>
+                    <br>
+                    • <strong>نرخ تکمیل</strong> = (تعداد تکمیل‌شده ÷ اسناد مؤثر) × ۱۰۰
+                    <br>
+                    • <strong>حجم کار</strong> = (اسناد مؤثر دپارتمان ÷ بیشترین اسناد مؤثر) × ۱۰۰
+                    <br>
+                    <span class="dp-note">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        با تغییر بازه زمانی روی نوار بالا، امتیازها و رتبه‌ها
+                        به‌صورت لحظه‌ای محاسبه مجدد می‌شوند و با انیمیشن نرم جابه‌جا می‌گردند.
+                    </span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================ -->
+        <!-- ★★★ راهنمای جامع محاسبات ★★★ -->
+        <!-- ============================================================ -->
+        <section class="dp-guide-section">
+            <div class="dp-guide-header">
+                <div class="dp-guide-header-icon">
+                    <i class="fa-solid fa-book-open-reader"></i>
+                </div>
+                <div>
+                    <h2>راهنمای جامع محاسبات و مفاهیم</h2>
+                    <p>توضیح کامل همه‌ی اعداد، معیارها و روش محاسبه امتیاز عملکرد</p>
+                </div>
+            </div>
+
+            <div class="dp-guide-grid">
+
+                <!-- ۱) دسته‌بندی اسناد -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #2b6cb0;">
+                            <i class="fa-solid fa-folder-tree"></i>
+                        </div>
+                        <h3>دسته‌بندی اسناد</h3>
+                    </div>
+                    <p class="dp-guide-intro">
+                        اسناد بر اساس وضعیتشون به سه دسته‌ی اصلی تقسیم می‌شن:
+                    </p>
+                    <div class="dp-guide-list">
+                        <div class="dp-guide-item" style="--item-color: #16a34a;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div>
+                                <strong>تکمیل‌شده</strong>
+                                <span>اسنادی که دپارتمان کارشون رو به پایان رسونده</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #d97706;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <div>
+                                <strong>باقی‌مانده فعال</strong>
+                                <span>اسنادی که در حال بررسی و پیگیری هستن</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #64748b;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-ban"></i>
+                            </div>
+                            <div>
+                                <strong>خارج از محاسبه</strong>
+                                <span>حذف‌شده، متوقف، یا جهت اطلاع (بدون نیاز به اقدام)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dp-guide-note">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        <span>
+                            چرا «خارج از محاسبه» در امتیاز دخالت نمی‌کنه؟ چون دپارتمان روی این اسناد
+                            عملاً کاری انجام نداده، پس نه در صورت (تکمیل) و نه در مخرج (کل) حساب نمی‌شه.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ۲) کارت‌های آماری -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #805ad5;">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <h3>معنی کارت‌های آماری</h3>
+                    </div>
+                    <div class="dp-guide-list">
+                        <div class="dp-guide-item" style="--item-color: #2b6cb0;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+                            <div>
+                                <strong>کل اسناد</strong>
+                                <span>مجموع همه‌ی اسناد در دپارتمان (شامل هر سه دسته)</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #16a34a;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div>
+                                <strong>تکمیل‌شده</strong>
+                                <span>تعداد اسناد با وضعیت «تکمیل‌شده»</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #d97706;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <div>
+                                <strong>باقی‌مانده</strong>
+                                <span>تعداد اسناد در حال بررسی</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #805ad5;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-percent"></i>
+                            </div>
+                            <div>
+                                <strong>نرخ تکمیل</strong>
+                                <span class="dp-guide-formula-line">
+                                    <code>(تکمیل‌شده ÷ اسناد مؤثر) × ۱۰۰</code>
+                                </span>
+                                <small>اسناد مؤثر = تکمیل‌شده + باقی‌مانده فعال</small>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #64748b;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-circle-minus"></i>
+                            </div>
+                            <div>
+                                <strong>خارج از محاسبه</strong>
+                                <span>مجموع اسناد حذف‌شده + متوقف + جهت اطلاع</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ۳) نمودار روند ماهانه -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #1b698b;">
+                            <i class="fa-solid fa-chart-line"></i>
+                        </div>
+                        <h3>نمودار روند ماهانه</h3>
+                    </div>
+                    <p class="dp-guide-intro">
+                        این نمودار تعداد اسناد رو در هر ماه شمسی نشون می‌ده:
+                    </p>
+                    <div class="dp-guide-list">
+                        <div class="dp-guide-item" style="--item-color: #1b698b;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                            <div>
+                                <strong>خط آبی — کل اسناد مؤثر</strong>
+                                <span>تکمیل‌شده + باقی‌مانده فعال در آن ماه</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #16a34a;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                            <div>
+                                <strong>خط سبز — تکمیل‌شده</strong>
+                                <span>اسنادی که در آن ماه تکمیل شدن</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #d97706;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                            <div>
+                                <strong>خط نارنجی — باقی‌مانده فعال</strong>
+                                <span>اسنادی که در آن ماه در حال بررسی بودن</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dp-guide-note">
+                        <i class="fa-solid fa-hand-pointer"></i>
+                        <span>
+                            با <strong>کلیک روی هر نقطه</strong> از نمودار، جزئیات دقیق آن ماه نمایش داده می‌شه.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ۴) نوار زمان -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #319795;">
+                            <i class="fa-solid fa-sliders"></i>
+                        </div>
+                        <h3>نوار انتخاب بازه زمانی</h3>
+                    </div>
+                    <p class="dp-guide-intro">
+                        این نوار به شما اجازه می‌ده یه بازه‌ی زمانی دلخواه انتخاب کنید:
+                    </p>
+                    <div class="dp-guide-list">
+                        <div class="dp-guide-item" style="--item-color: #1b698b;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-arrows-left-right"></i>
+                            </div>
+                            <div>
+                                <strong>کشیدن دستگیره‌ها</strong>
+                                <span>دستگیره‌ی چپ = شروع بازه، دستگیره‌ی راست = پایان بازه</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #1b698b;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-hand-pointer"></i>
+                            </div>
+                            <div>
+                                <strong>کلیک روی نوار</strong>
+                                <span>نزدیک‌ترین دستگیره به محل کلیک منتقل می‌شه</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #e17055;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </div>
+                            <div>
+                                <strong>دکمه بازنشانی</strong>
+                                <span>برگشت به حالت اولیه (کل ماه‌های موجود)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dp-guide-note"
+                        style="background: #ecfdf5; border-right-color: #16a34a; color: #14532d;">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>
+                            <strong>اثر جادویی:</strong> با تغییر بازه، هم نمودار خطی فیلتر می‌شه
+                            و هم <strong>رتبه‌بندی دپارتمان‌ها</strong> به‌صورت لحظه‌ای با انیمیشن نرم
+                            محاسبه مجدد می‌شه.
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ۵) امتیاز عملکرد -->
+                <div class="dp-guide-card dp-guide-card-wide">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #d97706;">
+                            <i class="fa-solid fa-trophy"></i>
+                        </div>
+                        <h3>امتیاز عملکرد — چطور محاسبه می‌شه؟</h3>
+                    </div>
+                    <p class="dp-guide-intro">
+                        امتیاز هر دپارتمان ترکیبی از دو معیار مهمه که با وزن‌های متفاوت محاسبه می‌شه:
+                    </p>
+
+                    <div class="dp-guide-formula-box">
+                        <span class="dp-guide-formula-label">فرمول اصلی:</span>
+                        <code class="dp-guide-formula-code">
+                            امتیاز = (نرخ تکمیل × ۰.۶) + (حجم کار × ۰.۴)
+                        </code>
+                    </div>
+
+                    <div class="dp-guide-two-col">
+                        <div class="dp-guide-detail" style="--detail-color: #16a34a;">
+                            <div class="dp-guide-detail-header">
+                                <i class="fa-solid fa-percent"></i>
+                                <strong>نرخ تکمیل (وزن ۶۰٪)</strong>
+                            </div>
+                            <p>
+                                نشون‌دهنده‌ی <strong>کیفیت کار</strong> دپارتمانه.
+                                هرچی درصد بیشتری از اسناد مؤثر تکمیل شده باشه، این معیار بالاتره.
+                            </p>
+                            <div class="dp-guide-formula-line">
+                                <code>نرخ تکمیل = (تکمیل‌شده ÷ اسناد مؤثر) × ۱۰۰</code>
+                            </div>
+                            <div class="dp-guide-example">
+                                <strong>مثال:</strong>
+                                اگه ۸۰ سند از ۱۰۰ سند مؤثر تکمیل شده باشه
+                                → نرخ تکمیل = ۸۰٪
+                            </div>
+                        </div>
+
+                        <div class="dp-guide-detail" style="--detail-color: #2b6cb0;">
+                            <div class="dp-guide-detail-header">
+                                <i class="fa-solid fa-chart-simple"></i>
+                                <strong>حجم کار (وزن ۴۰٪)</strong>
+                            </div>
+                            <p>
+                                نشون‌دهنده‌ی <strong>میزان فعالیت</strong> دپارتمانه.
+                                دپارتمانی که اسناد مؤثر بیشتری داره، حجم کارش بالاتره.
+                            </p>
+                            <div class="dp-guide-formula-line">
+                                <code>حجم کار = (اسناد مؤثر دپارتمان ÷ بیشترین اسناد مؤثر) × ۱۰۰</code>
+                            </div>
+                            <div class="dp-guide-example">
+                                <strong>مثال:</strong>
+                                اگه پرکارترین دپارتمان ۵۰ سند مؤثر داشته باشه
+                                و دپارتمان شما ۲۵ سند
+                                → حجم کار = ۵۰٪
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dp-guide-why">
+                        <div class="dp-guide-why-title">
+                            <i class="fa-solid fa-circle-question"></i>
+                            چرا این دو معیار با هم؟
+                        </div>
+                        <ul class="dp-guide-why-list">
+                            <li>
+                                <strong>فقط نرخ تکمیل کافی نیست:</strong>
+                                دپارتمانی که فقط ۵ سند داشته و همش رو تکمیل کرده نباید بالاتر از
+                                دپارتمانی باشه که ۵۰ سند داشته و ۴۵ تاش رو تکمیل کرده.
+                            </li>
+                            <li>
+                                <strong>فقط حجم کار هم کافی نیست:</strong>
+                                دپارتمانی که ۱۰۰ سند گرفته ولی فقط ۱۰ تاش رو تکمیل کرده
+                                نباید بالاتر از دپارتمانی باشه که ۵۰ سند گرفته و ۴۵ تاش رو تکمیل کرده.
+                            </li>
+                            <li>
+                                <strong>پس با ترکیب این دو:</strong>
+                                دپارتمان‌هایی که <span class="dp-guide-highlight">هم پرکار بودن و هم
+                                    کارشون رو خوب انجام دادن</span> بالاترین امتیاز رو می‌گیرن.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- ۶) معنی رنگ‌ها -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #22c55e;">
+                            <i class="fa-solid fa-palette"></i>
+                        </div>
+                        <h3>معنی رنگ امتیاز</h3>
+                    </div>
+                    <p class="dp-guide-intro">
+                        رنگ هر کارت رتبه‌بندی نشون‌دهنده‌ی سطح عملکرده:
+                    </p>
+                    <div class="dp-guide-colors">
+                        <div class="dp-guide-color" style="--color: #16a34a;">
+                            <span class="dp-guide-color-dot"></span>
+                            <div>
+                                <strong>سبز تیره (۸۰-۱۰۰)</strong>
+                                <span>عملکرد عالی</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-color" style="--color: #22c55e;">
+                            <span class="dp-guide-color-dot"></span>
+                            <div>
+                                <strong>سبز (۶۰-۷۹)</strong>
+                                <span>عملکرد خوب</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-color" style="--color: #f59e0b;">
+                            <span class="dp-guide-color-dot"></span>
+                            <div>
+                                <strong>زرد (۴۰-۵۹)</strong>
+                                <span>عملکرد متوسط</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-color" style="--color: #fb923c;">
+                            <span class="dp-guide-color-dot"></span>
+                            <div>
+                                <strong>نارنجی (۲۰-۳۹)</strong>
+                                <span>عملکرد ضعیف</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-color" style="--color: #dc2626;">
+                            <span class="dp-guide-color-dot"></span>
+                            <div>
+                                <strong>قرمز (۰-۱۹)</strong>
+                                <span>عملکرد بحرانی</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ۷) مدال‌ها و بج‌ها -->
+                <div class="dp-guide-card">
+                    <div class="dp-guide-card-head">
+                        <div class="dp-guide-card-icon" style="--icon-color: #fbbf24;">
+                            <i class="fa-solid fa-medal"></i>
+                        </div>
+                        <h3>معنی مدال‌ها و بج‌ها</h3>
+                    </div>
+                    <div class="dp-guide-list">
+                        <div class="dp-guide-item" style="--item-color: #fbbf24;">
+                            <div class="dp-guide-item-icon"
+                                style="background: linear-gradient(135deg, #fbbf24, #d97706);">
+                                <i class="fa-solid fa-crown"></i>
+                            </div>
+                            <div>
+                                <strong>تاج طلایی</strong>
+                                <span>رتبه‌ی اول — بهترین دپارتمان</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #94a3b8;">
+                            <div class="dp-guide-item-icon"
+                                style="background: linear-gradient(135deg, #cbd5e1, #94a3b8);">
+                                <i class="fa-solid fa-medal"></i>
+                            </div>
+                            <div>
+                                <strong>مدال نقره‌ای</strong>
+                                <span>رتبه‌ی دوم</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #b45309;">
+                            <div class="dp-guide-item-icon"
+                                style="background: linear-gradient(135deg, #d97706, #b45309);">
+                                <i class="fa-solid fa-award"></i>
+                            </div>
+                            <div>
+                                <strong>نشان برنزی</strong>
+                                <span>رتبه‌ی سوم</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #16a34a;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-arrow-up"></i>
+                            </div>
+                            <div>
+                                <strong>بج سبز با فلش بالا</strong>
+                                <span>چند رتبه نسبت به بازه‌ی قبلی صعود کرده</span>
+                            </div>
+                        </div>
+                        <div class="dp-guide-item" style="--item-color: #dc2626;">
+                            <div class="dp-guide-item-icon">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </div>
+                            <div>
+                                <strong>بج قرمز با فلش پایین</strong>
+                                <span>چند رتبه نسبت به بازه‌ی قبلی نزول کرده</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </div>
+
+</div>
+
+<!-- Tooltip -->
+<div id="dp-chart-tooltip"></div>
+
+<!-- Modals -->
+<div class="dp-modal-backdrop" id="pendingModal">
+    <div class="dp-modal">
+        <div class="dp-modal-header">
+            <h3><i class="fa-solid fa-hourglass-half"></i> <span>اسناد باقی‌مانده</span></h3>
+            <button type="button" class="dp-modal-close" id="pendingModalClose"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="dp-modal-body">
+            <div class="dp-modal-description">
+                <strong>اسناد باقی‌مانده فعال</strong> شامل اسنادی است که دپارتمان
+                هنوز کاری روی آن‌ها انجام نداده و در وضعیت <strong>«در دست بررسی»</strong> قرار دارند.
+            </div>
+            <div class="dp-status-list" id="pendingStatusList"></div>
+        </div>
+        <div class="dp-modal-footer">
+            <span>مجموع باقی‌مانده فعال:</span>
+            <strong id="pendingModalTotal">0</strong>
+        </div>
+    </div>
+</div>
+
+<div class="dp-modal-backdrop" id="excludedModal">
+    <div class="dp-modal">
+        <div class="dp-modal-header">
+            <h3><i class="fa-solid fa-circle-minus"></i> <span>اسناد خارج از محاسبه</span></h3>
+            <button type="button" class="dp-modal-close" id="excludedModalClose"><i
+                    class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="dp-modal-body">
+            <div class="dp-modal-description" style="background: #f1f5f9; border-right-color: #64748b; color: #334155;">
+                <strong>اسناد خارج از محاسبه:</strong> حذف‌شده + متوقف + جهت اطلاع
+            </div>
+            <div class="dp-status-list" id="excludedStatusList"></div>
+        </div>
+        <div class="dp-modal-footer">
+            <span>مجموع خارج از محاسبه:</span>
+            <strong id="excludedModalTotal" style="color: #64748b;">0</strong>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+<script type="application/json" id="dpInitialData">
+{
+    "summary": {{ summary | tojson }},
+    "monthly_trend": {{ monthly_trend | tojson }},
+    "ranking": {{ ranking | tojson }},
+    "departments": {{ departments | tojson }},
+    "available_years": {{ available_years | tojson }},
+    "filters": {{ filters | tojson }},
+    "monthly_per_department": {{ monthly_per_department | tojson }}
+}
+</script>
+
+<script src="{{ url_for('static', filename='js/pages/reports/department_performance.js') }}"></script>
+{% endblock %}

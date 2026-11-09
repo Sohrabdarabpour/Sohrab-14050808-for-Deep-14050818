@@ -1,0 +1,872 @@
+/* استایل صفحه: contract_types/list.html */
+
+    /* ============================================
+       SCOPE: .page-contract-types
+       ============================================ */
+    .page-contract-types {
+        --ct-primary: #1b698b;
+        --ct-primary-light: #167a5c;
+        --ct-primary-dark: #14506a;
+        --ct-text: #2d3e4a;
+        --ct-text-secondary: #6b7d8a;
+        --ct-text-muted: #a0aeb8;
+        --ct-border: #d8e6ed;
+        --ct-bg-soft: #f7fafc;
+        --ct-radius-lg: 22px;
+        --ct-radius-md: 14px;
+        --ct-radius-sm: 10px;
+        --ct-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --ct-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --ct-transition: .35s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* تمام‌عرض */
+    .page-contract-types .ct-wrap {
+        width: 100%;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+    .page-contract-types .ct-wrap * { box-sizing: border-box; }
+
+    /* انیمیشن‌ها */
+    @keyframes ctCardEnter {
+        0% { opacity: 0; transform: translateY(30px) scale(.96); }
+        100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes ctHeaderEnter {
+        0% { opacity: 0; transform: translateY(-20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ctShimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    @keyframes ctRingSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes ctPulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: .45; transform: scale(1.35); }
+    }
+    @keyframes ctEmptyFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-12px); }
+    }
+
+    /* ============================================
+       هدر صفحه
+       ============================================ */
+    .page-contract-types .ct-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+        padding-bottom: 22px;
+        position: relative;
+        animation: ctHeaderEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+    }
+
+    .page-contract-types .ct-header::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        height: 2px;
+        background: linear-gradient(90deg,
+                transparent 0%,
+                color-mix(in srgb, var(--ct-primary) 30%, transparent) 20%,
+                color-mix(in srgb, var(--ct-primary) 30%, transparent) 80%,
+                transparent 100%);
+        border-radius: 2px;
+    }
+
+    .page-contract-types .ct-header-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .page-contract-types .ct-header-icon {
+        position: relative;
+        width: clamp(50px, 4.8vw, 60px);
+        height: clamp(50px, 4.8vw, 60px);
+        min-width: clamp(50px, 4.8vw, 60px);
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--ct-primary) 0%, var(--ct-primary-light) 100%);
+        color: #fff;
+        font-size: clamp(1.15rem, 1.5vw, 1.4rem);
+        box-shadow:
+            0 10px 24px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-contract-types .ct-header-icon::before {
+        content: "";
+        position: absolute;
+        inset: -6px;
+        border-radius: 22px;
+        border: 2px dashed rgba(27, 105, 139, .35);
+        opacity: 0;
+        transition: opacity .4s ease, transform .6s ease;
+    }
+
+    .page-contract-types .ct-header-icon:hover {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-contract-types .ct-header-icon:hover::before {
+        opacity: 1;
+        transform: rotate(180deg);
+    }
+
+    .page-contract-types .ct-header-text { min-width: 0; }
+
+    .page-contract-types .ct-title {
+        margin: 0;
+        font-size: clamp(1.15rem, 1.6vw, 1.45rem);
+        font-weight: 800;
+        color: var(--ct-text);
+        letter-spacing: -.3px;
+        background: linear-gradient(135deg, var(--ct-text) 0%, var(--ct-primary-dark) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-contract-types .ct-subtitle {
+        margin: 5px 0 0;
+        font-size: clamp(.74rem, .9vw, .84rem);
+        color: var(--ct-text-secondary);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       دکمه‌های هدر
+       ============================================ */
+    .page-contract-types .ct-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .page-contract-types .ct-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.76rem, .88vw, .86rem);
+        font-weight: 700;
+        white-space: nowrap;
+        transition: all var(--ct-transition);
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        overflow: hidden;
+        isolation: isolate;
+    }
+
+    .page-contract-types .ct-btn i {
+        font-size: .9rem;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-contract-types .ct-btn-primary {
+        background: linear-gradient(135deg, var(--ct-primary) 0%, var(--ct-primary-light) 100%);
+        color: #fff;
+        box-shadow:
+            0 8px 22px rgba(27, 105, 139, .32),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+    }
+
+    .page-contract-types .ct-btn-primary::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg,
+                transparent 0%,
+                rgba(255, 255, 255, .3) 50%,
+                transparent 100%);
+        background-size: 200% 100%;
+        opacity: 0;
+        transition: opacity .3s ease;
+        z-index: -1;
+    }
+
+    .page-contract-types .ct-btn-primary:hover::before {
+        opacity: 1;
+        animation: ctShimmer 1.5s linear infinite;
+    }
+
+    .page-contract-types .ct-btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow:
+            0 14px 30px rgba(27, 105, 139, .42),
+            inset 0 -2px 6px rgba(0, 0, 0, .1);
+        color: #fff;
+    }
+
+    .page-contract-types .ct-btn-primary:hover i {
+        transform: rotate(180deg);
+    }
+
+    .page-contract-types .ct-btn:active {
+        transform: translateY(-1px) scale(.98);
+    }
+
+    /* ============================================
+       ★ گرید — یک کارت در هر ردیف
+       ============================================ */
+    .page-contract-types .ct-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    /* ============================================
+       ★ کارت نوع قرارداد — چیدمان افقی
+       ============================================ */
+    .page-contract-types .ct-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr) auto;
+        align-items: stretch;
+        gap: 0;
+        background: #ffffff;
+        border: 1.5px solid var(--ct-border);
+        border-radius: var(--ct-radius-lg);
+        box-shadow: var(--ct-shadow-sm);
+        overflow: hidden;
+        transition:
+            transform .45s cubic-bezier(.25, .46, .45, .94),
+            box-shadow .45s ease,
+            border-color .35s ease;
+        isolation: isolate;
+        min-width: 0;
+        animation: ctCardEnter .7s cubic-bezier(.25, .46, .45, .94) both;
+        animation-delay: calc(var(--ct-index, 0) * 60ms + 80ms);
+    }
+
+    /* نوار رنگی کناری */
+    .page-contract-types .ct-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 6px;
+        background: linear-gradient(180deg,
+                var(--ct-color, var(--ct-primary)) 0%,
+                var(--ct-color-light, var(--ct-primary-light)) 100%);
+        z-index: 3;
+        transition: width .35s ease;
+    }
+
+    .page-contract-types .ct-card:hover::before {
+        width: 8px;
+    }
+
+    /* دایره تزئینی */
+    .page-contract-types .ct-card::after {
+        content: "";
+        position: absolute;
+        top: -80px;
+        left: -80px;
+        width: 240px;
+        height: 240px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                var(--ct-color, var(--ct-primary)) 0%,
+                transparent 70%);
+        opacity: .06;
+        transition: all 1s cubic-bezier(.25, .46, .45, .94);
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .page-contract-types .ct-card:hover::after {
+        transform: scale(1.4) translate(-20px, 20px);
+        opacity: .12;
+    }
+
+    .page-contract-types .ct-card:hover {
+        transform: translateY(-4px);
+        box-shadow:
+            0 24px 55px color-mix(in srgb, var(--ct-color, var(--ct-primary)) 25%, transparent),
+            0 6px 16px color-mix(in srgb, var(--ct-color, var(--ct-primary)) 14%, transparent);
+        border-color: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 40%, #ffffff);
+    }
+
+    .page-contract-types .ct-card.is-inactive {
+        opacity: .65;
+        filter: grayscale(.35);
+    }
+
+    /* ============================================
+       ★ ستون ۱: هدر کارت (آیکون کد + عنوان)
+       ============================================ */
+    .page-contract-types .ct-card-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--ct-color, var(--ct-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--ct-color, var(--ct-primary)) 2%, #ffffff) 100%);
+        border-left: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 15%, #ffffff);
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-contract-types .ct-card-title-group {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    /* آیکون کد (مربع رنگی با کد قرارداد) */
+    .page-contract-types .ct-card-code-icon {
+        position: relative;
+        width: 60px;
+        height: 60px;
+        min-width: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--ct-color, var(--ct-primary)) 0%,
+                var(--ct-color-light, var(--ct-primary-light)) 100%);
+        color: #fff;
+        font-size: 1.15rem;
+        font-weight: 800;
+        box-shadow:
+            0 8px 20px color-mix(in srgb, var(--ct-color, var(--ct-primary)) 40%, transparent),
+            inset 0 -2px 6px rgba(0, 0, 0, .12);
+        flex-shrink: 0;
+        transition: transform .5s cubic-bezier(.34, 1.56, .64, 1);
+        z-index: 1;
+        letter-spacing: -.5px;
+    }
+
+    .page-contract-types .ct-card-code-icon::before {
+        content: "";
+        position: absolute;
+        inset: -5px;
+        border-radius: 21px;
+        border: 2px dashed color-mix(in srgb, var(--ct-color, var(--ct-primary)) 40%, transparent);
+        opacity: 0;
+        transition: opacity .4s ease;
+        animation: ctRingSpin 12s linear infinite;
+        animation-play-state: paused;
+    }
+
+    .page-contract-types .ct-card:hover .ct-card-code-icon {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-contract-types .ct-card:hover .ct-card-code-icon::before {
+        opacity: 1;
+        animation-play-state: running;
+    }
+
+    .page-contract-types .ct-card-title-content {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-contract-types .ct-card-name {
+        margin: 0 0 6px;
+        color: var(--ct-text);
+        font-size: clamp(1rem, 1.15vw, 1.15rem);
+        font-weight: 800;
+        line-height: 1.4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        transition: color .3s ease;
+    }
+
+    .page-contract-types .ct-card:hover .ct-card-name {
+        color: var(--ct-color, var(--ct-primary));
+    }
+
+    .page-contract-types .ct-card-subtitle {
+        font-size: .74rem;
+        font-weight: 700;
+        color: var(--ct-color, var(--ct-primary));
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        direction: ltr;
+        background: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 10%, #ffffff);
+        padding: 3px 10px;
+        border-radius: 7px;
+        border: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 22%, #ffffff);
+        transition: all .3s ease;
+    }
+
+    .page-contract-types .ct-card:hover .ct-card-subtitle {
+        background: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 18%, #ffffff);
+        transform: translateX(-2px);
+    }
+
+    /* ============================================
+       ★ ستون ۲: بدنه (توضیحات + ترتیب)
+       ============================================ */
+    .page-contract-types .ct-card-body {
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 4px;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-contract-types .ct-info-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: clamp(.76rem, .88vw, .86rem);
+        min-width: 0;
+        padding: 7px 0;
+        border-bottom: 1px dashed color-mix(in srgb, var(--ct-color, var(--ct-primary)) 15%, transparent);
+        transition: all .3s ease;
+    }
+
+    .page-contract-types .ct-info-row:last-child {
+        border-bottom: none;
+    }
+
+    .page-contract-types .ct-info-row:hover {
+        padding-right: 4px;
+    }
+
+    .page-contract-types .ct-info-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        color: var(--ct-text-secondary);
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .page-contract-types .ct-info-label i {
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 12%, #ffffff);
+        color: var(--ct-color, var(--ct-primary));
+        border-radius: 8px;
+        font-size: .78rem;
+        flex-shrink: 0;
+        transition: all .35s ease;
+    }
+
+    .page-contract-types .ct-card:hover .ct-info-label i {
+        background: var(--ct-color, var(--ct-primary));
+        color: #fff;
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    .page-contract-types .ct-info-value {
+        color: var(--ct-text);
+        font-weight: 700;
+        text-align: left;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        min-width: 0;
+    }
+
+    .page-contract-types .ct-info-value.muted {
+        color: var(--ct-text-muted);
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    /* ============================================
+       ★ ستون ۳: ساید (وضعیت + اکشن‌ها)
+       ============================================ */
+    .page-contract-types .ct-card-side {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: linear-gradient(180deg, #ffffff 0%, var(--ct-bg-soft) 100%);
+        border-right: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 12%, #ffffff);
+        padding: 18px 22px;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        min-width: 220px;
+    }
+
+    /* بج وضعیت (کارت بزرگ) */
+    .page-contract-types .ct-status-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 12%, #ffffff) 0%,
+                color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 4%, #ffffff) 100%);
+        border: 1px solid color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 20%, #ffffff);
+        border-radius: 12px;
+        transition: all .4s cubic-bezier(.25, .46, .45, .94);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-contract-types .ct-status-card::before {
+        content: "";
+        position: absolute;
+        bottom: -25px;
+        right: -25px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: var(--status-color, var(--ct-color, var(--ct-primary)));
+        opacity: .08;
+        transition: all .7s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-contract-types .ct-status-card:hover::before {
+        transform: scale(1.8);
+        opacity: .18;
+    }
+
+    .page-contract-types .ct-status-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 22px color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 22%, transparent);
+    }
+
+    .page-contract-types .ct-status-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg,
+                var(--status-color, var(--ct-color, var(--ct-primary))) 0%,
+                color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 70%, #000) 100%);
+        color: #fff;
+        font-size: .9rem;
+        box-shadow: 0 6px 14px color-mix(in srgb, var(--status-color, var(--ct-color, var(--ct-primary))) 35%, transparent);
+        position: relative;
+        z-index: 1;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    .page-contract-types .ct-status-card:hover .ct-status-icon {
+        transform: scale(1.1) rotate(-6deg);
+    }
+
+    .page-contract-types .ct-status-text {
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-contract-types .ct-status-label {
+        display: block;
+        font-size: .68rem;
+        color: var(--ct-text-secondary);
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .page-contract-types .ct-status-value {
+        display: block;
+        font-size: .86rem;
+        font-weight: 800;
+        color: var(--status-color, var(--ct-color, var(--ct-primary)));
+        line-height: 1.2;
+    }
+
+    /* اکشن‌ها */
+    .page-contract-types .ct-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .page-contract-types .ct-action-btn {
+        position: relative;
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        min-height: 38px;
+        padding: 8px 12px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .35s cubic-bezier(.25, .46, .45, .94);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+        overflow: hidden;
+        isolation: isolate;
+        background: transparent;
+    }
+
+    .page-contract-types .ct-action-btn i {
+        font-size: .82rem;
+        transition: transform .4s cubic-bezier(.34, 1.56, .64, 1);
+    }
+
+    /* دکمه ویرایش */
+    .page-contract-types .ct-action-btn.edit {
+        background: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 10%, #ffffff);
+        color: var(--ct-color, var(--ct-primary));
+        border-color: color-mix(in srgb, var(--ct-color, var(--ct-primary)) 32%, transparent);
+    }
+
+    .page-contract-types .ct-action-btn.edit::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--ct-color, var(--ct-primary));
+        transform: scaleX(0);
+        transform-origin: right center;
+        transition: transform .4s cubic-bezier(.25, .46, .45, .94);
+        z-index: -1;
+        border-radius: inherit;
+    }
+
+    .page-contract-types .ct-action-btn.edit:hover::before {
+        transform: scaleX(1);
+    }
+
+    .page-contract-types .ct-action-btn.edit:hover {
+        color: #ffffff;
+        border-color: var(--ct-color, var(--ct-primary));
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px color-mix(in srgb, var(--ct-color, var(--ct-primary)) 38%, transparent);
+    }
+
+    .page-contract-types .ct-action-btn.edit:hover i {
+        transform: rotate(-12deg) scale(1.1);
+    }
+
+    /* دکمه حذف */
+    .page-contract-types .ct-action-btn.delete {
+        flex: 0 0 42px;
+        background: #ffffff;
+        color: #b91c1c;
+        border-color: #fecaca;
+    }
+
+    .page-contract-types .ct-action-btn.delete:hover {
+        background: #dc2626;
+        color: #fff;
+        border-color: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(220, 38, 38, .35);
+    }
+
+    .page-contract-types .ct-action-btn.delete:hover i {
+        transform: scale(1.15);
+    }
+
+    /* ============================================
+       حالت خالی
+       ============================================ */
+    .page-contract-types .ct-empty {
+        background: #ffffff;
+        border: 2px dashed var(--ct-border);
+        border-radius: var(--ct-radius-lg);
+        padding: clamp(50px, 7vw, 90px) 24px;
+        text-align: center;
+        box-shadow: var(--ct-shadow-sm);
+        animation: ctCardEnter .6s cubic-bezier(.25, .46, .45, .94) both;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .page-contract-types .ct-empty::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        height: 400px;
+        border-radius: 50%;
+        background: radial-gradient(circle,
+                rgba(27, 105, 139, .08) 0%,
+                transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-contract-types .ct-empty-icon {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .12), rgba(22, 122, 92, .12));
+        color: var(--ct-primary);
+        font-size: 2.5rem;
+        animation: ctEmptyFloat 4s ease-in-out infinite;
+    }
+
+    .page-contract-types .ct-empty-icon::before {
+        content: "";
+        position: absolute;
+        inset: -10px;
+        border-radius: 50%;
+        border: 2px dashed rgba(27, 105, 139, .3);
+        animation: ctRingSpin 20s linear infinite;
+    }
+
+    .page-contract-types .ct-empty h3 {
+        margin: 0 0 10px;
+        color: var(--ct-text);
+        font-size: 1.2rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .page-contract-types .ct-empty p {
+        margin: 0 0 26px;
+        color: var(--ct-text-secondary);
+        font-size: .9rem;
+        position: relative;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+    @media (max-width: 1200px) {
+        .page-contract-types .ct-card {
+            grid-template-columns: minmax(0, 1.4fr) auto;
+        }
+        .page-contract-types .ct-card-header {
+            grid-column: 1 / -1;
+            border-left: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 15%, #ffffff);
+        }
+        .page-contract-types .ct-card-side {
+            min-width: 220px;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .page-contract-types .ct-card {
+            grid-template-columns: 1fr;
+        }
+        .page-contract-types .ct-card-header {
+            border-bottom: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 15%, #ffffff);
+        }
+        .page-contract-types .ct-card-side {
+            border-right: none;
+            border-top: 1px solid color-mix(in srgb, var(--ct-color, var(--ct-primary)) 12%, #ffffff);
+            min-width: 0;
+        }
+    }
+
+    @media (max-width: 700px) {
+        .page-contract-types .ct-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .page-contract-types .ct-header-actions {
+            width: 100%;
+        }
+        .page-contract-types .ct-btn {
+            flex: 1;
+            justify-content: center;
+        }
+        .page-contract-types .ct-card-header {
+            padding: 18px 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .page-contract-types .ct-card-body {
+            padding: 18px 20px;
+        }
+        .page-contract-types .ct-card-side {
+            padding: 16px 20px;
+        }
+        .page-contract-types .ct-card-code-icon {
+            width: 52px;
+            height: 52px;
+            min-width: 52px;
+            font-size: 1rem;
+        }
+        .page-contract-types .ct-card-name {
+            font-size: 1rem;
+            white-space: normal;
+            -webkit-line-clamp: 2;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+        }
+        .page-contract-types .ct-actions {
+            flex-wrap: wrap;
+        }
+        .page-contract-types .ct-action-btn.edit {
+            flex: 1 1 calc(50% - 4px);
+        }
+        .page-contract-types .ct-action-btn.delete {
+            flex: 1 1 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-contract-types .ct-wrap {
+            padding: 10px;
+        }
+        .page-contract-types .ct-card-code-icon {
+            width: 46px;
+            height: 46px;
+            min-width: 46px;
+            font-size: .9rem;
+        }
+        .page-contract-types .ct-actions {
+            flex-direction: column;
+        }
+        .page-contract-types .ct-action-btn {
+            width: 100%;
+            flex: 1 1 100% !important;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-contract-types .ct-wrap *,
+        .page-contract-types .ct-wrap *::before,
+        .page-contract-types .ct-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

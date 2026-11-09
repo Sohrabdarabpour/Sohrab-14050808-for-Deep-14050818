@@ -1,0 +1,1073 @@
+/* استایل صفحه: departments/view.html */
+
+    /* ============================================
+       SCOPE: .page-report-department-documents
+       ============================================ */
+
+    .page-report-department-documents {
+        --dv-primary: #1b698b;
+        --dv-primary-light: #167a5c;
+        --dv-primary-dark: #14506a;
+        --dv-text: #2d3e4a;
+        --dv-text-secondary: #6b7d8a;
+        --dv-text-muted: #a0aeb8;
+        --dv-border: #d8e6ed;
+        --dv-bg-soft: #f7fafc;
+        --dv-radius-lg: 20px;
+        --dv-radius-md: 14px;
+        --dv-radius-sm: 10px;
+        --dv-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --dv-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --dv-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-report-department-documents .dv-wrap {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+
+    .page-report-department-documents .dv-wrap *,
+    .page-report-department-documents .dv-wrap *::before,
+    .page-report-department-documents .dv-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       هدر صفحه
+       ============================================ */
+    .page-report-department-documents .dv-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        flex-wrap: wrap;
+        padding: clamp(18px, 2.2vw, 26px);
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-lg);
+        box-shadow: var(--dv-shadow-sm);
+        margin-bottom: 22px;
+        min-width: 0;
+    }
+
+    .page-report-department-documents .dv-header-title {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        min-width: 0;
+    }
+
+    .page-report-department-documents .dv-header-icon {
+        width: clamp(52px, 5vw, 64px);
+        height: clamp(52px, 5vw, 64px);
+        min-width: clamp(52px, 5vw, 64px);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--dv-primary) 0%, var(--dv-primary-light) 100%);
+        color: #ffffff;
+        font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .28);
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-header-text h1 {
+        margin: 0;
+        color: var(--dv-text);
+        font-size: clamp(1.1rem, 1.6vw, 1.4rem);
+        font-weight: 900;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    .page-report-department-documents .dv-header-text p {
+        margin: 5px 0 0;
+        color: var(--dv-text-secondary);
+        font-size: clamp(.72rem, .85vw, .82rem);
+    }
+
+    .page-report-department-documents .dv-header-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        padding: 9px 18px;
+        border-radius: 11px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--dv-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-report-department-documents .dv-btn-primary {
+        background: linear-gradient(135deg, var(--dv-primary) 0%, var(--dv-primary-light) 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .25);
+    }
+
+    .page-report-department-documents .dv-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(27, 105, 139, .38);
+        color: #ffffff;
+    }
+
+    .page-report-department-documents .dv-btn-secondary {
+        background: #ffffff;
+        border-color: var(--dv-border);
+        color: var(--dv-text-secondary);
+    }
+
+    .page-report-department-documents .dv-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--dv-primary);
+        transform: translateY(-2px);
+    }
+
+    /* ============================================
+       کارت‌های آمار
+       ============================================ */
+    .page-report-department-documents .dv-info-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 22px;
+    }
+
+    .page-report-department-documents .dv-info-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 18px;
+        background: #ffffff;
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-md);
+        box-shadow: var(--dv-shadow-sm);
+        transition: all var(--dv-transition);
+        overflow: hidden;
+    }
+
+    .page-report-department-documents .dv-info-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg,
+                var(--ic-color, var(--dv-primary)) 0%,
+                var(--ic-color-light, var(--dv-primary-light)) 100%);
+    }
+
+    .page-report-department-documents .dv-info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 26px color-mix(in srgb, var(--ic-color, var(--dv-primary)) 18%, transparent);
+    }
+
+    .page-report-department-documents .dv-info-card:nth-child(1) { --ic-color: #2b6cb0; --ic-color-light: #3d8ad4; }
+    .page-report-department-documents .dv-info-card:nth-child(2) { --ic-color: #167a5c; --ic-color-light: #2aa07a; }
+    .page-report-department-documents .dv-info-card:nth-child(3) { --ic-color: #805ad5; --ic-color-light: #9f7ae8; }
+    .page-report-department-documents .dv-info-card:nth-child(4) { --ic-color: #d69e2e; --ic-color-light: #e8b94a; }
+    .page-report-department-documents .dv-info-card:nth-child(5) { --ic-color: #38a169; --ic-color-light: #48bb78; }
+    .page-report-department-documents .dv-info-card:nth-child(6) { --ic-color: #c53030; --ic-color-light: #e53e3e; }
+
+    .page-report-department-documents .dv-info-icon {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                var(--ic-color, var(--dv-primary)) 0%,
+                var(--ic-color-light, var(--dv-primary-light)) 100%);
+        color: #ffffff;
+        font-size: 1.15rem;
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--ic-color, var(--dv-primary)) 30%, transparent);
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-info-content { min-width: 0; flex: 1; }
+
+    .page-report-department-documents .dv-info-label {
+        display: block;
+        color: var(--dv-text-secondary);
+        font-size: clamp(.68rem, .8vw, .76rem);
+        font-weight: 500;
+        margin-bottom: 4px;
+    }
+
+    .page-report-department-documents .dv-info-value {
+        display: block;
+        color: var(--dv-text);
+        font-size: clamp(1.15rem, 1.6vw, 1.5rem);
+        font-weight: 900;
+        line-height: 1.2;
+    }
+
+    /* ============================================
+       نمودار کارهای در دست بررسی
+       ============================================ */
+    .page-report-department-documents .dv-pending-chart-card {
+        background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-lg);
+        padding: clamp(16px, 1.8vw, 24px);
+        margin-bottom: 22px;
+        box-shadow: var(--dv-shadow-sm);
+    }
+
+    .page-report-department-documents .dv-pending-chart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eef3f6;
+    }
+
+    .page-report-department-documents .dv-pending-chart-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--dv-text);
+        font-size: clamp(.95rem, 1.15vw, 1.1rem);
+        font-weight: 800;
+    }
+
+    .page-report-department-documents .dv-pending-chart-title i {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #d69e2e 0%, #e8b94a 100%);
+        color: #ffffff;
+        border-radius: 10px;
+        font-size: .9rem;
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-pending-chart-meta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(214, 158, 46, .10) 0%, rgba(232, 185, 74, .10) 100%);
+        color: #b7791f;
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 800;
+        border: 1px solid rgba(214, 158, 46, .25);
+    }
+
+    .page-report-department-documents .dv-chart-toggle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 7px 14px;
+        border-radius: 20px;
+        background: #ffffff;
+        color: var(--dv-text-secondary);
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 700;
+        border: 1.5px solid var(--dv-border);
+        cursor: pointer;
+        transition: all var(--dv-transition);
+        user-select: none;
+    }
+
+    .page-report-department-documents .dv-chart-toggle input {
+        width: 16px;
+        height: 16px;
+        accent-color: #d69e2e;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .page-report-department-documents .dv-chart-toggle.active {
+        background: linear-gradient(135deg, rgba(214, 158, 46, .12) 0%, rgba(232, 185, 74, .12) 100%);
+        color: #b7791f;
+        border-color: rgba(214, 158, 46, .35);
+    }
+
+    .page-report-department-documents .dv-pending-chart-wrapper {
+        position: relative;
+        width: 100%;
+        height: clamp(240px, 30vw, 400px);
+        min-height: 220px;
+    }
+
+    /* ============================================
+       پنل فیلتر
+       ============================================ */
+    .page-report-department-documents .dv-filter-panel {
+        background: #ffffff;
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-lg);
+        padding: clamp(16px, 1.8vw, 22px);
+        margin-bottom: 22px;
+        box-shadow: var(--dv-shadow-sm);
+    }
+
+    .page-report-department-documents .dv-filter-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eef3f6;
+    }
+
+    .page-report-department-documents .dv-filter-heading h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--dv-text);
+        font-size: clamp(.92rem, 1.1vw, 1.05rem);
+        font-weight: 800;
+    }
+
+    .page-report-department-documents .dv-filter-heading h2 i {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #e8f2f7 0%, #dceee8 100%);
+        color: var(--dv-primary);
+        border-radius: 9px;
+        font-size: .85rem;
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-filter-heading span {
+        color: var(--dv-text-secondary);
+        font-size: clamp(.7rem, .82vw, .78rem);
+    }
+
+    .page-report-department-documents .dv-filters {
+        display: grid;
+        grid-template-columns: 150px 150px 160px 160px 1fr auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .page-report-department-documents .dv-field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+        min-width: 0;
+    }
+
+    .page-report-department-documents .dv-field label {
+        color: #3d484b;
+        font-size: clamp(.72rem, .82vw, .78rem);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-report-department-documents .dv-field label i {
+        color: var(--dv-primary);
+        font-size: .8rem;
+    }
+
+    .page-report-department-documents .dv-field input,
+    .page-report-department-documents .dv-field select {
+        width: 100%;
+        min-height: 46px;
+        padding: 10px 14px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 11px;
+        background: #ffffff;
+        color: var(--dv-text);
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .88vw, .84rem);
+        outline: none;
+        transition: all var(--dv-transition);
+    }
+
+    .page-report-department-documents .dv-field select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b698b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        background-size: 16px;
+        padding-left: 40px;
+    }
+
+    .page-report-department-documents .dv-field input:focus,
+    .page-report-department-documents .dv-field select:focus {
+        border-color: var(--dv-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .12);
+    }
+
+    .page-report-department-documents .dv-clear-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 46px;
+        padding: 10px 18px;
+        border: 1.5px solid var(--dv-border);
+        border-radius: 11px;
+        background: #ffffff;
+        color: var(--dv-text-secondary);
+        font-family: inherit;
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--dv-transition);
+        white-space: nowrap;
+    }
+
+    .page-report-department-documents .dv-clear-btn:hover {
+        background: #fdf0ec;
+        border-color: #f8d9cc;
+        color: #c05621;
+        transform: translateY(-2px);
+    }
+
+    /* ============================================
+       بخش کارشناسان
+       ============================================ */
+    .page-report-department-documents .dv-experts-section {
+        background: #ffffff;
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-lg);
+        padding: clamp(16px, 1.8vw, 24px);
+        box-shadow: var(--dv-shadow-sm);
+    }
+
+    .page-report-department-documents .dv-experts-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #eef3f6;
+    }
+
+    .page-report-department-documents .dv-experts-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: var(--dv-text);
+        font-size: clamp(.95rem, 1.15vw, 1.15rem);
+        font-weight: 800;
+    }
+
+    .page-report-department-documents .dv-experts-title i {
+        width: 34px;
+        height: 34px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--dv-primary) 0%, var(--dv-primary-light) 100%);
+        color: #ffffff;
+        border-radius: 10px;
+        font-size: .9rem;
+        flex-shrink: 0;
+    }
+
+    .page-report-department-documents .dv-experts-count {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 16px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .10) 0%, rgba(22, 122, 92, .10) 100%);
+        color: var(--dv-primary);
+        font-size: clamp(.72rem, .85vw, .82rem);
+        font-weight: 800;
+        border: 1px solid rgba(27, 105, 139, .15);
+    }
+
+    /* ============================================
+       ★★★ گرید کارت‌ها: ۲ ستون در هر ردیف
+       ============================================ */
+    .page-report-department-documents .dv-experts-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    /* ============================================
+       ★★★ کارت کارشناس — طراحی جدید
+       ============================================ */
+    .page-report-department-documents .dv-expert-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-md);
+        padding: 0;
+        overflow: hidden;
+        transition: transform var(--dv-transition), box-shadow var(--dv-transition), border-color var(--dv-transition);
+        isolation: isolate;
+        min-width: 0;
+    }
+
+    .page-report-department-documents .dv-expert-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg,
+                var(--ex-color, var(--dv-primary)) 0%,
+                var(--ex-color-light, var(--dv-primary-light)) 100%);
+        z-index: 2;
+    }
+
+    .page-report-department-documents .dv-expert-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px color-mix(in srgb, var(--ex-color, var(--dv-primary)) 20%, transparent);
+        border-color: color-mix(in srgb, var(--ex-color, var(--dv-primary)) 35%, #ffffff);
+    }
+
+    /* ============================================
+       هدر کارت: آواتار + نام + وضعیت
+       ============================================ */
+    .page-report-department-documents .dv-expert-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 16px 18px;
+        background: linear-gradient(135deg, #f8fbfd 0%, #f0f7fa 100%);
+        border-bottom: 1px solid #eef3f6;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-report-department-documents .dv-expert-avatar {
+        position: relative;
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+        border-radius: 50%;
+        overflow: visible;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg,
+                var(--ex-color, var(--dv-primary)) 0%,
+                var(--ex-color-light, var(--dv-primary-light)) 100%);
+        color: #ffffff;
+        font-size: 1.3rem;
+        border: 3px solid #ffffff;
+        box-shadow: 0 5px 14px color-mix(in srgb, var(--ex-color, var(--dv-primary)) 30%, transparent);
+        flex-shrink: 0;
+        z-index: 2;
+    }
+
+    .page-report-department-documents .dv-expert-avatar img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        display: block;
+        z-index: 1;
+    }
+
+    .page-report-department-documents .dv-avatar-ring {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: calc(100% + 8px);
+        height: calc(100% + 8px);
+        margin-top: calc((100% + 8px) / -2);
+        margin-left: calc((100% + 8px) / -2);
+        border-radius: 50%;
+        border: 1.5px dashed var(--ex-color, var(--dv-primary));
+        opacity: 0.55;
+        animation: dvAvatarRingRotate 12s linear infinite;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    .page-report-department-documents .dv-avatar-ring.ring-2 {
+        width: calc(100% + 16px);
+        height: calc(100% + 16px);
+        margin-top: calc((100% + 16px) / -2);
+        margin-left: calc((100% + 16px) / -2);
+        border: 1.5px dotted color-mix(in srgb, var(--ex-color, var(--dv-primary)) 65%, #ffffff);
+        opacity: 0.45;
+        animation: dvAvatarRingRotateReverse 18s linear infinite;
+    }
+
+    @keyframes dvAvatarRingRotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    @keyframes dvAvatarRingRotateReverse {
+        from { transform: rotate(360deg); }
+        to { transform: rotate(0deg); }
+    }
+
+    .page-report-department-documents .dv-expert-status {
+        position: absolute;
+        bottom: -1px;
+        left: -1px;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #48bb78;
+        border: 2.5px solid #ffffff;
+        z-index: 5;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, .08);
+    }
+
+    .page-report-department-documents .dv-expert-status.offline {
+        background: #94a3b8;
+    }
+
+    .page-report-department-documents .dv-expert-main {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-report-department-documents .dv-expert-name {
+        margin: 0 0 6px;
+        color: var(--dv-text);
+        font-size: 1rem;
+        font-weight: 800;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .page-report-department-documents .dv-expert-tags {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .page-report-department-documents .dv-expert-username {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        background: color-mix(in srgb, var(--ex-color, var(--dv-primary)) 10%, #ffffff);
+        color: var(--ex-color, var(--dv-primary));
+        border: 1px solid color-mix(in srgb, var(--ex-color, var(--dv-primary)) 22%, transparent);
+        border-radius: 20px;
+        font-size: .7rem;
+        font-weight: 600;
+        direction: ltr;
+        white-space: nowrap;
+    }
+
+    .page-report-department-documents .dv-expert-account-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: .68rem;
+        font-weight: 700;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+
+    .page-report-department-documents .dv-expert-account-badge i {
+        font-size: .66rem;
+    }
+
+    .page-report-department-documents .dv-expert-account-badge.active {
+        background: #eaf6f1;
+        color: #276749;
+        border-color: #c8e6d8;
+    }
+
+    .page-report-department-documents .dv-expert-account-badge.inactive {
+        background: #fdecea;
+        color: #c53030;
+        border-color: #f8d0cc;
+    }
+
+    /* ============================================
+       بدنه کارت: تعداد اسناد + چیپ‌های وضعیت
+       ============================================ */
+    .page-report-department-documents .dv-expert-body {
+        padding: 16px 18px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ★ ردیف تعداد اسناد */
+    .page-report-department-documents .dv-expert-docs-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--ex-color, var(--dv-primary)) 8%, #ffffff) 0%,
+                color-mix(in srgb, var(--ex-color, var(--dv-primary)) 4%, #ffffff) 100%);
+        border: 1px solid color-mix(in srgb, var(--ex-color, var(--dv-primary)) 15%, #ffffff);
+        border-radius: 12px;
+    }
+
+    .page-report-department-documents .dv-expert-docs-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: var(--ex-color, var(--dv-primary));
+        font-size: .78rem;
+        font-weight: 700;
+    }
+
+    .page-report-department-documents .dv-expert-docs-label i {
+        font-size: .82rem;
+    }
+
+    .page-report-department-documents .dv-expert-docs-value {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 1.1rem;
+        font-weight: 900;
+        color: var(--ex-color, var(--dv-primary));
+        direction: ltr;
+    }
+
+    .page-report-department-documents .dv-expert-docs-value small {
+        font-size: .7rem;
+        font-weight: 600;
+        color: var(--dv-text-secondary);
+    }
+
+    /* ★ چیپ‌های وضعیت */
+    .page-report-department-documents .dv-expert-statuses {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .page-report-department-documents .dv-status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--st-color, #3D8499) 10%, #ffffff);
+        border: 1px solid color-mix(in srgb, var(--st-color, #3D8499) 25%, transparent);
+        font-size: .68rem;
+        font-weight: 700;
+        color: color-mix(in srgb, var(--st-color, #3D8499) 90%, #000);
+        white-space: nowrap;
+        transition: all var(--dv-transition);
+    }
+
+    .page-report-department-documents .dv-status-chip:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--st-color, #3D8499) 25%, transparent);
+    }
+
+    .page-report-department-documents .dv-status-chip-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--st-color, #3D8499);
+        flex-shrink: 0;
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--st-color, #3D8499) 25%, transparent);
+    }
+
+    .page-report-department-documents .dv-status-chip-count {
+        background: var(--st-color, #3D8499);
+        color: #ffffff;
+        padding: 1px 7px;
+        border-radius: 12px;
+        font-size: .62rem;
+        min-width: 20px;
+        text-align: center;
+        direction: ltr;
+        font-weight: 800;
+    }
+
+    .page-report-department-documents .dv-no-docs {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        background: #f1f5f9;
+        color: #94a3b8;
+        border: 1px dashed #cbd5e0;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 600;
+    }
+
+    /* ============================================
+       فوتر کارت: دکمه‌ها
+       ============================================ */
+    .page-report-department-documents .dv-expert-actions {
+        display: flex;
+        gap: 8px;
+        padding: 14px 18px;
+        background: #fafcfd;
+        border-top: 1px solid #eef3f6;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-report-department-documents .dv-expert-btn {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 40px;
+        padding: 9px 14px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .76rem;
+        font-weight: 700;
+        transition: all var(--dv-transition);
+        white-space: nowrap;
+        border: 1.5px solid transparent;
+    }
+
+    .page-report-department-documents .dv-expert-btn i {
+        font-size: .8rem;
+        transition: transform var(--dv-transition);
+    }
+
+    .page-report-department-documents .dv-expert-btn-view {
+        background: #ffffff;
+        color: var(--ex-color, var(--dv-primary));
+        border-color: color-mix(in srgb, var(--ex-color, var(--dv-primary)) 30%, transparent);
+    }
+
+    .page-report-department-documents .dv-expert-btn-view:hover {
+        background: var(--ex-color, var(--dv-primary));
+        color: #ffffff;
+        border-color: var(--ex-color, var(--dv-primary));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px color-mix(in srgb, var(--ex-color, var(--dv-primary)) 30%, transparent);
+    }
+
+    .page-report-department-documents .dv-expert-btn-breakdown {
+        background: linear-gradient(135deg, var(--ex-color, var(--dv-primary)) 0%, var(--ex-color-light, var(--dv-primary-light)) 100%);
+        color: #ffffff;
+        box-shadow: 0 3px 10px color-mix(in srgb, var(--ex-color, var(--dv-primary)) 30%, transparent);
+    }
+
+    .page-report-department-documents .dv-expert-btn-breakdown:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--ex-color, var(--dv-primary)) 45%, transparent);
+        color: #ffffff;
+    }
+
+    /* ============================================
+       حالت خالی
+       ============================================ */
+    .page-report-department-documents .dv-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+    .page-report-department-documents .dv-empty-icon {
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(27, 105, 139, .10), rgba(22, 122, 92, .10));
+        color: var(--dv-primary);
+        font-size: 2.2rem;
+    }
+
+    .page-report-department-documents .dv-empty h3 {
+        margin: 0 0 8px;
+        color: var(--dv-text);
+        font-size: 1.1rem;
+        font-weight: 800;
+    }
+
+    .page-report-department-documents .dv-empty p {
+        margin: 0;
+        color: var(--dv-text-secondary);
+        font-size: .85rem;
+    }
+
+    .page-report-department-documents .dv-no-result {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+        color: var(--dv-text-secondary);
+        font-size: .88rem;
+    }
+
+    /* ============================================
+       فوتر صفحه
+       ============================================ */
+    .page-report-department-documents .dv-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 22px;
+        padding: 14px 20px;
+        background: #ffffff;
+        border: 1.5px solid var(--dv-border);
+        border-radius: var(--dv-radius-md);
+        color: var(--dv-text-secondary);
+        font-size: clamp(.68rem, .8vw, .78rem);
+        box-shadow: var(--dv-shadow-sm);
+    }
+
+    .page-report-department-documents .dv-footer span {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .page-report-department-documents .dv-footer span i {
+        color: var(--dv-primary);
+    }
+
+    .page-report-department-documents .dv-footer a {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--dv-primary);
+        text-decoration: none;
+        font-weight: 700;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+
+    @media (max-width: 1200px) {
+        .page-report-department-documents .dv-info-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 900px) {
+        .page-report-department-documents .dv-experts-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .page-report-department-documents .dv-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-report-department-documents .dv-header-actions { width: 100%; }
+        .page-report-department-documents .dv-btn { flex: 1; }
+
+        .page-report-department-documents .dv-filters {
+            grid-template-columns: 1fr;
+        }
+
+        .page-report-department-documents .dv-clear-btn { width: 100%; }
+
+        .page-report-department-documents .dv-info-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 480px) {
+        .page-report-department-documents .dv-wrap { padding: 10px; }
+
+        .page-report-department-documents .dv-info-grid {
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .page-report-department-documents .dv-expert-actions {
+            flex-direction: column;
+        }
+
+        .page-report-department-documents .dv-expert-btn {
+            width: 100%;
+        }
+
+        .page-report-department-documents .dv-expert-top {
+            padding: 14px 16px;
+            gap: 12px;
+        }
+
+        .page-report-department-documents .dv-expert-avatar {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+        }
+
+        .page-report-department-documents .dv-expert-name {
+            font-size: .92rem;
+        }
+
+        .page-report-department-documents .dv-expert-body {
+            padding: 14px 16px;
+        }
+
+        .page-report-department-documents .dv-expert-actions {
+            padding: 12px 16px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .page-report-department-documents .dv-wrap *,
+        .page-report-department-documents .dv-avatar-ring {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

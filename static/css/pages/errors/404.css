@@ -1,0 +1,197 @@
+/* استایل صفحه: errors/404.html */
+
+    .error-page {
+        --ep-primary: #3b82f6;
+        --ep-primary-light: #60a5fa;
+        --ep-primary-dark: #1d4ed8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        min-height: 500px;
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-radius: 16px;
+        margin: 20px;
+        box-sizing: border-box;
+    }
+
+    .error-page * {
+        box-sizing: border-box;
+    }
+
+    .error-page .ep-card {
+        max-width: 520px;
+        width: 100%;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(59, 130, 246, .15);
+        padding: 44px 32px;
+        text-align: center;
+        border: 1.5px solid #dbeafe;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .error-page .ep-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+    }
+
+    .error-page .ep-code {
+        font-size: 5rem;
+        font-weight: 900;
+        line-height: 1;
+        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 8px;
+        letter-spacing: -4px;
+    }
+
+    .error-page .ep-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 18px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1d4ed8;
+        font-size: 2.2rem;
+        border: 3px solid #fff;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, .20);
+        position: relative;
+    }
+
+    .error-page .ep-icon::before {
+        content: "";
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 2px dashed rgba(59, 130, 246, .30);
+        animation: epRingRotate 18s linear infinite;
+    }
+
+    @keyframes epRingRotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .error-page .ep-title {
+        margin: 0 0 12px;
+        color: #2d3e4a;
+        font-size: 1.5rem;
+        font-weight: 800;
+    }
+
+    .error-page .ep-text {
+        margin: 0 0 28px;
+        color: #6b7d8a;
+        font-size: .9rem;
+        line-height: 1.8;
+    }
+
+    .error-page .ep-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .error-page .ep-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 22px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        transition: all .3s ease;
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .error-page .ep-btn-primary {
+        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, .28);
+    }
+
+    .error-page .ep-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(59, 130, 246, .38);
+        color: #fff;
+    }
+
+    .error-page .ep-btn-secondary {
+        background: #fff;
+        border-color: #e8eef2;
+        color: #6b7d8a;
+    }
+
+    .error-page .ep-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #3b82f6;
+        color: #1d4ed8;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 576px) {
+        .error-page {
+            margin: 10px;
+            padding: 24px 12px;
+        }
+
+        .error-page .ep-card {
+            padding: 32px 20px;
+            border-radius: 16px;
+        }
+
+        .error-page .ep-code {
+            font-size: 3.5rem;
+        }
+
+        .error-page .ep-icon {
+            width: 66px;
+            height: 66px;
+            font-size: 1.8rem;
+        }
+
+        .error-page .ep-title {
+            font-size: 1.2rem;
+        }
+
+        .error-page .ep-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .error-page .ep-btn {
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .error-page * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}کارتابل من{% endblock %}
+{% block body_class %}page-workflow-inbox{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/workflow/inbox.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="wi-wrap">
+
+    <!-- Header -->
+    <div class="wi-header">
+        <div class="wi-header-info">
+            <div class="wi-header-icon">
+                <i class="fa-solid fa-inbox"></i>
+            </div>
+            <div class="wi-header-text">
+                <h1>کارتابل من</h1>
+                <p>یادداشت‌های در انتظار اقدام</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assigned to me -->
+    <div class="wi-section">
+        <h2 class="wi-section-title">
+            <i class="fa-solid fa-user-check"></i>
+            تخصیص‌یافته به من
+            <span class="wi-count">{{ notes|length }}</span>
+        </h2>
+
+        {% if notes %}
+        <div class="wi-list">
+            {% for note in notes %}
+                {% with show_status=True %}
+                    {% include "workflow/_note_card.html" %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="wi-empty">
+            <i class="fa-solid fa-inbox"></i>
+            <p>یادداشتی در انتظار اقدام ندارید</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Role-based notes -->
+    {% if role_notes and role_notes|length > 0 %}
+    <div class="wi-section">
+        <h2 class="wi-section-title">
+            <i class="fa-solid fa-users-gear"></i>
+            در انتظار نقش من ({{ current_role }})
+            <span class="wi-count">{{ role_notes|length }}</span>
+        </h2>
+
+        <div class="wi-list">
+            {% for note in role_notes %}
+                {% with show_status=True %}
+                    {% include "workflow/_note_card.html" %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

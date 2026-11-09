@@ -1,0 +1,1100 @@
+{% extends "base.html" %}
+{% block title %}دستیار هوشمند{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+
+<!-- ============================================
+     ★★★ AVATAR از session ★★★
+     ============================================ -->
+{% set user_avatar = session.get('avatar') %}
+{% set user_gender = session.get('gender', 'male') %}
+{% set user_name = session.get('full_name', 'کاربر') %}
+
+{% if user_avatar and user_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+{% set avatar_url = url_for('static', filename='uploads/avatar/' + user_avatar) %}
+{% elif user_gender == 'female' %}
+{% set avatar_url = url_for('static', filename='images/default-profile-female.png') %}
+{% else %}
+{% set avatar_url = url_for('static', filename='images/default-profile-male.png') %}
+{% endif %}
+
+<button class="rail-toggle" id="railToggle" title="منوی چت‌ها" type="button">
+    <i class="fa-solid fa-bars"></i>
+</button>
+
+<div class="rail-overlay" id="railOverlay"></div>
+
+<div class="chat-shell">
+
+    <div class="chat-main">
+        <div class="ch-body" id="chBody"></div>
+
+        <div class="ch-foot">
+            <div class="in-wrap">
+                <i class="fa-solid fa-comment-dots"></i>
+                <input id="qInput" type="text" placeholder="سوال خود را بنویسید..." autocomplete="off"
+                    onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMsg()}">
+                <button class="mic-btn" id="micBtn" title="ورودی صوتی" type="button">
+                    <i class="fa-solid fa-microphone"></i>
+                </button>
+            </div>
+            <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+                <i class="fa-solid fa-paper-plane"></i>
+                <span class="btn-txt">ارسال</span>
+            </button>
+        </div>
+    </div>
+
+    <aside class="chat-rail" id="chatRail">
+
+        <div class="rail-top">
+            <div class="rail-logo">
+                <i class="fa-solid fa-robot"></i>
+            </div>
+            <div class="rail-brand">
+                <div class="rail-brand-title">دستیار هوشمند</div>
+                <div class="rail-brand-status">
+                    <span class="dot-online"></span>
+                    <span>آنلاین</span>
+                </div>
+            </div>
+        </div>
+
+        <button class="rail-new-btn" id="btnClear" type="button">
+            <i class="fa-solid fa-plus"></i>
+            گفتگوی جدید
+        </button>
+
+        <div class="rail-section-title">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span>چت‌های اخیر</span>
+        </div>
+
+        <div class="rail-history" id="railHistory">
+            <div class="history-empty">
+                <i class="fa-solid fa-comments"></i>
+                <div class="history-empty-text">
+                    هنوز گفتگویی ثبت نشده
+                </div>
+            </div>
+        </div>
+
+        <div class="rail-bottom">
+            <button class="rail-action-btn" id="btnTheme" type="button">
+                <i class="fa-solid fa-moon"></i>
+                <span class="action-txt">حالت شب</span>
+            </button>
+
+            <button class="rail-action-btn" id="btnHelp" type="button">
+                <i class="fa-solid fa-circle-question"></i>
+                <span>راهنما</span>
+            </button>
+
+            <a href="{{ url_for('dashboard.dashboard') }}" class="rail-action-btn">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                <span>بازگشت به داشبورد</span>
+            </a>
+        </div>
+
+        <div class="rail-footer-note">
+            SSPE Assistant v3.5
+        </div>
+
+    </aside>
+
+</div>
+
+<!-- MODAL -->
+<div class="doc-modal-backdrop" id="docModal">
+    <div class="doc-modal">
+        <div class="doc-modal-head">
+            <div class="doc-modal-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </div>
+            <div class="doc-modal-title-wrap">
+                <div class="doc-modal-title" id="docModalTitle">در حال بارگذاری...</div>
+                <div class="doc-modal-code" id="docModalCode"></div>
+            </div>
+            <button class="doc-modal-close" onclick="closeDocModal()" title="بستن">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <div class="doc-modal-body" id="docModalBody">
+            <div class="doc-loading">
+                <i class="fa-solid fa-circle-notch"></i>
+                <div>در حال دریافت اطلاعات...</div>
+            </div>
+        </div>
+        <div class="doc-modal-foot" id="docModalFoot" style="display:none;">
+            <button class="btn btn-primary" onclick="openDocInApp()">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                مشاهده کامل سند
+            </button>
+            <button class="btn btn-secondary" onclick="closeDocModal()">
+                <i class="fa-solid fa-xmark"></i>
+                بستن
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+    /* ============================================================
+       ★★★ CHAT LOGIC v3.5 — With History + Downloads ★★★
+       ============================================================ */
+
+    const chBody = document.getElementById('chBody');
+    const qInput = document.getElementById('qInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const btnClear = document.getElementById('btnClear');
+    const btnHelp = document.getElementById('btnHelp');
+    const btnTheme = document.getElementById('btnTheme');
+    const micBtn = document.getElementById('micBtn');
+    const railHistory = document.getElementById('railHistory');
+    const railToggle = document.getElementById('railToggle');
+    const railOverlay = document.getElementById('railOverlay');
+    const chatRail = document.getElementById('chatRail');
+
+    const USER_AVATAR_URL = "{{ avatar_url }}";
+    const USER_NAME = "{{ user_name|e }}";
+
+    const WELCOME = `<i class="fa-solid fa-hand-wave" style="color:#f59e0b"></i> سلام <strong>${escapeHtml(USER_NAME)}</strong>!
+
+<i class="fa-solid fa-robot" style="color:#3D8499"></i> من دستیار هوشمند اسناد شما هستم.
+
+<i class="fa-solid fa-comment-dots" style="color:#3D8499"></i> <strong>می‌تونید از من بپرسید:</strong>
+&nbsp;&nbsp;<i class="fa-solid fa-angle-left"></i> چند سند در حال بررسی دارم؟
+&nbsp;&nbsp;<i class="fa-solid fa-angle-left"></i> کارهای من چیه؟
+&nbsp;&nbsp;<i class="fa-solid fa-angle-left"></i> اسناد دیرکرد
+&nbsp;&nbsp;<i class="fa-solid fa-angle-left"></i> خروجی اکسل از زیرگروه‌ها بده
+&nbsp;&nbsp;<i class="fa-solid fa-angle-left"></i> خروجی پاورپوینت بده
+
+<i class="fa-solid fa-lightbulb" style="color:#f59e0b"></i> برای راهنمای کامل «راهنما» بنویسید.`;
+
+    let isSending = false;
+    let currentDocId = null;
+    let recognition = null;
+    let isRecording = false;
+    let lastQuestion = '';
+    let lastAnswer = '';
+
+    /* ============================================================
+       ★★★ HISTORY MANAGEMENT ★★★
+       ============================================================ */
+    const HISTORY_KEY = 'assistant_chat_history';
+    const MAX_HISTORY = 30;
+
+    function getHistory() {
+        try {
+            const raw = localStorage.getItem(HISTORY_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) { return []; }
+    }
+
+    function saveHistory(history) {
+        try {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
+        } catch (e) {}
+    }
+
+    function addToHistory(firstQuestion, sessionId) {
+        if (!firstQuestion) return;
+        const history = getHistory();
+        const filtered = history.filter(h => h.sessionId !== sessionId);
+        const newItem = {
+            sessionId: sessionId,
+            title: firstQuestion.length > 40 ? firstQuestion.substring(0, 40) + '...' : firstQuestion,
+            timestamp: Date.now()
+        };
+        filtered.unshift(newItem);
+        saveHistory(filtered);
+        renderHistory();
+    }
+
+    function removeFromHistory(sessionId) {
+        const history = getHistory();
+        const filtered = history.filter(h => h.sessionId !== sessionId);
+        saveHistory(filtered);
+        renderHistory();
+    }
+
+    function formatHistoryTime(timestamp) {
+        const diff = Date.now() - timestamp;
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        if (minutes < 1) return 'همین الان';
+        if (minutes < 60) return `${minutes} دقیقه پیش`;
+        if (hours < 24) return `${hours} ساعت پیش`;
+        if (days < 7) return `${days} روز پیش`;
+        return 'قدیمی';
+    }
+
+    function renderHistory() {
+        const history = getHistory();
+        if (!history.length) {
+            railHistory.innerHTML = `
+                <div class="history-empty">
+                    <i class="fa-solid fa-comments"></i>
+                    <div class="history-empty-text">هنوز گفتگویی ثبت نشده</div>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        history.forEach(item => {
+            const isActive = currentSessionId === item.sessionId;
+            html += `
+                <div class="history-item ${isActive ? 'active' : ''}" data-session="${escapeHtml(item.sessionId)}">
+                    <div class="history-icon"><i class="fa-regular fa-comment"></i></div>
+                    <div class="history-content">
+                        <div class="history-title" title="${escapeHtml(item.title)}">${escapeHtml(item.title)}</div>
+                        <div class="history-time">
+                            <i class="fa-regular fa-clock"></i>
+                            ${formatHistoryTime(item.timestamp)}
+                        </div>
+                    </div>
+                    <button class="history-delete" data-delete="${escapeHtml(item.sessionId)}" title="حذف" type="button">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            `;
+        });
+
+        railHistory.innerHTML = html;
+
+        railHistory.querySelectorAll('.history-item').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.history-delete')) return;
+                loadHistorySession(el.dataset.session);
+            });
+        });
+
+        railHistory.querySelectorAll('.history-delete').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (confirm('این گفتگو از تاریخچه حذف شود؟')) {
+                    removeFromHistory(btn.dataset.delete);
+                    showToast('از تاریخچه حذف شد', 'info', 1500);
+                }
+            });
+        });
+    }
+
+    function loadHistorySession(sessionId) {
+        if (currentSessionId === sessionId) { closeRailMobile(); return; }
+        showToast('در حال بارگذاری گفتگوی قبلی...', 'info', 1500);
+        const sessionData = localStorage.getItem('session_' + sessionId);
+        if (sessionData) {
+            try {
+                const messages = JSON.parse(sessionData);
+                chBody.innerHTML = '';
+                messages.forEach(m => appendMsg(m.role, m.text, {typing: false}));
+                currentSessionId = sessionId;
+                renderHistory();
+                closeRailMobile();
+                return;
+            } catch (e) {}
+        }
+        chBody.innerHTML = '';
+        appendMsg('bot', WELCOME, {speed: 8});
+        currentSessionId = sessionId;
+        renderHistory();
+        closeRailMobile();
+    }
+
+    /* ============================================================
+       ★★★ SESSION MANAGEMENT ★★★
+       ============================================================ */
+    let currentSessionId = null;
+    let currentSessionFirstQuestion = null;
+
+    function generateSessionId() {
+        return 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    }
+
+    function saveSessionMessage(role, text) {
+        if (!currentSessionId) return;
+        try {
+            const key = 'session_' + currentSessionId;
+            const raw = localStorage.getItem(key);
+            const messages = raw ? JSON.parse(raw) : [];
+            messages.push({role, text, timestamp: Date.now()});
+            localStorage.setItem(key, JSON.stringify(messages.slice(-50)));
+        } catch (e) {}
+    }
+
+    /* ============================================================
+       ★★★ UTILS ★★★
+       ============================================================ */
+    function escapeHtml(s) {
+        if (s === null || s === undefined) return '';
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    function formatUserText(text) {
+        if (!text) return '';
+        let s = escapeHtml(text);
+        s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        s = s.replace(/\n/g, '<br>');
+        return s;
+    }
+
+    function formatBotText(text) {
+        if (!text) return '';
+        return text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    function stripHtml(html) {
+        if (!html) return '';
+        let text = String(html);
+        text = text.replace(/<br\s*\/?>/gi, '\n');
+        text = text.replace(/<[^>]+>/g, '');
+        text = text.replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'");
+        return text;
+    }
+
+    function nowTime() {
+        const d = new Date();
+        return String(d.getHours()).padStart(2, '0') + ':' +
+            String(d.getMinutes()).padStart(2, '0');
+    }
+
+    function scrollEnd() {
+        requestAnimationFrame(() => {
+            chBody.scrollTop = chBody.scrollHeight;
+        });
+    }
+
+    function createUserAvatarHtml() {
+        if (USER_AVATAR_URL && USER_AVATAR_URL !== '') {
+            return `
+                <img src="${escapeHtml(USER_AVATAR_URL)}"
+                     alt="${escapeHtml(USER_NAME)}"
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';" />
+                <span class="fallback-icon" style="display:none;">
+                    <i class="fa-solid fa-user"></i>
+                </span>
+            `;
+        }
+        return '<span class="fallback-icon"><i class="fa-solid fa-user"></i></span>';
+    }
+
+    /* ============================================================
+       ★★★ RAIL TOGGLE ★★★
+       ============================================================ */
+    function openRailMobile() {
+        chatRail.classList.add('open');
+        railOverlay.classList.add('show');
+    }
+
+    function closeRailMobile() {
+        chatRail.classList.remove('open');
+        railOverlay.classList.remove('show');
+    }
+
+    railToggle?.addEventListener('click', () => {
+        if (chatRail.classList.contains('open')) closeRailMobile();
+        else openRailMobile();
+    });
+
+    railOverlay?.addEventListener('click', closeRailMobile);
+
+    /* ============================================================
+       ★★★ TOAST ★★★
+       ============================================================ */
+    function showToast(message, type = 'info', duration = 2500) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        const icons = {
+            success: 'fa-circle-check',
+            error: 'fa-circle-xmark',
+            info: 'fa-circle-info'
+        };
+        toast.innerHTML = `
+        <i class="fa-solid ${icons[type] || icons.info}"></i>
+        <span>${escapeHtml(message)}</span>
+    `;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'toastIn .3s ease reverse';
+            setTimeout(() => toast.remove(), 300);
+        }, duration);
+    }
+
+    /* ============================================================
+       ★★★ APPEND MESSAGE ★★★
+       ============================================================ */
+    function appendMsg(role, text, options = {}) {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg ' + role;
+        wrap.dataset.question = options.question || '';
+
+        const av = document.createElement('div');
+        av.className = 'msg-av';
+
+        if (role === 'user') {
+            av.innerHTML = createUserAvatarHtml();
+        } else {
+            av.innerHTML = '<i class="fa-solid fa-robot"></i>';
+        }
+
+        const content = document.createElement('div');
+        content.className = 'msg-wrap';
+
+        const bub = document.createElement('div');
+        bub.className = 'bubble';
+
+        content.appendChild(bub);
+        wrap.appendChild(av);
+        wrap.appendChild(content);
+        chBody.appendChild(wrap);
+        scrollEnd();
+
+        if (role === 'user') {
+            bub.innerHTML = formatUserText(text);
+            addTime(bub);
+            saveSessionMessage('user', text);
+            return wrap;
+        }
+
+        if (role === 'bot' && options.typing !== false) {
+            typewriter(bub, text, options, wrap);
+        } else {
+            bub.innerHTML = formatBotText(text);
+            addTime(bub);
+            if (options.suggestions?.length) addSuggestions(bub, options.suggestions);
+            if (options.data?.length) renderRich(bub, options);
+            if (role === 'bot') addActions(wrap, options);
+            if (role === 'bot' && text) saveSessionMessage('bot', text);
+        }
+        return wrap;
+    }
+
+    /* ============================================================
+       ★★★ TYPEWRITER ★★★
+       ============================================================ */
+    function typewriter(el, htmlText, options = {}, wrapEl = null) {
+        const rawText = stripHtml(htmlText);
+        const maxDur = 3500;
+        const baseSpeed = 12;
+        const speed = Math.max(4, Math.min(baseSpeed, maxDur / Math.max(rawText.length, 1)));
+
+        let i = 0;
+        el.innerHTML = '<span class="tw"></span><span class="typing-cursor"></span>';
+        const tw = el.querySelector('.tw');
+
+        function step() {
+            if (i >= rawText.length) {
+                el.innerHTML = formatBotText(htmlText);
+                addTime(el);
+                if (options.suggestions?.length) addSuggestions(el, options.suggestions);
+                if (options.data?.length) renderRich(el, options);
+                if (wrapEl) addActions(wrapEl, options);
+                saveSessionMessage('bot', htmlText);
+                scrollEnd();
+                return;
+            }
+            tw.textContent = rawText.substring(0, ++i);
+            scrollEnd();
+            setTimeout(step, speed);
+        }
+        setTimeout(step, 300);
+    }
+
+    /* ============================================================
+       ★★★ TIME ★★★
+       ============================================================ */
+    function addTime(el) {
+        const t = document.createElement('span');
+        t.className = 'bubble-time';
+        t.innerHTML = `<i class="fa-regular fa-clock"></i> ${nowTime()}`;
+        el.appendChild(t);
+    }
+
+    /* ============================================================
+       ★★★ SUGGESTIONS ★★★
+       ============================================================ */
+    function addSuggestions(bub, list) {
+        const wrap = document.createElement('div');
+        wrap.className = 'bubble-suggestions';
+        list.forEach(s => {
+            const b = document.createElement('button');
+            b.innerHTML = `<i class="fa-solid fa-arrow-left"></i> ${escapeHtml(s)}`;
+            b.onclick = () => send(s);
+            wrap.appendChild(b);
+        });
+        bub.appendChild(wrap);
+        scrollEnd();
+    }
+
+    /* ============================================================
+       ★★★ ACTIONS ★★★
+       ============================================================ */
+    function addActions(wrap, options) {
+        const msgWrap = wrap.querySelector('.msg-wrap');
+        if (!msgWrap) return;
+
+        const actions = document.createElement('div');
+        actions.className = 'msg-actions';
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'msg-action-btn';
+        copyBtn.title = 'کپی';
+        copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            const text = wrap.querySelector('.bubble').innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.innerHTML = '<i class="fa-solid fa-check"></i>';
+                showToast('کپی شد!', 'success', 1500);
+                setTimeout(() => {
+                    copyBtn.innerHTML = '<i class="fa-regular fa-copy"></i>';
+                }, 1500);
+            }).catch(() => showToast('خطا در کپی', 'error'));
+        };
+        actions.appendChild(copyBtn);
+
+        const upBtn = document.createElement('button');
+        upBtn.className = 'msg-action-btn';
+        upBtn.title = 'پاسخ مفید بود';
+        upBtn.innerHTML = '<i class="fa-regular fa-thumbs-up"></i>';
+        upBtn.onclick = (e) => {
+            e.stopPropagation();
+            sendFeedback('up', wrap);
+            upBtn.classList.add('active-up');
+            upBtn.innerHTML = '<i class="fa-solid fa-thumbs-up"></i>';
+        };
+        actions.appendChild(upBtn);
+
+        const downBtn = document.createElement('button');
+        downBtn.className = 'msg-action-btn';
+        downBtn.title = 'پاسخ مفید نبود';
+        downBtn.innerHTML = '<i class="fa-regular fa-thumbs-down"></i>';
+        downBtn.onclick = (e) => {
+            e.stopPropagation();
+            sendFeedback('down', wrap);
+            downBtn.classList.add('active-down');
+            downBtn.innerHTML = '<i class="fa-solid fa-thumbs-down"></i>';
+        };
+        actions.appendChild(downBtn);
+
+        msgWrap.appendChild(actions);
+    }
+
+    async function sendFeedback(rating, wrap) {
+        const question = wrap.dataset.question || lastQuestion;
+        const answer = wrap.querySelector('.bubble').innerText;
+        try {
+            await fetch('/assistant/feedback', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({question, answer, rating})
+            });
+            showToast('بازخورد شما ثبت شد. ممنون!', 'success', 1800);
+        } catch (e) {}
+    }
+
+    function renderRich(bub, options) {
+        const data = options.data || [];
+        if (!data.length) return;
+    }
+
+    /* ============================================================
+       ★★★ TYPING INDICATOR ★★★
+       ============================================================ */
+    function showTyping() {
+        const wrap = document.createElement('div');
+        wrap.className = 'msg bot';
+        wrap.id = 'typingInd';
+        wrap.innerHTML = `
+        <div class="msg-av"><i class="fa-solid fa-robot"></i></div>
+        <div class="msg-wrap">
+            <div class="bubble">
+                <div class="typing"><span></span><span></span><span></span></div>
+            </div>
+        </div>`;
+        chBody.appendChild(wrap);
+        scrollEnd();
+    }
+    function hideTyping() {
+        document.getElementById('typingInd')?.remove();
+    }
+
+    /* ============================================================
+       ★★★ SEND MESSAGE ★★★
+       ============================================================ */
+    async function sendMsg() {
+        const q = qInput.value.trim();
+        if (!q || isSending) return;
+
+        if (!currentSessionId) {
+            currentSessionId = generateSessionId();
+            currentSessionFirstQuestion = q;
+        }
+
+        isSending = true;
+        lastQuestion = q;
+        appendMsg('user', q);
+        qInput.value = '';
+        qInput.focus();
+
+        if (!getHistory().find(h => h.sessionId === currentSessionId)) {
+            addToHistory(currentSessionFirstQuestion || q, currentSessionId);
+        }
+
+        sendBtn.disabled = true;
+        showTyping();
+
+        const t0 = Date.now();
+
+        try {
+            const res = await fetch('/assistant/ask', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({question: q})
+            });
+
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+            const data = await res.json();
+
+            const elapsed = Date.now() - t0;
+            if (elapsed < 500) await new Promise(r => setTimeout(r, 500 - elapsed));
+
+            hideTyping();
+
+            const answerText = data.answer || 'خطایی رخ داد.';
+            lastAnswer = answerText;
+
+            appendMsg('bot', answerText, {
+                data: data.data || [],
+                suggestions: data.suggestions || [],
+                type: data.type,
+                speed: 10,
+                question: q
+            });
+
+        } catch (err) {
+            hideTyping();
+            appendMsg('bot',
+                '<i class="fa-solid fa-triangle-exclamation" style="color:#ef4444"></i> ' +
+                'خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.',
+                {speed: 15}
+            );
+            showToast('خطا در ارتباط با سرور', 'error');
+        } finally {
+            sendBtn.disabled = false;
+            isSending = false;
+        }
+    }
+
+    function send(t) {
+        if (isSending) return;
+        qInput.value = t;
+        sendMsg();
+    }
+
+    /* ============================================================
+       ★★★ NEW CHAT ★★★
+       ============================================================ */
+    btnClear.addEventListener('click', async () => {
+        if (chBody.children.length > 1) {
+            if (!confirm('گفتگوی جدید شروع شود؟ (گفتگوی فعلی در تاریخچه ذخیره می‌شود)')) return;
+        }
+
+        currentSessionId = null;
+        currentSessionFirstQuestion = null;
+
+        try { await fetch('/assistant/clear', {method: 'POST'}); } catch (e) { }
+
+        chBody.innerHTML = '';
+        appendMsg('bot', WELCOME, {speed: 8});
+        renderHistory();
+        closeRailMobile();
+        showToast('گفتگوی جدید شروع شد', 'success', 1500);
+    });
+
+    /* ============================================================
+       ★★★ HELP ★★★
+       ============================================================ */
+    btnHelp.addEventListener('click', () => {
+        send('راهنما');
+        closeRailMobile();
+    });
+
+    /* ============================================================
+       ★★★ DARK MODE ★★★
+       ============================================================ */
+    function applyTheme(theme) {
+        if (theme === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            btnTheme.innerHTML = '<i class="fa-solid fa-sun"></i><span class="action-txt">حالت روز</span>';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            btnTheme.innerHTML = '<i class="fa-solid fa-moon"></i><span class="action-txt">حالت شب</span>';
+        }
+        localStorage.setItem('assistant-theme', theme);
+    }
+
+    btnTheme.addEventListener('click', () => {
+        const current = localStorage.getItem('assistant-theme') || 'light';
+        applyTheme(current === 'dark' ? 'light' : 'dark');
+        closeRailMobile();
+    });
+
+    applyTheme(localStorage.getItem('assistant-theme') || 'light');
+
+    /* ============================================================
+       ★★★ VOICE INPUT ★★★
+       ============================================================ */
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.lang = 'fa-IR';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            qInput.value = transcript;
+            qInput.focus();
+        };
+
+        recognition.onend = () => {
+            isRecording = false;
+            micBtn.classList.remove('recording');
+        };
+
+        recognition.onerror = (event) => {
+            isRecording = false;
+            micBtn.classList.remove('recording');
+            if (event.error === 'no-speech') showToast('صدایی شنیده نشد', 'info');
+            else if (event.error !== 'aborted') showToast('خطا در تشخیص صدا', 'error');
+        };
+
+        micBtn.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                isRecording = false;
+                micBtn.classList.remove('recording');
+            } else {
+                try {
+                    recognition.start();
+                    isRecording = true;
+                    micBtn.classList.add('recording');
+                    showToast('در حال شنیدن... صحبت کنید', 'info', 2000);
+                } catch (e) {
+                    showToast('امکان شروع ضبط نیست', 'error');
+                }
+            }
+        });
+    } else {
+        micBtn.style.display = 'none';
+    }
+
+    /* ============================================================
+       ★★★ DOWNLOAD HANDLER — دکمه‌های دانلود ★★★ (جدید)
+       ============================================================ */
+    document.addEventListener('click', async function(e) {
+        const btn = e.target.closest('.dl-btn');
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (btn.classList.contains('loading')) return;
+
+        const url = btn.dataset.url;
+        const filename = btn.dataset.filename || 'download';
+        const originalHtml = btn.innerHTML;
+
+        btn.classList.add('loading');
+        btn.innerHTML = '<i class="fa-solid fa-spinner"></i> در حال ساخت فایل...';
+
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(downloadUrl);
+            }, 100);
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> دانلود شد!';
+            showToast('فایل با موفقیت دانلود شد', 'success', 2500);
+
+            setTimeout(() => {
+                btn.classList.remove('loading');
+                btn.innerHTML = originalHtml;
+            }, 2000);
+
+        } catch (err) {
+            console.error('Download error:', err);
+            btn.classList.remove('loading');
+            btn.innerHTML = originalHtml;
+            showToast('خطا در دانلود: ' + err.message, 'error', 3000);
+        }
+    });
+
+    /* ============================================================
+       ★★★ DOCUMENT MODAL ★★★
+       ============================================================ */
+    async function openDocDetails(docId) {
+        currentDocId = docId;
+        const modal = document.getElementById('docModal');
+        const title = document.getElementById('docModalTitle');
+        const code = document.getElementById('docModalCode');
+        const body = document.getElementById('docModalBody');
+        const foot = document.getElementById('docModalFoot');
+
+        title.textContent = 'در حال بارگذاری...';
+        code.textContent = '';
+        body.innerHTML = `
+        <div class="doc-loading">
+            <i class="fa-solid fa-circle-notch"></i>
+            <div>در حال دریافت اطلاعات...</div>
+        </div>`;
+        foot.style.display = 'none';
+        modal.classList.add('show');
+
+        try {
+            const res = await fetch(`/assistant/document/${docId}`);
+            const data = await res.json();
+
+            if (!data.ok) {
+                body.innerHTML = `
+                <div class="doc-loading">
+                    <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;animation:none;"></i>
+                    <div>${escapeHtml(data.message || data.error || 'خطا')}</div>
+                </div>`;
+                return;
+            }
+
+            renderDocDetails(data.document);
+            foot.style.display = 'flex';
+
+        } catch (err) {
+            body.innerHTML = `
+            <div class="doc-loading">
+                <i class="fa-solid fa-wifi" style="color:#ef4444;animation:none;"></i>
+                <div>خطا در ارتباط با سرور</div>
+            </div>`;
+        }
+    }
+
+    function renderDocDetails(doc) {
+        const title = document.getElementById('docModalTitle');
+        const code = document.getElementById('docModalCode');
+        const body = document.getElementById('docModalBody');
+
+        title.textContent = doc.subject || 'بدون موضوع';
+        code.innerHTML = `
+        <span><i class="fa-solid fa-hashtag"></i> ${escapeHtml(doc.code_dfc || '-')}</span>
+        ${doc.status_title ? `<span><i class="fa-solid fa-circle-dot"></i> ${escapeHtml(doc.status_title)}</span>` : ''}
+    `;
+
+        const sections = [
+            {
+                title: 'اطلاعات اصلی', icon: 'fa-circle-info',
+                fields: [
+                    {label: 'کد DFC', key: 'code_dfc', icon: 'fa-hashtag'},
+                    {label: 'موضوع', key: 'subject', icon: 'fa-heading'},
+                    {label: 'شماره اتوماسیون', key: 'automation_number', icon: 'fa-barcode'},
+                    {label: 'شماره نامه پیمانکار', key: 'contractor_letter_number', icon: 'fa-envelope'},
+                    {label: 'تاریخ نامه', key: 'date_letter', icon: 'fa-calendar-day'},
+                ]
+            },
+            {
+                title: 'اطلاعات پروژه و پیمان', icon: 'fa-diagram-project',
+                fields: [
+                    {label: 'نام پروژه', key: 'project_name', icon: 'fa-building'},
+                    {label: 'پیمانکار', key: 'contractor', icon: 'fa-user-tie'},
+                    {label: 'شماره قرارداد', key: 'contract_number', icon: 'fa-file-contract'},
+                    {label: 'ناحیه', key: 'area_title', icon: 'fa-map-location-dot'},
+                ]
+            },
+            {
+                title: 'طبقه‌بندی', icon: 'fa-layer-group',
+                fields: [
+                    {label: 'گروه سند', key: 'group_title', icon: 'fa-folder-tree'},
+                    {label: 'زیرگروه سند', key: 'subgroup_title', icon: 'fa-sitemap'},
+                    {label: 'دپارتمان', key: 'department_title', icon: 'fa-building-user'},
+                    {label: 'واحد', key: 'unit', icon: 'fa-warehouse'},
+                    {label: 'وضعیت', key: 'status_title', icon: 'fa-circle-dot'},
+                ]
+            },
+            {
+                title: 'زمان‌بندی', icon: 'fa-clock',
+                fields: [
+                    {label: 'تاریخ دریافت', key: 'date_received', icon: 'fa-calendar-plus'},
+                    {label: 'تاریخ ارجاع', key: 'date_referral', icon: 'fa-calendar-check'},
+                    {label: 'مهلت', key: 'deadline', icon: 'fa-hourglass-half'},
+                    {label: 'تاریخ اعلام پاسخ', key: 'response_announce_date', icon: 'fa-calendar-day'},
+                    {label: 'تاخیر نهایی', key: 'final_delay', icon: 'fa-clock-rotate-left'},
+                ]
+            },
+            {
+                title: 'مسئولیت و پیگیری', icon: 'fa-user-check',
+                fields: [
+                    {label: 'کارشناس', key: 'user_full_name', icon: 'fa-user'},
+                    {label: 'کارشناس همراه', key: 'colleague', icon: 'fa-user-group'},
+                    {label: 'طرف مسئول', key: 'Responsible_Party', icon: 'fa-handshake'},
+                    {label: 'وضعیت پاسخ', key: 'doc_response_status', icon: 'fa-comment-dots'},
+                ]
+            },
+            {
+                title: 'درخواست و پاسخ', icon: 'fa-clipboard-list',
+                fields: [
+                    {label: 'درخواست تکمیل مدارک', key: 'request_complete_docs', icon: 'fa-file-circle-plus'},
+                    {label: 'تکمیل مدارک پیمانکار', key: 'complete_docs_by_contractor', icon: 'fa-file-circle-check'},
+                    {label: 'شماره نامه نهایی', key: 'final_letter_number', icon: 'fa-file-signature'},
+                ]
+            },
+        ];
+
+        let html = '';
+        sections.forEach(sec => {
+            const validFields = sec.fields.filter(f => {
+                const v = doc[f.key];
+                return v !== null && v !== undefined && v !== '' && v !== 0;
+            });
+            if (!validFields.length) return;
+
+            html += `
+            <div class="doc-section">
+                <div class="doc-section-title">
+                    <i class="fa-solid ${sec.icon}"></i>
+                    <span>${sec.title}</span>
+                </div>
+                <div class="doc-grid">`;
+
+            validFields.forEach(f => {
+                let val = doc[f.key];
+                let valueHtml;
+                if (f.key === 'status_title') {
+                    const color = doc.status_color || '#1b698b';
+                    valueHtml = `<span class="doc-status-badge" style="background:${color}15;color:${color};border-color:${color}30;">${escapeHtml(val)}</span>`;
+                } else {
+                    valueHtml = `<span class="doc-field-value">${escapeHtml(String(val))}</span>`;
+                }
+                html += `
+                <div class="doc-field">
+                    <div class="doc-field-label">
+                        <i class="fa-solid ${f.icon}"></i>
+                        ${f.label}
+                    </div>
+                    ${valueHtml}
+                </div>`;
+            });
+
+            html += `</div></div>`;
+        });
+
+        if (!html) {
+            html = `
+            <div class="doc-section">
+                <div style="text-align:center;padding:20px;color:#94a3b8;">
+                    <i class="fa-solid fa-inbox" style="font-size:32px;margin-bottom:10px;display:block;"></i>
+                    اطلاعات تکمیلی ثبت نشده است.
+                </div>
+            </div>`;
+        }
+        body.innerHTML = html;
+    }
+
+    function closeDocModal() {
+        document.getElementById('docModal').classList.remove('show');
+        currentDocId = null;
+    }
+
+    function openDocInApp() {
+        if (!currentDocId) return;
+        window.open(`/documents/view/${currentDocId}`, '_blank');
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+            closeDocModal();
+            closeRailMobile();
+        }
+    });
+
+    document.getElementById('docModal').addEventListener('click', e => {
+        if (e.target.id === 'docModal') closeDocModal();
+    });
+
+    document.addEventListener('click', e => {
+        const link = e.target.closest('.doc-link');
+        if (link) {
+            e.preventDefault();
+            const docId = link.getAttribute('data-doc-id');
+            if (docId) openDocDetails(docId);
+        }
+    });
+
+    /* ============================================================
+       ★★★ KEYBOARD SHORTCUTS ★★★
+       ============================================================ */
+    document.addEventListener('keydown', e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            qInput.focus();
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key === 'l' && e.shiftKey) {
+            e.preventDefault();
+            btnClear.click();
+        }
+    });
+
+    /* ============================================================
+       ★★★ INIT ★★★
+       ============================================================ */
+    window.addEventListener('DOMContentLoaded', () => {
+        currentSessionId = generateSessionId();
+        currentSessionFirstQuestion = 'گفتگوی خوش‌آمدگویی';
+        appendMsg('bot', WELCOME, {speed: 8});
+        qInput.focus();
+        renderHistory();
+    });
+</script>
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/ai/assistant/index.css') }}">
+{% endblock %}

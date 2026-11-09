@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+{% block title %}لیست پیمانکاران{% endblock %}
+{% block body_class %}page-contractors{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-contractors" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contractors/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="cn-wrap">
+
+    <!-- ============================================
+         هدر صفحه
+         ============================================ -->
+    <div class="cn-header">
+        <div class="cn-header-info">
+            <div class="cn-header-icon">
+                <i class="fa-solid fa-helmet-safety"></i>
+            </div>
+            <div class="cn-header-text">
+                <h1 class="cn-title">مدیریت پیمانکاران</h1>
+                <p class="cn-subtitle">فهرست پیمانکاران، پروژه‌ها و اطلاعات تماس</p>
+            </div>
+        </div>
+
+        <div class="cn-header-actions">
+            <a href="{{ url_for('contractors.add_contractor') }}" class="cn-btn cn-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                افزودن پیمانکار
+            </a>
+            <a href="{{ url_for('contractors.export_excel') }}" class="cn-btn cn-btn-success">
+                <i class="fa-solid fa-file-excel"></i>
+                خروجی اکسل
+            </a>
+            <button type="button" class="cn-btn cn-btn-outline" onclick="openImportModal()">
+                <i class="fa-solid fa-file-import"></i>
+                ورود از اکسل
+            </button>
+            <a href="{{ url_for('contractors.download_template') }}" class="cn-btn cn-btn-outline">
+                <i class="fa-solid fa-download"></i>
+                دانلود قالب
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================
+         خلاصه آمار
+         ============================================ -->
+    <div class="cn-summary">
+        <div class="cn-summary-item s-total">
+            <span class="cn-summary-icon">
+                <i class="fa-solid fa-users"></i>
+            </span>
+            <div class="cn-summary-content">
+                <span class="cn-summary-label">کل پیمانکاران</span>
+                <span class="cn-summary-value">{{ stats.total }}</span>
+            </div>
+        </div>
+        <div class="cn-summary-item s-active">
+            <span class="cn-summary-icon">
+                <i class="fa-solid fa-circle-check"></i>
+            </span>
+            <div class="cn-summary-content">
+                <span class="cn-summary-label">فعال</span>
+                <span class="cn-summary-value">{{ stats.active }}</span>
+            </div>
+        </div>
+        <div class="cn-summary-item s-inactive">
+            <span class="cn-summary-icon">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </span>
+            <div class="cn-summary-content">
+                <span class="cn-summary-label">غیرفعال</span>
+                <span class="cn-summary-value">{{ stats.inactive }}</span>
+            </div>
+        </div>
+        <div class="cn-summary-item s-display">
+            <span class="cn-summary-icon">
+                <i class="fa-solid fa-list-check"></i>
+            </span>
+            <div class="cn-summary-content">
+                <span class="cn-summary-label">نتایج نمایش</span>
+                <span class="cn-summary-value">{{ total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         فیلتر
+         ============================================ -->
+    <form method="GET" class="cn-filter" action="{{ url_for('contractors.list_contractors') }}">
+        <div class="cn-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" value="{{ query }}" class="cn-search-input"
+                placeholder="جستجو در نام، کد، مدیرعامل، موبایل...">
+        </div>
+        <label class="cn-checkbox">
+            <input type="checkbox" name="active" value="1" {% if only_active %}checked{% endif %}>
+            فقط فعال‌ها
+        </label>
+        <button type="submit" class="cn-btn cn-btn-primary">
+            <i class="fa-solid fa-filter"></i>
+            اعمال
+        </button>
+        {% if query or only_active %}
+        <a href="{{ url_for('contractors.list_contractors') }}" class="cn-btn cn-btn-outline">
+            <i class="fa-solid fa-xmark"></i>
+            پاک کردن
+        </a>
+        {% endif %}
+    </form>
+
+    <!-- ============================================
+         لیست پیمانکاران
+         ============================================ -->
+    {% if contractors %}
+    <div class="cn-grid" id="contractorsGrid">
+        {% for c in contractors %}
+        <article class="cn-card" data-cn-index="{{ loop.index0 }}" style="--cn-index: {{ loop.index0 }};">
+
+            <!-- ★ ستون ۱: هدر کارت -->
+            <div class="cn-card-header">
+                <div class="cn-card-title-group">
+                    <div class="cn-card-avatar">
+                        {{ c.name[0] if c.name else '?' }}
+                    </div>
+                    <div class="cn-card-title-content">
+                        <h2 class="cn-card-name" title="{{ c.name }}">
+                            {{ c.name }}
+                        </h2>
+                        {% if c.code %}
+                        <span class="cn-card-code">
+                            <i class="fa-solid fa-barcode"></i>
+                            {{ c.code }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <span class="cn-status {{ 'active' if c.is_active else 'inactive' }}">
+                    <i class="fa-solid fa-circle"></i>
+                    {{ 'فعال' if c.is_active else 'غیرفعال' }}
+                </span>
+            </div>
+
+            <!-- ★ ستون ۲: بدنه (اطلاعات) -->
+            <div class="cn-card-body">
+                <div class="cn-info-row">
+                    <span class="cn-info-label">
+                        <i class="fa-solid fa-user-tie"></i>
+                        مدیرعامل
+                    </span>
+                    <span class="cn-info-value {{ 'muted' if not c.manager_name else '' }}">
+                        {{ c.manager_name or 'تعیین نشده' }}
+                    </span>
+                </div>
+
+                <div class="cn-info-row">
+                    <span class="cn-info-label">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                        موبایل
+                    </span>
+                    <span class="cn-info-value {{ 'muted' if not c.mobile else '' }}">
+                        {{ c.mobile or 'ثبت نشده' }}
+                    </span>
+                </div>
+
+                <div class="cn-info-row">
+                    <span class="cn-info-label">
+                        <i class="fa-solid fa-location-dot"></i>
+                        موقعیت
+                    </span>
+                    <span class="cn-info-value {{ 'muted' if not (c.province or c.city) else '' }}">
+                        {% if c.province or c.city %}
+                        {{ c.province or '' }}{% if c.province and c.city %} - {% endif %}{{ c.city or '' }}
+                        {% else %}
+                        تعیین نشده
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۳: ساید (اطلاعات تکمیلی + اکشن‌ها) -->
+            <div class="cn-card-side">
+
+                <div class="cn-card-stats">
+                    <div class="cn-stat">
+                        <span class="cn-stat-icon">
+                            <i class="fa-solid fa-phone"></i>
+                        </span>
+                        <span class="cn-stat-value" style="font-size:.85rem;">
+                            {{ c.phone or '—' }}
+                        </span>
+                        <span class="cn-stat-label">تلفن</span>
+                    </div>
+                    <div class="cn-stat">
+                        <span class="cn-stat-icon">
+                            <i class="fa-solid fa-id-card"></i>
+                        </span>
+                        <span class="cn-stat-value" style="font-size:.85rem;">
+                            {{ c.national_id or '—' }}
+                        </span>
+                        <span class="cn-stat-label">کد ملی</span>
+                    </div>
+                </div>
+
+                <div class="cn-actions">
+                    <a href="{{ url_for('contractors.view_contractor', contractor_id=c.id) }}"
+                        class="cn-action-btn view" title="مشاهده">
+                        <i class="fa-solid fa-eye"></i>
+                        مشاهده
+                    </a>
+                    <a href="{{ url_for('contractors.edit_contractor', contractor_id=c.id) }}"
+                        class="cn-action-btn edit" title="ویرایش">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+                    <form method="POST" action="{{ url_for('contractors.toggle_contractor', contractor_id=c.id) }}"
+                        style="display:inline">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="cn-action-btn edit" title="تغییر وضعیت">
+                            <i class="fa-solid fa-power-off"></i>
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('contractors.delete_contractor', contractor_id=c.id) }}"
+                        style="display:inline" onsubmit="return confirm('از حذف «{{ c.name }}» مطمئن هستید؟')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="cn-action-btn delete" title="حذف">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <!-- ===== حالت خالی ===== -->
+    <div class="cn-empty">
+        <div class="cn-empty-icon">
+            <i class="fa-solid fa-helmet-safety"></i>
+        </div>
+        <h3>هنوز پیمانکاری ثبت نشده است</h3>
+        <p>برای شروع، اولین پیمانکار را اضافه کنید یا از اکسل وارد کنید.</p>
+        <a href="{{ url_for('contractors.add_contractor') }}" class="cn-btn cn-btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            افزودن اولین پیمانکار
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- ============================================
+     Modal Import
+     ============================================ -->
+<div class="cn-modal-backdrop" id="importModal">
+    <div class="cn-modal-box">
+        <h3>
+            <i class="fa-solid fa-file-import"></i>
+            ورود پیمانکاران از اکسل
+        </h3>
+        <form method="POST" action="{{ url_for('contractors.import_excel') }}" enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file" name="file" accept=".xlsx,.xls" class="cn-modal-file-input" required>
+            <label class="cn-checkbox" style="margin-bottom:12px;">
+                <input type="checkbox" name="update_existing" value="1">
+                به‌روزرسانی رکوردهای موجود (بر اساس کد)
+            </label>
+            <div class="cn-modal-actions">
+                <button type="button" class="cn-btn cn-btn-outline" onclick="closeImportModal()">
+                    انصراف
+                </button>
+                <button type="submit" class="cn-btn cn-btn-primary">
+                    <i class="fa-solid fa-upload"></i>
+                    آپلود و Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/contractors/list.js') }}"></script>{% endblock %}

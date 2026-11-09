@@ -1,0 +1,263 @@
+/* استایل صفحه: access_denied.html */
+
+    /* ============================================
+       صفحه عدم دسترسی
+       ★ کاملاً اسکوپ‌شده — به هیچ جای دیگه دست نمی‌زنه
+       ============================================ */
+
+    .access-denied-page {
+        /* ★ متغیرهای محلی */
+        --ad-primary: #5b9bb5;
+        --ad-primary-light: #7ab5a0;
+        --ad-primary-dark: #4a7f94;
+        --ad-text-primary: #2d3e4a;
+        --ad-text-secondary: #6b7d8a;
+        --ad-border-soft: #d8e6ed;
+        --ad-transition: .3s cubic-bezier(.25, .46, .45, .94);
+
+        /* ★ چیدمان */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 500px;
+        border-radius: 16px;
+        margin: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .access-denied-page * {
+        box-sizing: border-box;
+    }
+
+    /* ★ حباب‌های تزئینی */
+    .access-denied-page::before,
+    .access-denied-page::after {
+        content: "";
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .access-denied-page::before {
+        width: 300px;
+        height: 300px;
+        top: -150px;
+        right: -150px;
+        background: radial-gradient(circle, rgba(91, 155, 181, .15) 0%, transparent 70%);
+    }
+
+    .access-denied-page::after {
+        width: 250px;
+        height: 250px;
+        bottom: -120px;
+        left: -120px;
+        background: radial-gradient(circle, rgba(122, 181, 160, .15) 0%, transparent 70%);
+    }
+
+    /* ============================================
+       کارت اصلی
+       ============================================ */
+    .access-denied-page .ad-card {
+        position: relative;
+        z-index: 1;
+        max-width: 500px;
+        width: 100%;
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 10px 40px rgba(91, 155, 181, .15);
+        padding: 44px 32px;
+        text-align: center;
+        border: 1.5px solid #e8eef2;
+    }
+
+    /* ★ نوار گرادیان بالا */
+    .access-denied-page .ad-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #5b9bb5 0%, #7ab5a0 100%);
+        border-radius: 20px 20px 0 0;
+    }
+
+    /* ============================================
+       آیکون قفل
+       ============================================ */
+    .access-denied-page .ad-icon {
+        position: relative;
+        width: 90px;
+        height: 90px;
+        margin: 0 auto 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #fdf0ec 0%, #f8d9cc 100%);
+        color: #c05621;
+        font-size: 2.5rem;
+        border: 3px solid #ffffff;
+        box-shadow: 0 8px 24px rgba(192, 86, 33, .20);
+    }
+
+    /* ★ رینگ چرخان دور آیکون */
+    .access-denied-page .ad-icon::before {
+        content: "";
+        position: absolute;
+        inset: -12px;
+        border-radius: 50%;
+        border: 2px dashed rgba(192, 86, 33, .30);
+        animation: adRingRotate 18s linear infinite;
+    }
+
+    @keyframes adRingRotate {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ============================================
+       عنوان
+       ============================================ */
+    .access-denied-page .ad-title {
+        margin: 0 0 12px;
+        color: var(--ad-text-primary);
+        font-size: 1.5rem;
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    /* ============================================
+       متن
+       ============================================ */
+    .access-denied-page .ad-text {
+        margin: 0 0 28px;
+        color: var(--ad-text-secondary);
+        font-size: .9rem;
+        line-height: 1.8;
+    }
+
+    .access-denied-page .ad-text strong {
+        color: var(--ad-primary-dark);
+        font-weight: 700;
+    }
+
+    /* ============================================
+       دکمه‌ها
+       ============================================ */
+    .access-denied-page .ad-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .access-denied-page .ad-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 22px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .85rem;
+        font-weight: 700;
+        transition: all var(--ad-transition);
+        border: 1.5px solid transparent;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .access-denied-page .ad-btn i {
+        font-size: .9rem;
+    }
+
+    /* دکمه اصلی */
+    .access-denied-page .ad-btn-primary {
+        background: linear-gradient(135deg, #5b9bb5 0%, #7ab5a0 100%);
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(91, 155, 181, .25);
+    }
+
+    .access-denied-page .ad-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(91, 155, 181, .35);
+        color: #fff;
+    }
+
+    /* دکمه ثانویه */
+    .access-denied-page .ad-btn-secondary {
+        background: #ffffff;
+        border-color: #d8e6ed;
+        color: #6b7d8a;
+    }
+
+    .access-denied-page .ad-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #5b9bb5;
+        color: #4a7f94;
+        transform: translateY(-2px);
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+    @media (max-width: 576px) {
+        .access-denied-page {
+            margin: 10px;
+            padding: 24px 12px;
+            border-radius: 12px;
+        }
+
+        .access-denied-page .ad-card {
+            padding: 32px 20px;
+            border-radius: 16px;
+        }
+
+        .access-denied-page .ad-icon {
+            width: 74px;
+            height: 74px;
+            font-size: 2rem;
+        }
+
+        .access-denied-page .ad-title {
+            font-size: 1.2rem;
+        }
+
+        .access-denied-page .ad-text {
+            font-size: .82rem;
+        }
+
+        .access-denied-page .ad-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .access-denied-page .ad-btn {
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .access-denied-page *,
+        .access-denied-page *::before,
+        .access-denied-page *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

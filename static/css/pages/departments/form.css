@@ -1,0 +1,492 @@
+/* استایل صفحه: departments/form.html */
+
+    /* ============================================
+       SCOPE: .page-departments
+       ============================================ */
+
+    .page-departments {
+        --dp-primary: #1b698b;
+        --dp-primary-light: #167a5c;
+        --dp-primary-dark: #14506a;
+        --dp-text: #2d3e4a;
+        --dp-text-secondary: #6b7d8a;
+        --dp-text-muted: #a0aeb8;
+        --dp-border: #d8e6ed;
+        --dp-bg-soft: #f7fafc;
+        --dp-radius-lg: 20px;
+        --dp-radius-md: 14px;
+        --dp-radius-sm: 10px;
+        --dp-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --dp-shadow-md: 0 10px 30px rgba(91, 155, 181, .14);
+        --dp-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    .page-departments .dp-wrap {
+        max-width: 850px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+
+    .page-departments .dp-wrap *,
+    .page-departments .dp-wrap *::before,
+    .page-departments .dp-wrap *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       کارت فرم
+       ============================================ */
+    .page-departments .dp-form-card {
+        position: relative;
+        background: #ffffff;
+        border: 1.5px solid var(--dp-border);
+        border-radius: var(--dp-radius-lg);
+        box-shadow: var(--dp-shadow-sm);
+        overflow: hidden;
+        transition: all var(--dp-transition);
+    }
+
+    .page-departments .dp-form-card:hover {
+        box-shadow: var(--dp-shadow-md);
+        border-color: #b8d4e0;
+    }
+
+    /* نوار رنگی بالای کارت */
+    .page-departments .dp-form-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        left: 0;
+        height: 5px;
+        background: linear-gradient(90deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        z-index: 2;
+    }
+
+    /* ============================================
+       هدر فرم
+       ============================================ */
+    .page-departments .dp-form-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: clamp(20px, 2.4vw, 28px);
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 100%);
+        border-bottom: 1px solid #eaf0f4;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-departments .dp-form-header-icon {
+        width: clamp(52px, 5vw, 64px);
+        height: clamp(52px, 5vw, 64px);
+        min-width: clamp(52px, 5vw, 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        background: linear-gradient(135deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        color: #ffffff;
+        font-size: clamp(1.2rem, 1.5vw, 1.5rem);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .28);
+        flex-shrink: 0;
+        transition: transform var(--dp-transition);
+    }
+
+    .page-departments .dp-form-card:hover .dp-form-header-icon {
+        transform: scale(1.06) rotate(-6deg);
+    }
+
+    .page-departments .dp-form-header-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-departments .dp-form-title {
+        margin: 0;
+        color: var(--dp-text);
+        font-size: clamp(1rem, 1.3vw, 1.2rem);
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    .page-departments .dp-form-subtitle {
+        margin: 5px 0 0;
+        color: var(--dp-text-secondary);
+        font-size: clamp(.72rem, .85vw, .82rem);
+        line-height: 1.6;
+    }
+
+    /* ============================================
+       بدنه فرم
+       ============================================ */
+    .page-departments .dp-form-body {
+        padding: clamp(20px, 2.4vw, 30px);
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-departments .dp-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .page-departments .dp-field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .page-departments .dp-field.full-width {
+        grid-column: 1 / -1;
+    }
+
+    /* ============================================
+       برچسب فیلد
+       ============================================ */
+    .page-departments .dp-label {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #3d484b;
+        font-size: clamp(.75rem, .85vw, .82rem);
+        font-weight: 700;
+    }
+
+    .page-departments .dp-label i {
+        width: 18px;
+        height: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(27, 105, 139, .08);
+        color: var(--dp-primary);
+        border-radius: 5px;
+        font-size: .72rem;
+        flex-shrink: 0;
+    }
+
+    .page-departments .dp-label .required {
+        color: #e17055;
+        font-size: .85rem;
+        margin-right: 2px;
+    }
+
+    /* ============================================
+       ورودی‌ها
+       ============================================ */
+    .page-departments .dp-input,
+    .page-departments .dp-select {
+        width: 100%;
+        min-height: 48px;
+        padding: 11px 15px;
+        border: 1.5px solid #d8e2e5;
+        border-radius: 12px;
+        background: #ffffff;
+        color: var(--dp-text);
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .88vw, .85rem);
+        outline: none;
+        transition: all var(--dp-transition);
+        box-sizing: border-box;
+    }
+
+    .page-departments .dp-input::placeholder {
+        color: var(--dp-text-muted);
+    }
+
+    .page-departments .dp-input:hover,
+    .page-departments .dp-select:hover {
+        border-color: #b8ccd2;
+    }
+
+    .page-departments .dp-input:focus,
+    .page-departments .dp-select:focus {
+        border-color: var(--dp-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .12);
+    }
+
+    .page-departments .dp-input[dir="ltr"] {
+        direction: ltr;
+        text-align: left;
+    }
+
+    .page-departments .dp-select {
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231b698b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: left 14px center;
+        background-size: 16px;
+        padding-left: 40px;
+    }
+
+    /* ============================================
+       متن راهنما
+       ============================================ */
+    .page-departments .dp-help {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--dp-text-muted);
+        font-size: clamp(.65rem, .78vw, .74rem);
+        font-weight: 500;
+    }
+
+    .page-departments .dp-help i {
+        font-size: .7rem;
+        color: var(--dp-primary);
+    }
+
+    /* ============================================
+       چک‌باکس سفارشی
+       ============================================ */
+    .page-departments .dp-checkbox-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, #f7fafc 0%, #f1f6f9 100%);
+        border: 1.5px solid var(--dp-border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all var(--dp-transition);
+        user-select: none;
+    }
+
+    .page-departments .dp-checkbox-wrapper:hover {
+        border-color: #b8d4e0;
+        background: linear-gradient(135deg, #eef7fa 0%, #e8f3f7 100%);
+    }
+
+    .page-departments .dp-checkbox {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        border: 2px solid #cfdeda;
+        border-radius: 7px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: all var(--dp-transition);
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    .page-departments .dp-checkbox:checked {
+        background: linear-gradient(135deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        border-color: var(--dp-primary);
+        box-shadow: 0 3px 10px rgba(27, 105, 139, .25);
+    }
+
+    .page-departments .dp-checkbox:checked::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -60%) rotate(45deg);
+        width: 6px;
+        height: 11px;
+        border: solid #ffffff;
+        border-width: 0 2.5px 2.5px 0;
+    }
+
+    .page-departments .dp-checkbox-wrapper:has(.dp-checkbox:checked) {
+        border-color: var(--dp-primary);
+        background: linear-gradient(135deg, #eaf4f9 0%, #e0eef4 100%);
+        box-shadow: 0 3px 10px rgba(27, 105, 139, .10);
+    }
+
+    .page-departments .dp-checkbox-text {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-departments .dp-checkbox-text strong {
+        color: var(--dp-text);
+        font-size: clamp(.78rem, .88vw, .85rem);
+        font-weight: 700;
+    }
+
+    .page-departments .dp-checkbox-text small {
+        color: var(--dp-text-secondary);
+        font-size: clamp(.65rem, .78vw, .74rem);
+        font-weight: 500;
+    }
+
+    /* ============================================
+       دکمه‌ها
+       ============================================ */
+    .page-departments .dp-form-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 28px;
+        padding-top: 22px;
+        border-top: 1px solid #eef3f6;
+        flex-wrap: wrap;
+    }
+
+    .page-departments .dp-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        padding: 10px 22px;
+        border-radius: 12px;
+        font-family: "Vazirmatn", Tahoma, Arial, sans-serif;
+        font-size: clamp(.78rem, .9vw, .86rem);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--dp-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-departments .dp-btn i {
+        font-size: .95rem;
+        transition: transform var(--dp-transition);
+    }
+
+    /* دکمه اصلی (ذخیره) */
+    .page-departments .dp-btn-primary {
+        background: linear-gradient(135deg, var(--dp-primary) 0%, var(--dp-primary-light) 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .25);
+        border-color: transparent;
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .page-departments .dp-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(27, 105, 139, .38);
+        color: #ffffff;
+    }
+
+    .page-departments .dp-btn-primary:hover i {
+        transform: scale(1.15);
+    }
+
+    .page-departments .dp-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    /* دکمه انصراف */
+    .page-departments .dp-btn-secondary {
+        background: #ffffff;
+        border-color: var(--dp-border);
+        color: var(--dp-text-secondary);
+    }
+
+    .page-departments .dp-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--dp-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .10);
+    }
+
+    .page-departments .dp-btn-secondary:hover i {
+        transform: rotate(-8deg);
+    }
+
+    .page-departments .dp-btn-secondary:active {
+        transform: translateY(0);
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .page-departments .dp-form-grid {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+
+        .page-departments .dp-field.full-width {
+            grid-column: auto;
+        }
+
+        .page-departments .dp-form-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .page-departments .dp-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-departments .dp-form-header {
+            gap: 12px;
+            padding: 18px;
+        }
+
+        .page-departments .dp-form-header-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            border-radius: 13px;
+            font-size: 1.15rem;
+        }
+
+        .page-departments .dp-form-body {
+            padding: 18px;
+        }
+
+        .page-departments .dp-input,
+        .page-departments .dp-select {
+            min-height: 46px;
+            padding: 10px 13px;
+        }
+
+        .page-departments .dp-checkbox-wrapper {
+            padding: 12px 14px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .page-departments .dp-wrap {
+            padding: 8px;
+        }
+
+        .page-departments .dp-form-header {
+            padding: 14px;
+        }
+
+        .page-departments .dp-form-header-icon {
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            font-size: 1rem;
+            border-radius: 11px;
+        }
+
+        .page-departments .dp-form-body {
+            padding: 14px;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        .page-departments .dp-wrap *,
+        .page-departments .dp-wrap *::before,
+        .page-departments .dp-wrap *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

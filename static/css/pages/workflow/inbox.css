@@ -1,0 +1,321 @@
+/* استایل صفحه: workflow/inbox.html */
+
+    .page-workflow-inbox {
+        --wi-primary: #1b698b;
+        --wi-primary-2: #167a5c;
+        --wi-text: #1e293b;
+        --wi-text-2: #64748b;
+        --wi-border: #e2e8f0;
+    }
+
+    .page-workflow-inbox .wi-wrap {
+        max-width: 1100px;
+        margin: 20px auto;
+        padding: 0 clamp(16px, 2.5vw, 40px);
+        direction: rtl;
+        font-family: "Vazirmatn", Tahoma, sans-serif;
+    }
+
+    /* ============================================
+       Header
+       ============================================ */
+    .page-workflow-inbox .wi-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 22px 26px;
+        background: linear-gradient(135deg, #f0f7fa, #eaf5f0);
+        border: 1.5px solid #d8e6ed;
+        border-radius: 20px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 16px rgba(27, 105, 139, .06);
+    }
+
+    .page-workflow-inbox .wi-header-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .page-workflow-inbox .wi-header-icon {
+        width: 56px;
+        height: 56px;
+        min-width: 56px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--wi-primary), var(--wi-primary-2));
+        color: #fff;
+        font-size: 1.4rem;
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .28);
+    }
+
+    .page-workflow-inbox .wi-header-text h1 {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+        font-weight: 800;
+        color: var(--wi-text);
+    }
+
+    .page-workflow-inbox .wi-header-text p {
+        margin: 4px 0 0;
+        font-size: .82rem;
+        color: var(--wi-text-2);
+    }
+
+    /* ============================================
+       Section
+       ============================================ */
+    .page-workflow-inbox .wi-section {
+        margin-bottom: 30px;
+    }
+
+    .page-workflow-inbox .wi-section-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: .95rem;
+        font-weight: 800;
+        color: var(--wi-text);
+        margin: 0 0 14px;
+    }
+
+    .page-workflow-inbox .wi-section-title i {
+        color: #fff;
+        background: linear-gradient(135deg, var(--wi-primary), var(--wi-primary-2));
+        width: 32px;
+        height: 32px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .85rem;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .22);
+    }
+
+    .page-workflow-inbox .wi-count {
+        font-size: .72rem;
+        background: #e0f2fe;
+        color: #0369a1;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+        margin-right: auto;
+    }
+
+    /* ============================================
+       List
+       ============================================ */
+    .page-workflow-inbox .wi-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    /* ============================================
+       Card (کارت یادداشت — همون ساختار _note_card)
+       ============================================ */
+    .page-workflow-inbox .nc-card {
+        display: block;
+        background: #fff;
+        border: 1.5px solid var(--wi-border);
+        border-radius: 16px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        transition: all .3s;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, .04);
+    }
+
+    .page-workflow-inbox .nc-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(27, 105, 139, .14);
+        border-color: var(--wi-primary);
+    }
+
+    /* نوار وضعیت */
+    .page-workflow-inbox .nc-status-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 16px;
+        font-size: .78rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .page-workflow-inbox .nc-status-review   { background: linear-gradient(135deg, #1b698b, #14506a); }
+    .page-workflow-inbox .nc-status-approved { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .page-workflow-inbox .nc-status-rejected { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .page-workflow-inbox .nc-status-info     { background: linear-gradient(135deg, #64748b, #475569); }
+
+    .page-workflow-inbox .nc-status-left {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-workflow-inbox .nc-status-right {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .7rem;
+        font-weight: 600;
+        opacity: .95;
+    }
+
+    /* بدنه کارت */
+    .page-workflow-inbox .nc-body {
+        display: flex;
+        gap: 14px;
+        padding: 16px 18px;
+    }
+
+    .page-workflow-inbox .nc-icon {
+        width: 46px;
+        height: 46px;
+        min-width: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f7fa;
+        color: var(--wi-primary);
+        font-size: 1.05rem;
+        flex-shrink: 0;
+        border: 1px solid #d8e6ed;
+    }
+
+    .page-workflow-inbox .nc-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .page-workflow-inbox .nc-subject {
+        font-size: .92rem;
+        font-weight: 800;
+        color: var(--wi-text);
+        margin-bottom: 4px;
+        line-height: 1.5;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+    }
+
+    .page-workflow-inbox .nc-code {
+        font-size: .72rem;
+        color: #94a3b8;
+        margin-bottom: 6px;
+        font-family: monospace;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .page-workflow-inbox .nc-snippet {
+        font-size: .8rem;
+        color: var(--wi-text-2);
+        line-height: 1.6;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .page-workflow-inbox .nc-meta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: .68rem;
+        color: #94a3b8;
+        flex-wrap: wrap;
+    }
+
+    .page-workflow-inbox .nc-meta > span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .page-workflow-inbox .nc-step-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 9px;
+        border-radius: 8px;
+        font-size: .68rem;
+        font-weight: 700;
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    /* ============================================
+       Empty
+       ============================================ */
+    .page-workflow-inbox .wi-empty {
+        text-align: center;
+        padding: 50px 20px;
+        background: #fff;
+        border: 2px dashed var(--wi-border);
+        border-radius: 18px;
+        color: var(--wi-text-2);
+    }
+
+    .page-workflow-inbox .wi-empty i {
+        font-size: 2.5rem;
+        color: #cbd5e0;
+        display: block;
+        margin-bottom: 12px;
+    }
+
+    .page-workflow-inbox .wi-empty p {
+        margin: 0;
+        font-size: .85rem;
+    }
+
+    /* ============================================
+       Responsive
+       ============================================ */
+    @media (max-width: 600px) {
+        .page-workflow-inbox .wi-wrap {
+            padding: 0 12px;
+            margin: 12px auto;
+        }
+
+        .page-workflow-inbox .wi-header {
+            flex-direction: column;
+            align-items: stretch;
+            padding: 18px 20px;
+        }
+
+        .page-workflow-inbox .wi-header-icon {
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            font-size: 1.2rem;
+        }
+
+        .page-workflow-inbox .nc-body {
+            padding: 14px;
+            gap: 10px;
+        }
+
+        .page-workflow-inbox .nc-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            font-size: .92rem;
+            border-radius: 12px;
+        }
+
+        .page-workflow-inbox .nc-subject { font-size: .85rem; }
+        .page-workflow-inbox .nc-snippet { font-size: .75rem; }
+    }

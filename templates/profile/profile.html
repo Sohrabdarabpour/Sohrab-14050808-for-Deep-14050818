@@ -1,0 +1,414 @@
+{% extends "base.html" %}
+
+{% block title %}
+پروفایل کاربر
+{% endblock %}
+
+{% block body_class %}
+page-profile
+{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-profile" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/profile/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pf-wrap">
+
+    <!-- ===== ★ پیام‌های Flash ★ ===== -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="pf-flash-container">
+        {% for category, message in messages %}
+        <div class="pf-flash pf-flash-{{ category }}">
+            {% if category == 'success' %}
+            <i class="fa-solid fa-circle-check"></i>
+            {% elif category == 'danger' %}
+            <i class="fa-solid fa-circle-exclamation"></i>
+            {% elif category == 'warning' %}
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            {% else %}
+            <i class="fa-solid fa-circle-info"></i>
+            {% endif %}
+            <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <!-- ===== هدر پروفایل ===== -->
+    <div class="pf-header">
+
+        <!-- آواتار + آپلود -->
+        <div class="pf-avatar-wrapper">
+
+            <div class="pf-avatar-rings">
+                <div class="pf-avatar-ring"></div>
+                <div class="pf-avatar-ring ring-2"></div>
+            </div>
+
+            <label for="avatarInput" class="pf-avatar" id="pfAvatarLabel">
+
+                <!-- ★ آواتار بر اساس جنسیت و آواتار اختصاصی -->
+                {% set u_avatar = user['avatar'] %}
+                {% set u_gender = user['gender'] or 'male' %}
+
+                {% if u_avatar and u_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                    {# آواتار اختصاصی #}
+                    <img id="pfAvatarImg"
+                        src="{{ url_for('static', filename='uploads/avatar/' + u_avatar) }}"
+                        alt="{{ user['full_name'] if user['full_name'] else 'کاربر' }}"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                {% elif u_gender == 'female' %}
+                    {# آواتار پیش‌فرض خانم #}
+                    <img id="pfAvatarImg"
+                        src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                        alt="{{ user['full_name'] if user['full_name'] else 'کاربر' }}" />
+                {% else %}
+                    {# آواتار پیش‌فرض آقا #}
+                    <img id="pfAvatarImg"
+                        src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                        alt="{{ user['full_name'] if user['full_name'] else 'کاربر' }}" />
+                {% endif %}
+
+                <div class="pf-avatar-overlay">
+                    <i class="fa-solid fa-camera"></i>
+                    <span>تغییر</span>
+                </div>
+
+                <!-- ★ نوار پیشرفت آپلود -->
+                <div class="pf-upload-progress" id="pfUploadProgress">
+                    <div class="pf-upload-progress-bar" id="pfUploadProgressBar"></div>
+                </div>
+            </label>
+
+            <input type="file" id="avatarInput" name="avatar" class="pf-avatar-input"
+                accept="image/png,image/jpeg,image/jpg,image/webp,image/gif">
+
+            <div class="pf-avatar-actions">
+                <button type="button" class="pf-avatar-btn" id="pfAvatarBtn">
+                    <i class="fa-solid fa-camera"></i>
+                    تغییر تصویر
+                </button>
+
+                {% if user['avatar'] and user['avatar'] not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                <button type="button" class="pf-avatar-btn pf-avatar-remove" id="pfAvatarRemove">
+                    <i class="fa-solid fa-trash"></i>
+                    حذف تصویر
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- اطلاعات -->
+        <div class="pf-header-info">
+            <h1>{{ user['full_name'] }}</h1>
+            <span class="pf-role-badge">
+                <i class="fa-solid fa-shield-halved"></i>
+                {{ user['role'] }}
+            </span>
+        </div>
+
+    </div>
+
+    <!-- ===== فرم آپلود آواتار (مخفی) ===== -->
+    <form method="POST" enctype="multipart/form-data" id="pfAvatarForm" style="display:none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="avatar">
+        <input type="file" name="avatar" id="pfAvatarFormInput">
+    </form>
+
+    <!-- ===== فرم حذف آواتار (مخفی) ===== -->
+    <form method="POST" id="pfAvatarRemoveForm" style="display:none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="remove_avatar">
+    </form>
+
+    <!-- ===== گرید کارت‌ها ===== -->
+    <div class="pf-grid">
+
+        <!-- ===== ویرایش اطلاعات ===== -->
+        <div class="pf-card">
+            <h3>
+                <i class="fa-solid fa-user-pen"></i>
+                ویرایش اطلاعات
+            </h3>
+
+            <form method="POST" id="pfProfileForm" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="update">
+
+                <div class="pf-field">
+                    <label for="full_name">
+                        <i class="fa-solid fa-id-card"></i>
+                        نام و نام خانوادگی
+                    </label>
+                    <input id="full_name" name="full_name" value="{{ user['full_name'] or '' }}"
+                        placeholder="نام و نام خانوادگی را وارد کنید" required>
+                    <small class="pf-field-help">حداقل ۳ کاراکتر</small>
+                    <small class="pf-field-error" data-error="full_name">نام را وارد کنید (حداقل ۳ کاراکتر)</small>
+                </div>
+
+                <div class="pf-field">
+                    <label for="email">
+                        <i class="fa-solid fa-envelope"></i>
+                        ایمیل
+                    </label>
+                    <input id="email" name="email" type="email" value="{{ user['email'] or '' }}"
+                        placeholder="example@email.com">
+                    <small class="pf-field-error" data-error="email">ایمیل معتبر وارد کنید</small>
+                </div>
+
+                <div class="pf-field">
+                    <label for="phone">
+                        <i class="fa-solid fa-phone"></i>
+                        شماره تماس
+                    </label>
+                    <input id="phone" name="phone" value="{{ user['phone'] or '' }}"
+                        placeholder="۰۹۱۲۳۴۵۶۷۸۹">
+                    <small class="pf-field-help">۱۱ رقم، با ۰۹ شروع شود</small>
+                    <small class="pf-field-error" data-error="phone">شماره تماس معتبر وارد کنید</small>
+                </div>
+
+                <div class="pf-field">
+                    <label for="national_code">
+                        <i class="fa-solid fa-id-badge"></i>
+                        کد ملی
+                    </label>
+                    <input id="national_code" name="national_code" value="{{ user['national_code'] or '' }}"
+                        placeholder="۱۰ رقم بدون خط تیره" maxlength="10">
+                    <small class="pf-field-help">۱۰ رقم</small>
+                    <small class="pf-field-error" data-error="national_code">کد ملی باید ۱۰ رقم باشد</small>
+                </div>
+
+                <div class="pf-field">
+                    <label for="position">
+                        <i class="fa-solid fa-briefcase"></i>
+                        سمت
+                    </label>
+                    <input id="position" name="position" value="{{ user['position'] or '' }}"
+                        placeholder="سمت خود را وارد کنید">
+                </div>
+
+                <!-- ★ جنسیت -->
+                <div class="pf-field">
+                    <label for="gender">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        جنسیت
+                    </label>
+                    <select id="gender" name="gender">
+                        <option value="male" {% if (user['gender'] or 'male') == 'male' %}selected{% endif %}>
+                            آقا
+                        </option>
+                        <option value="female" {% if user['gender'] == 'female' %}selected{% endif %}>
+                            خانم
+                        </option>
+                    </select>
+                    <small class="pf-field-help">با تغییر جنسیت، تصویر پیش‌فرض به‌روز می‌شود</small>
+                </div>
+
+                <button type="submit" class="pf-btn">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    ذخیره اطلاعات
+                </button>
+            </form>
+        </div>
+
+        <!-- ===== تغییر رمز عبور ===== -->
+        <div class="pf-card">
+            <h3>
+                <i class="fa-solid fa-lock"></i>
+                تغییر رمز عبور
+            </h3>
+
+            <form method="POST" id="pfPasswordForm" novalidate>
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="action" value="password">
+
+                <div class="pf-field pf-field-password">
+                    <label for="old_password">
+                        <i class="fa-solid fa-key"></i>
+                        رمز فعلی
+                    </label>
+                    <input id="old_password" name="old_password" type="password"
+                        placeholder="رمز فعلی خود را وارد کنید" autocomplete="current-password" required>
+                    <button type="button" class="pf-toggle-password" data-target="old_password"
+                        aria-label="نمایش رمز">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                </div>
+
+                <div class="pf-field pf-field-password">
+                    <label for="new_password">
+                        <i class="fa-solid fa-lock"></i>
+                        رمز جدید
+                    </label>
+                    <input id="new_password" name="new_password" type="password"
+                        placeholder="رمز جدید را وارد کنید" autocomplete="new-password" required>
+                    <button type="button" class="pf-toggle-password" data-target="new_password"
+                        aria-label="نمایش رمز">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+
+                    <div class="pf-password-strength" id="pfPasswordStrength" data-strength="">
+                        <span class="pf-password-strength-bar"></span>
+                        <span class="pf-password-strength-bar"></span>
+                        <span class="pf-password-strength-bar"></span>
+                    </div>
+                    <div class="pf-password-strength-text" id="pfPasswordStrengthText">
+                        حداقل ۸ کاراکتر شامل حرف و عدد
+                    </div>
+
+                    <small class="pf-field-error" data-error="new_password">رمز باید حداقل ۸ کاراکتر باشد</small>
+                </div>
+
+                <div class="pf-field pf-field-password">
+                    <label for="confirm_password">
+                        <i class="fa-solid fa-check-double"></i>
+                        تکرار رمز جدید
+                    </label>
+                    <input id="confirm_password" name="confirm_password" type="password"
+                        placeholder="رمز جدید را دوباره وارد کنید" autocomplete="new-password" required>
+                    <button type="button" class="pf-toggle-password" data-target="confirm_password"
+                        aria-label="نمایش رمز">
+                        <i class="fa-solid fa-eye"></i>
+                    </button>
+                    <small class="pf-field-error" data-error="confirm_password">رمزها یکسان نیستند</small>
+                </div>
+
+                <button type="submit" class="pf-btn" id="pfPasswordSubmit" disabled>
+                    <i class="fa-solid fa-key"></i>
+                    تغییر رمز
+                </button>
+            </form>
+        </div>
+
+        <!-- ===== اطلاعات حساب ===== -->
+        <div class="pf-card">
+            <h3>
+                <i class="fa-solid fa-circle-info"></i>
+                اطلاعات حساب
+            </h3>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-hashtag"></i>
+                    شناسه
+                </span>
+                <span class="pf-info-value">{{ user['id'] }}</span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-at"></i>
+                    نام کاربری
+                </span>
+                <span class="pf-info-value">{{ user['username'] }}</span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    نقش
+                </span>
+                <span class="pf-info-value fa">{{ user['role'] }}</span>
+            </div>
+
+            <!-- ★ جنسیت -->
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-venus-mars"></i>
+                    جنسیت
+                </span>
+                <span class="pf-info-value fa">
+                    {% if user['gender'] == 'female' %}خانم{% else %}آقا{% endif %}
+                </span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-envelope"></i>
+                    ایمیل
+                </span>
+                <span class="pf-info-value">{{ user['email'] or '—' }}</span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-phone"></i>
+                    تلفن
+                </span>
+                <span class="pf-info-value">{{ user['phone'] or '—' }}</span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    عضویت
+                </span>
+                <span class="pf-info-value">
+                    {{ user['created_at']|jalali_date if user['created_at'] else '—' }}
+                </span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    آخرین ورود
+                </span>
+                <span class="pf-info-value">
+                    {{ user['last_login']|jalali_datetime if user['last_login'] else '—' }}
+                </span>
+            </div>
+
+            <div class="pf-info-item">
+                <span class="pf-info-label">
+                    <i class="fa-solid fa-eye"></i>
+                    آخرین فعالیت
+                </span>
+                <span class="pf-info-value">
+                    {{ user['last_seen']|jalali_datetime if user['last_seen'] else '—' }}
+                </span>
+            </div>
+
+            <!-- ★ دکمه بازگشت (بر اساس نقش) -->
+            <div class="pf-actions-row">
+                {% set role = session.get('role') %}
+
+                {% if role == 'admin' or role == 'manager' %}
+                {# ادمین و مدیر → به مدیریت کاربران #}
+                <a href="{{ url_for('panel.users') }}" class="pf-cancel-btn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت به مدیریت کاربران
+                </a>
+
+                {% elif role == 'supervisor' and session.get('department_id') %}
+                {# سرپرست → به دپارتمان خودش #}
+                <a href="{{ url_for('departments.view_department', department_id=session.get('department_id')) }}"
+                    class="pf-cancel-btn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت به دپارتمان
+                </a>
+
+                {% else %}
+                {# کارشناس و سایر نقش‌ها → به داشبورد #}
+                <a href="{{ url_for('main.index') }}" class="pf-cancel-btn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    بازگشت به داشبورد
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/profile/profile.js') }}"></script>{% endblock %}

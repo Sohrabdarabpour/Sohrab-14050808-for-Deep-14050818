@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}سوابق یادداشت‌های من{% endblock %}
+{% block body_class %}page-my-notes{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/workflow/my_notes.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="mn-wrap">
+
+    <!-- Header -->
+    <div class="mn-header">
+        <div class="mn-header-info">
+            <div class="mn-header-icon">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+            </div>
+            <div class="mn-header-text">
+                <h1>سوابق یادداشت‌های من</h1>
+                <p>همه یادداشت‌هایی که ثبت کرده‌اید</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="mn-stats">
+
+        <a href="{{ url_for('workflow.my_notes') }}"
+           class="mn-stat {% if not current_filter %}active{% endif %}">
+            <div class="mn-stat-icon total">
+                <i class="fa-solid fa-list"></i>
+            </div>
+            <div class="mn-stat-content">
+                <span class="mn-stat-label">همه</span>
+                <span class="mn-stat-value">{{ stats.total }}</span>
+            </div>
+        </a>
+
+        <a href="{{ url_for('workflow.my_notes', status='in_review') }}"
+           class="mn-stat {% if current_filter == 'in_review' %}active{% endif %}">
+            <div class="mn-stat-icon review">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div class="mn-stat-content">
+                <span class="mn-stat-label">در بررسی</span>
+                <span class="mn-stat-value">{{ stats.in_review }}</span>
+            </div>
+        </a>
+
+        <a href="{{ url_for('workflow.my_notes', status='approved') }}"
+           class="mn-stat {% if current_filter == 'approved' %}active{% endif %}">
+            <div class="mn-stat-icon approved">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="mn-stat-content">
+                <span class="mn-stat-label">تایید شده</span>
+                <span class="mn-stat-value">{{ stats.approved }}</span>
+            </div>
+        </a>
+
+        <a href="{{ url_for('workflow.my_notes', status='rejected') }}"
+           class="mn-stat {% if current_filter == 'rejected' %}active{% endif %}">
+            <div class="mn-stat-icon rejected">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div class="mn-stat-content">
+                <span class="mn-stat-label">رد شده</span>
+                <span class="mn-stat-value">{{ stats.rejected }}</span>
+            </div>
+        </a>
+
+    </div>
+
+    <!-- List -->
+    {% if notes and notes|length > 0 %}
+    <div class="mn-list">
+        {% for note in notes %}
+            {% with show_status=True %}
+                {% include "workflow/_note_card.html" %}
+            {% endwith %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="mn-empty">
+        <i class="fa-solid fa-note-sticky"></i>
+        <h3>هیچ یادداشتی ندارید</h3>
+        <p>
+            {% if current_filter %}
+                توی این دسته یادداشتی ندارید
+            {% else %}
+                وقتی یادداشت جدیدی ثبت کنید، اینجا نمایش داده می‌شود
+            {% endif %}
+        </p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

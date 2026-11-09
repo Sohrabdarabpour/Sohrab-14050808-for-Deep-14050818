@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت دپارتمان‌ها{% endblock %}
+
+{% block body_class %}page-departments{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-departments" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/departments/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dp-wrap">
+
+    <!-- ===== هدر صفحه ===== -->
+    <div class="dp-header">
+        <div class="dp-header-info">
+            <div class="dp-header-icon">
+                <i class="fa-solid fa-building"></i>
+            </div>
+            <div class="dp-header-text">
+                <h1 class="dp-title">مدیریت دپارتمان‌ها</h1>
+                <p class="dp-subtitle">فهرست واحدها، سرپرستان و آمار فعالیت‌ها</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('departments.add_department') }}" class="dp-add-btn">
+            <i class="fa-solid fa-plus"></i>
+            افزودن دپارتمان
+        </a>
+    </div>
+
+    {% if departments %}
+
+    <!-- ===== گرید کارت‌ها — یک کارت در هر ردیف ===== -->
+    <div class="dp-grid" id="departmentsGrid">
+
+        {% for department in departments %}
+        <article class="dp-card" data-dept-index="{{ loop.index0 }}" style="--dept-index: {{ loop.index0 }};">
+
+            <!-- ★ ستون ۱: هدر (آیکون + عنوان + کد + بج) -->
+            <div class="dp-card-header">
+                <div class="dp-card-title-group">
+                    <div class="dp-card-icon">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <div class="dp-card-title-content">
+                        <h2 class="dp-card-name">{{ department.title }}</h2>
+                        {% if department.code %}
+                        <span class="dp-card-code">
+                            <i class="fa-solid fa-hashtag"></i>
+                            {{ department.code }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <span class="dp-status {{ 'active' if department.is_active else 'inactive' }}">
+                    <i class="fa-solid fa-circle"></i>
+                    {{ 'فعال' if department.is_active else 'غیرفعال' }}
+                </span>
+            </div>
+
+            <!-- ★ ستون ۲: بدنه (سرپرست، ترتیب) -->
+            <div class="dp-card-body">
+                <div class="dp-info-row">
+                    <span class="dp-info-label">
+                        <i class="fa-solid fa-user-tie"></i>
+                        سرپرست
+                    </span>
+                    <span class="dp-info-value {{ 'muted' if not department.supervisor_name else '' }}">
+                        {{ department.supervisor_name or 'تعیین نشده' }}
+                    </span>
+                </div>
+
+                <div class="dp-info-row">
+                    <span class="dp-info-label">
+                        <i class="fa-solid fa-sort-numeric-down"></i>
+                        ترتیب نمایش
+                    </span>
+                    <span class="dp-info-value">{{ department.sort_order }}</span>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۳: آمار + اکشن‌ها -->
+            <div class="dp-card-side">
+
+                <!-- آمار -->
+                <div class="dp-stats">
+                    <div class="dp-stat">
+                        <span class="dp-stat-number">{{ department.experts_count }}</span>
+                        <span class="dp-stat-label">کارشناس فعال</span>
+                    </div>
+                    <div class="dp-stat">
+                        <span class="dp-stat-number">{{ department.documents_count }}</span>
+                        <span class="dp-stat-label">سند</span>
+                    </div>
+                </div>
+
+                <!-- اکشن‌ها -->
+                <div class="dp-actions">
+                    <a href="{{ url_for('departments.view_department', department_id=department['id']) }}"
+                        class="dp-action-btn view">
+                        <i class="fa-solid fa-eye"></i>
+                        مشاهده
+                    </a>
+                    <a href="{{ url_for('departments.edit_department', department_id=department.id) }}"
+                        class="dp-action-btn edit">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+                </div>
+
+            </div>
+
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <!-- ===== حالت خالی ===== -->
+    <div class="dp-empty">
+        <div class="dp-empty-icon">
+            <i class="fa-solid fa-building"></i>
+        </div>
+        <h3>هنوز دپارتمانی ثبت نشده است</h3>
+        <p>برای شروع، اولین دپارتمان را اضافه کنید.</p>
+        <a href="{{ url_for('departments.add_department') }}" class="dp-add-btn">
+            <i class="fa-solid fa-plus"></i>
+            افزودن اولین دپارتمان
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/departments/list.js') }}"></script>{% endblock %}

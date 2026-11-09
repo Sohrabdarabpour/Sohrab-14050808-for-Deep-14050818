@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}
+{% if status %}اسناد - {{ status.title }}{% else %}اسناد وضعیت{% endif %}
+{% endblock %}
+{% block body_class %}
+page-report-status-documents
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/status_documents.css') }}">
+{% endblock %}
+{% block content %}
+<div class="status-documents-container" style="--status-color:{{ status.color if status else '#3D8499' }};">
+    <div class="page-top">
+        <h1 class="page-title">
+            <i class="fa-solid fa-file-lines"></i>
+            {% if status %}
+            اسناد با وضعیت «{{ status.title }}»
+            {% else %}
+            اسناد وضعیت
+            {% endif %}
+        </h1>
+        <a href="{{ url_for('reports.status_report',year=selected_year) }}" class="back-button">
+            <i class="fa-solid fa-arrow-right"></i>
+            بازگشت به گزارش وضعیت
+        </a>
+    </div>
+    {% if status %}
+    <div class="filter-row">
+        <div class="filter-item">
+            <label for="yearFilter">
+                <i class="fa-solid fa-calendar"></i>
+                سال دریافت
+            </label>
+            <select id="yearFilter">
+                <option value="all" {% if selected_year|string=="all" %}selected{% endif %}>همه سال‌ها</option>
+                {% for year in available_years %}
+                <option value="{{ year }}" {% if selected_year|string==year|string %}selected{% endif %}>{{ year }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="button" id="clearFilters" class="clear-filter">
+            <i class="fa-solid fa-filter-circle-xmark"></i>
+            پاک کردن فیلترها
+        </button>
+    </div>
+    <div class="search-wrapper">
+        <span class="search-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+        <input type="text" id="searchInput" value="{{ search }}" placeholder="جستجو در اسناد این وضعیت..."
+            autocomplete="off">
+        <span class="search-clear" id="searchClear">
+            <i class="fa-solid fa-xmark"></i>
+        </span>
+    </div>
+    <div class="results-header">
+        <h2 class="results-title">
+            <i class="fa-solid fa-folder-open"></i>
+            {{ status.title }}
+        </h2>
+        <span class="results-count">
+            {{ total }} سند
+        </span>
+    </div>
+    <div class="document-grid">
+        {% for record in documents %}
+        <div class="document-card"
+            style="--status-color:{{ record.status_color if record.status_color else status.color }};">
+            <div class="doc-header">
+                <div class="doc-title-group">
+                    <div class="doc-subject">
+                        <i class="fa-solid fa-file-pen"></i>
+                        <span>{{ record.subject if record.subject else 'بدون موضوع' }}</span>
+                    </div>
+                    {% if record.project_name %}
+                    <div class="doc-project">
+                        <i class="fa-solid fa-diagram-project"></i>
+                        <div class="doc-project-content">
+                            <span class="doc-project-label">پروژه:</span>
+                            <span class="doc-project-name">{{ record.project_name }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="doc-meta">
+                        {% if record.code_dfc %}
+                        <span>
+                            <i class="fa-solid fa-hashtag"></i>
+                            DFC:{{ record.code_dfc }}
+                        </span>
+                        {% endif %}
+                        {% if record.contractor %}
+                        <span>
+                            <i class="fa-solid fa-building"></i>
+                            {{ record.contractor }}
+                        </span>
+                        {% endif %}
+                        {% if record.expert_name %}
+                        <span>
+                            <i class="fa-solid fa-user-tie"></i>
+                            {{ record.expert_name }}
+                        </span>
+                        {% endif %}
+                        {% if record.sub_group %}
+                        <span>
+                            <i class="fa-solid fa-layer-group"></i>
+                            {{ record.sub_group }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="doc-status-badge">
+                    <i class="fa-solid fa-circle"></i>
+                    {{ status.title }}
+                </span>
+            </div>
+            <div class="doc-body">
+                <div class="doc-body-row">
+                    {% if record.date_letter %}
+                    <div class="doc-field">
+                        <span class="field-label"><i class="fa-solid fa-calendar-day"></i>تاریخ نامه</span>
+                        <span class="field-value ltr">{{ record.date_letter|jalali_date }}</span>
+                    </div>
+                    {% endif %}
+                    {% if record.automation_number %}
+                    <div class="doc-field">
+                        <span class="field-label"><i class="fa-solid fa-barcode"></i>شماره اتوماسیون</span>
+                        <span class="field-value ltr">{{ record.automation_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if record.contractor_letter_number %}
+                    <div class="doc-field">
+                        <span class="field-label"><i class="fa-solid fa-envelope"></i>شماره نامه پیمانکار</span>
+                        <span class="field-value ltr">{{ record.contractor_letter_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if record.contract_number %}
+                    <div class="doc-field">
+                        <span class="field-label"><i class="fa-solid fa-file-contract"></i>شماره قرارداد</span>
+                        <span class="field-value ltr">{{ record.contract_number }}</span>
+                    </div>
+                    {% endif %}
+                    {% if record.deadline %}
+                    <div class="doc-field">
+                        <span class="field-label" style="color:#dc2626;"><i class="fa-solid fa-hourglass-half"></i>مهلت
+                            پاسخ</span>
+                        <span class="field-value ltr" style="color:#dc2626;">{{ record.deadline|jalali_date }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="doc-expandable-wrapper">
+                    <button type="button" class="doc-expand-btn" onclick="toggleExpand(this)">
+                        <i class="fa-solid fa-plus"></i>
+                        <span class="btn-text">نمایش جزئیات بیشتر</span>
+                    </button>
+                    <div class="doc-expand-content">
+                        <div class="doc-expand-content-inner">
+                            <div class="doc-body-row">
+                                {% if record.area_title or record.area %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-location-dot"></i>ناحیه</span>
+                                    <span class="field-value">{{ record.area_title or record.area }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.date_received %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-calendar-plus"></i>تاریخ
+                                        دریافت</span>
+                                    <span class="field-value ltr">{{ record.date_received|jalali_date }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.date_referral %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-share-from-square"></i>تاریخ
+                                        ارجاع</span>
+                                    <span class="field-value ltr">{{ record.date_referral|jalali_date }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.unit %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-building-columns"></i>واحد</span>
+                                    <span class="field-value">{{ record.unit }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="doc-body-row">
+                                {% if record.department_title %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-sitemap"></i>دپارتمان</span>
+                                    <span class="field-value">{{ record.department_title }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.document_group %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-folder"></i>گروه مدرک</span>
+                                    <span class="field-value">{{ record.document_group }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.sub_group %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-layer-group"></i>زیرگروه</span>
+                                    <span class="field-value">{{ record.sub_group }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="doc-body-row">
+                                {% if record.doc_response_status %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-clipboard-check"></i>وضعیت پاسخ
+                                        مدرک</span>
+                                    <span class="field-value">{{ record.doc_response_status }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.final_letter_number %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-file-signature"></i>شماره نامه
+                                        نهایی</span>
+                                    <span class="field-value ltr">{{ record.final_letter_number }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.final_delay %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-hourglass-end"></i>تاخیر
+                                        نهایی</span>
+                                    <span class="field-value ltr">{{ record.final_delay }}</span>
+                                </div>
+                                {% endif %}
+                                {% if record.created_at %}
+                                <div class="doc-field">
+                                    <span class="field-label"><i class="fa-solid fa-calendar-plus"></i>تاریخ
+                                        ایجاد</span>
+                                    <span class="field-value ltr">{{ record.created_at|jalali_date }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-file-circle-xmark"></i>
+            <p>{% if search %}سندی مطابق عبارت جستجو پیدا نشد{% else %}سندی برای این وضعیت وجود ندارد{% endif %}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% if total_pages>1 %}
+    <div class="pagination">
+        {% if page>1 %}
+        <a href="{{ url_for('reports.status_documents',status_code=status.code,year=selected_year,search=search,page=page-1) }}"
+            class="pagination-button">
+            <i class="fa-solid fa-chevron-right"></i>
+            قبلی
+        </a>
+        {% endif %}
+        <div class="pagination-pages">
+            {% for page_number in range(1,total_pages+1) %}
+            {% if page_number==page %}
+            <span class="pagination-page active">{{ page_number }}</span>
+            {% elif page_number<=3 or page_number>total_pages-3 or page_number>=page-1 and page_number<=page+1 %} <a
+                    href="{{ url_for('reports.status_documents',status_code=status.code,year=selected_year,search=search,page=page_number) }}"
+                    class="pagination-page">{{ page_number }}</a>
+                    {% elif page_number==4 or page_number==total_pages-3 %}
+                    <span class="pagination-dots">...</span>
+                    {% endif %}
+                    {% endfor %}
+        </div>
+        {% if page<total_pages %} <a
+            href="{{ url_for('reports.status_documents',status_code=status.code,year=selected_year,search=search,page=page+1) }}"
+            class="pagination-button">
+            بعدی
+            <i class="fa-solid fa-chevron-left"></i>
+            </a>
+            {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="empty-state">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <p>وضعیت مورد نظر پیدا نشد</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/reports/status_documents.js') }}"></script>{% endblock %}

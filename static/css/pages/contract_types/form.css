@@ -1,0 +1,267 @@
+/* استایل صفحه: contract_types/form.html */
+
+    .page-contract-type-form {
+        --cf-primary: #1b698b;
+        --cf-primary-light: #167a5c;
+        --cf-text: #2d3e4a;
+        --cf-text-secondary: #6b7d8a;
+        --cf-border: #d8e6ed;
+        --cf-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+    .page-contract-type-form .cf-wrap {
+        width: 100%;
+        padding: clamp(12px, 1.6vw, 28px);
+        box-sizing: border-box;
+        direction: rtl;
+    }
+    .page-contract-type-form .cf-wrap * { box-sizing: border-box; }
+
+    .page-contract-type-form .cf-card {
+        background: #fff;
+        border: 1.5px solid var(--cf-border);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(91, 155, 181, .1);
+        overflow: hidden;
+    }
+
+    .page-contract-type-form .cf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+        padding: 22px 28px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--cf-primary) 8%, #fff),
+            color-mix(in srgb, var(--cf-primary) 2%, #fff));
+        border-bottom: 1px solid color-mix(in srgb, var(--cf-primary) 12%, #fff);
+    }
+
+    .page-contract-type-form .cf-header-info {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .page-contract-type-form .cf-header-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--cf-primary), var(--cf-primary-light));
+        color: #fff;
+        font-size: 1.1rem;
+        box-shadow: 0 8px 18px rgba(27, 105, 139, .3);
+    }
+
+    .page-contract-type-form .cf-title {
+        margin: 0;
+        font-size: clamp(1rem, 1.4vw, 1.25rem);
+        font-weight: 800;
+        color: var(--cf-text);
+    }
+
+    .page-contract-type-form .cf-back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 11px;
+        background: #fff;
+        color: var(--cf-text-secondary);
+        border: 1.5px solid var(--cf-border);
+        font-family: inherit;
+        font-size: .82rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all var(--cf-transition);
+    }
+
+    .page-contract-type-form .cf-back-btn:hover {
+        color: var(--cf-primary);
+        border-color: var(--cf-primary);
+    }
+
+    .page-contract-type-form .cf-body {
+        padding: 28px;
+    }
+
+    .page-contract-type-form .cf-grid {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+    }
+
+    .page-contract-type-form .cf-field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .page-contract-type-form .cf-col-4 { grid-column: span 4; }
+    .page-contract-type-form .cf-col-6 { grid-column: span 6; }
+    .page-contract-type-form .cf-col-8 { grid-column: span 8; }
+    .page-contract-type-form .cf-col-12 { grid-column: span 12; }
+
+    .page-contract-type-form .cf-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        font-size: .82rem;
+        font-weight: 700;
+        color: var(--cf-text);
+    }
+
+    .page-contract-type-form .cf-label .req { color: #dc2626; font-weight: 900; }
+    .page-contract-type-form .cf-label i { color: var(--cf-primary); font-size: .8rem; }
+
+    .page-contract-type-form .cf-input,
+    .page-contract-type-form .cf-textarea,
+    .page-contract-type-form .cf-select {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1.5px solid var(--cf-border);
+        border-radius: 10px;
+        background: #fff;
+        font-family: inherit;
+        font-size: .85rem;
+        color: var(--cf-text);
+        transition: all var(--cf-transition);
+        outline: none;
+    }
+
+    .page-contract-type-form .cf-input:focus,
+    .page-contract-type-form .cf-textarea:focus {
+        border-color: var(--cf-primary);
+        box-shadow: 0 0 0 4px color-mix(in srgb, var(--cf-primary) 12%, transparent);
+    }
+
+    .page-contract-type-form .cf-input.ltr { direction: ltr; }
+    .page-contract-type-form .cf-textarea { resize: vertical; min-height: 80px; }
+
+    .page-contract-type-form .cf-switch-wrap {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 18px;
+        background: #f8fafc;
+        border: 1.5px solid var(--cf-border);
+        border-radius: 12px;
+        cursor: pointer;
+    }
+
+    .page-contract-type-form .cf-switch-wrap strong {
+        font-size: .85rem;
+        color: var(--cf-text);
+    }
+
+    .page-contract-type-form .cf-switch-wrap small {
+        display: block;
+        font-size: .72rem;
+        color: var(--cf-text-secondary);
+        margin-top: 2px;
+    }
+
+    .page-contract-type-form .cf-switch {
+        position: relative;
+        width: 46px;
+        height: 26px;
+        flex-shrink: 0;
+    }
+
+    .page-contract-type-form .cf-switch input { opacity: 0; width: 0; height: 0; }
+
+    .page-contract-type-form .cf-switch-slider {
+        position: absolute;
+        inset: 0;
+        background: #cbd5e1;
+        border-radius: 26px;
+        cursor: pointer;
+        transition: all .3s;
+    }
+
+    .page-contract-type-form .cf-switch-slider::before {
+        content: "";
+        position: absolute;
+        top: 3px;
+        right: 3px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #fff;
+        transition: all .3s;
+    }
+
+    .page-contract-type-form .cf-switch input:checked + .cf-switch-slider {
+        background: linear-gradient(135deg, var(--cf-primary), var(--cf-primary-light));
+    }
+
+    .page-contract-type-form .cf-switch input:checked + .cf-switch-slider::before {
+        transform: translateX(-20px);
+    }
+
+    .page-contract-type-form .cf-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px 28px;
+        background: #f8fafc;
+        border-top: 1px solid color-mix(in srgb, var(--cf-primary) 12%, #fff);
+        flex-wrap: wrap;
+    }
+
+    .page-contract-type-form .cf-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 11px 22px;
+        border-radius: 12px;
+        font-family: inherit;
+        font-size: .86rem;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--cf-transition);
+        border: 1.5px solid transparent;
+    }
+
+    .page-contract-type-form .cf-btn-save {
+        background: linear-gradient(135deg, var(--cf-primary), var(--cf-primary-light));
+        color: #fff;
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .3);
+    }
+
+    .page-contract-type-form .cf-btn-save:hover {
+        transform: translateY(-2px);
+        color: #fff;
+    }
+
+    .page-contract-type-form .cf-btn-cancel {
+        background: #fff;
+        color: var(--cf-text-secondary);
+        border-color: var(--cf-border);
+    }
+
+    .page-contract-type-form .cf-btn-cancel:hover {
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+
+    @media (max-width: 768px) {
+        .page-contract-type-form .cf-header,
+        .page-contract-type-form .cf-body,
+        .page-contract-type-form .cf-actions {
+            padding: 18px 20px;
+        }
+        .page-contract-type-form .cf-back-btn { width: 100%; justify-content: center; }
+        .page-contract-type-form .cf-col-4,
+        .page-contract-type-form .cf-col-6,
+        .page-contract-type-form .cf-col-8 { grid-column: span 12; }
+        .page-contract-type-form .cf-actions { flex-direction: column-reverse; }
+        .page-contract-type-form .cf-btn { width: 100%; }
+    }

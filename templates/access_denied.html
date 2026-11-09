@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}عدم دسترسی{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-access-denied" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/access_denied.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="access-denied-page">
+
+    <div class="ad-card">
+
+        <div class="ad-icon">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <h1 class="ad-title">عدم دسترسی</h1>
+
+        <p class="ad-text">
+            متأسفانه شما مجوز دسترسی به این بخش را ندارید.<br>
+            لطفاً با <strong>مدیر سیستم</strong> تماس بگیرید.
+        </p>
+
+        <div class="ad-actions">
+            <a href="{{ url_for('main.index') }}" class="ad-btn ad-btn-primary">
+                <i class="fa-solid fa-house"></i>
+                <span>بازگشت به صفحه اصلی</span>
+            </a>
+            <a href="javascript:history.back()" class="ad-btn ad-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>صفحه قبل</span>
+            </a>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

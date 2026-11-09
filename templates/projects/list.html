@@ -1,0 +1,421 @@
+{% extends "base.html" %}
+{% block title %}پروژه‌ها{% endblock %}
+{% block body_class %}page-projects{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/projects/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="pj-wrap">
+
+    <!-- ============================================
+         هدر صفحه
+         ============================================ -->
+    <div class="pj-header">
+        <div class="pj-header-info">
+            <div class="pj-header-icon">
+                <i class="fa-solid fa-diagram-project"></i>
+            </div>
+            <div class="pj-header-text">
+                <h1 class="pj-title">مدیریت پروژه‌ها</h1>
+                <p class="pj-subtitle">فهرست پروژه‌ها، وضعیت و پیشرفت</p>
+            </div>
+        </div>
+
+        <div class="pj-header-actions">
+            <a href="{{ url_for('projects.add_project') }}" class="pj-btn pj-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                افزودن پروژه
+            </a>
+            <a href="{{ url_for('projects.export_excel') }}" class="pj-btn pj-btn-success">
+                <i class="fa-solid fa-file-excel"></i>
+                خروجی اکسل
+            </a>
+            <button type="button"
+                    class="pj-btn pj-btn-outline"
+                    onclick="openImportModal()">
+                <i class="fa-solid fa-file-import"></i>
+                ورود از اکسل
+            </button>
+            <a href="{{ url_for('projects.download_template') }}"
+               class="pj-btn pj-btn-outline">
+                <i class="fa-solid fa-download"></i>
+                دانلود قالب
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================
+         خلاصه آمار
+         ============================================ -->
+    <div class="pj-summary">
+        <div class="pj-summary-item" style="--sc: #1b698b;">
+            <div class="pj-summary-icon"><i class="fa-solid fa-diagram-project"></i></div>
+            <div class="pj-summary-content">
+                <span class="pj-summary-label">کل پروژه‌ها</span>
+                <span class="pj-summary-value">{{ stats.total }}</span>
+            </div>
+        </div>
+        <div class="pj-summary-item" style="--sc: #16a34a;">
+            <div class="pj-summary-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="pj-summary-content">
+                <span class="pj-summary-label">فعال</span>
+                <span class="pj-summary-value">{{ stats.active }}</span>
+            </div>
+        </div>
+        <div class="pj-summary-item" style="--sc: #dc2626;">
+            <div class="pj-summary-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+            <div class="pj-summary-content">
+                <span class="pj-summary-label">غیرفعال</span>
+                <span class="pj-summary-value">{{ stats.inactive }}</span>
+            </div>
+        </div>
+        <div class="pj-summary-item" style="--sc: #7c3aed;">
+            <div class="pj-summary-icon"><i class="fa-solid fa-list-check"></i></div>
+            <div class="pj-summary-content">
+                <span class="pj-summary-label">نتایج نمایش</span>
+                <span class="pj-summary-value">{{ total }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         فیلتر
+         ============================================ -->
+    <form method="GET" class="pj-filter">
+        <div class="pj-search-wrap">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" name="q" value="{{ query }}"
+                   class="pj-input" placeholder="جستجو در نام، کد، شماره قرارداد...">
+        </div>
+
+        <select name="contractor_id" class="pj-select">
+            <option value="">همه پیمانکاران</option>
+            {% for c in contractors %}
+            <option value="{{ c.id }}" {% if contractor_id == c.id %}selected{% endif %}>
+                {{ c.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="contract_type_id" class="pj-select">
+            <option value="">همه انواع قرارداد</option>
+            {% for t in contract_types %}
+            <option value="{{ t.id }}" {% if contract_type_id == t.id %}selected{% endif %}>
+                {{ t.title }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <select name="status" class="pj-select">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="active"    {% if status == 'active' %}selected{% endif %}>فعال</option>
+            <option value="completed" {% if status == 'completed' %}selected{% endif %}>تکمیل</option>
+            <option value="paused"    {% if status == 'paused' %}selected{% endif %}>متوقف</option>
+            <option value="cancelled" {% if status == 'cancelled' %}selected{% endif %}>لغو</option>
+            <option value="pending"   {% if status == 'pending' %}selected{% endif %}>در انتظار</option>
+        </select>
+
+        <div class="pj-filter-actions">
+            <label class="pj-checkbox">
+                <input type="checkbox" name="active" value="1"
+                       {% if only_active %}checked{% endif %}>
+                فقط پروژه‌های فعال
+            </label>
+
+            <div class="pj-filter-buttons">
+                <button type="submit" class="pj-btn pj-btn-primary">
+                    <i class="fa-solid fa-filter"></i>
+                    اعمال فیلتر
+                </button>
+                {% if query or only_active or contractor_id or contract_type_id or status %}
+                <a href="{{ url_for('projects.list_projects') }}" class="pj-btn pj-btn-outline">
+                    <i class="fa-solid fa-xmark"></i>
+                    پاک کردن
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+
+    <!-- ============================================
+         لیست کارت‌ها
+         ============================================ -->
+    {% if projects %}
+    <div class="pj-grid" id="projectsGrid">
+        {% set colors = [
+            ('#1b698b', '#3d8bb5'),
+            ('#167a5c', '#2aa07a'),
+            ('#d69e2e', '#e8b94a'),
+            ('#c05621', '#dd7a3d'),
+            ('#4a5568', '#6b7a8f'),
+            ('#2b6cb0', '#3d8ad4'),
+            ('#319795', '#4fc3c0'),
+            ('#805ad5', '#9f7ae8'),
+            ('#718096', '#8fa0b5'),
+            ('#2f855a', '#4aa876')
+        ] %}
+
+        {% for p in projects %}
+        {% set c = colors[loop.index0 % colors|length] %}
+        <article class="pj-card {% if not p.is_active %}is-inactive{% endif %}"
+                 data-pj-index="{{ loop.index0 }}"
+                 style="--pj-index: {{ loop.index0 }};
+                        --pj-color: {{ c[0] }};
+                        --pj-color-light: {{ c[1] }};">
+
+            <!-- ★ ستون ۱: هدر فشرده -->
+            <div class="pj-card-header">
+
+                <div class="pj-card-head-top">
+                    <div class="pj-card-avatar">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <div class="pj-card-title-content">
+                        <h2 class="pj-card-name" title="{{ p.name }}">{{ p.name }}</h2>
+                        {% if p.code %}
+                        <span class="pj-card-subtitle">
+                            <i class="fa-solid fa-barcode"></i>
+                            {{ p.code }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if p.status == 'active' %}
+                        <span class="pj-status active"><i class="fa-solid fa-circle"></i>فعال</span>
+                    {% elif p.status == 'completed' %}
+                        <span class="pj-status completed"><i class="fa-solid fa-circle-check"></i>تکمیل</span>
+                    {% elif p.status == 'paused' %}
+                        <span class="pj-status paused"><i class="fa-solid fa-pause"></i>متوقف</span>
+                    {% elif p.status == 'cancelled' %}
+                        <span class="pj-status cancelled"><i class="fa-solid fa-xmark"></i>لغو</span>
+                    {% else %}
+                        <span class="pj-status pending"><i class="fa-solid fa-hourglass"></i>در انتظار</span>
+                    {% endif %}
+                </div>
+
+                <div class="pj-card-overall">
+                    <span class="pj-card-overall-label">
+                        <i class="fa-solid fa-chart-simple"></i>
+                        کلی
+                    </span>
+                    <div class="pj-card-overall-bar">
+                        <div class="pj-card-overall-fill"
+                             style="width: {{ p.progress_percent or 0 }}%;"></div>
+                    </div>
+                    <span class="pj-card-overall-value">{{ p.progress_percent or 0 }}٪</span>
+                </div>
+            </div>
+
+            <!-- ★ ستون ۲: بدنه -->
+            <div class="pj-card-body">
+                <div class="pj-info-row">
+                    <span class="pj-info-label">
+                        <i class="fa-solid fa-helmet-safety"></i>
+                        پیمانکار
+                    </span>
+                    <span class="pj-info-value {{ 'muted' if not p.contractor_name else '' }}">
+                        {{ p.contractor_name or 'تعیین نشده' }}
+                    </span>
+                </div>
+
+                <div class="pj-info-row">
+                    <span class="pj-info-label">
+                        <i class="fa-solid fa-file-contract"></i>
+                        نوع قرارداد
+                    </span>
+                    <span class="pj-info-value {{ 'muted' if not p.contract_type_title else '' }}">
+                        {{ p.contract_type_title or 'تعیین نشده' }}
+                    </span>
+                </div>
+
+                <div class="pj-info-row">
+                    <span class="pj-info-label">
+                        <i class="fa-solid fa-money-bill-wave"></i>
+                        مبلغ ریالی
+                    </span>
+                    <span class="pj-info-value">
+                        {% if p.contract_amount %}
+                            {{ "{:,.0f}".format(p.contract_amount) }} ریال
+                        {% else %}
+                            —
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% if p.contract_amount_foreign %}
+                <div class="pj-info-row">
+                    <span class="pj-info-label">
+                        <i class="fa-solid fa-dollar-sign"></i>
+                        مبلغ ارزی
+                    </span>
+                    <span class="pj-info-value">
+                        {{ "{:,.0f}".format(p.contract_amount_foreign) }}
+                        {{ p.currency or 'USD' }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- ★ ستون ۳: ساید -->
+            <div class="pj-card-side">
+
+                <div class="pj-progress-block">
+
+                    <div class="pj-progress-row">
+                        <span class="pj-progress-row-label">
+                            <i class="fa-solid fa-trowel-bricks"></i>
+                            فیزیکی
+                        </span>
+                        <div class="pj-progress-row-bar">
+                            <div class="pj-progress-row-fill"
+                                 style="width: {{ p.physical_progress or 0 }}%;"></div>
+                        </div>
+                        <span class="pj-progress-row-value">{{ p.physical_progress or 0 }}٪</span>
+                    </div>
+
+                    <div class="pj-progress-row">
+                        <span class="pj-progress-row-label">
+                            <i class="fa-solid fa-clock"></i>
+                            برنامه‌ای
+                        </span>
+                        <div class="pj-progress-row-bar">
+                            <div class="pj-progress-row-fill"
+                                 style="width: {{ p.time_progress or 0 }}%;"></div>
+                        </div>
+                        <span class="pj-progress-row-value">{{ p.time_progress or 0 }}٪</span>
+                    </div>
+
+                    <div class="pj-progress-row">
+                        <span class="pj-progress-row-label">
+                            <i class="fa-solid fa-money-bill-1-wave"></i>
+                            مالی ریالی
+                        </span>
+                        <div class="pj-progress-row-bar">
+                            <div class="pj-progress-row-fill"
+                                 style="width: {{ p.financial_progress_rial or 0 }}%;"></div>
+                        </div>
+                        <span class="pj-progress-row-value">{{ p.financial_progress_rial or 0 }}٪</span>
+                    </div>
+
+                    {% if p.contract_amount_foreign %}
+                    <div class="pj-progress-row">
+                        <span class="pj-progress-row-label">
+                            <i class="fa-solid fa-dollar-sign"></i>
+                            مالی ارزی
+                        </span>
+                        <div class="pj-progress-row-bar">
+                            <div class="pj-progress-row-fill"
+                                 style="width: {{ p.financial_progress_foreign or 0 }}%;"></div>
+                        </div>
+                        <span class="pj-progress-row-value">{{ p.financial_progress_foreign or 0 }}٪</span>
+                    </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="pj-card-stats">
+                    <span class="pj-card-stat">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <span>{{ p.area_title or 'نامشخص' }}</span>
+                    </span>
+                    {% if p.planned_end_date %}
+                    <span class="pj-card-stat">
+                        <i class="fa-solid fa-calendar"></i>
+                        <span>{{ p.planned_end_date }}</span>
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div class="pj-actions" onclick="event.stopPropagation();">
+                    <a href="{{ url_for('projects.view_project', project_id=p.id) }}"
+                       class="pj-action-btn view"
+                       title="مشاهده">
+                        <i class="fa-solid fa-eye"></i>
+                        مشاهده
+                    </a>
+                    <a href="{{ url_for('projects.edit_project', project_id=p.id) }}"
+                       class="pj-action-btn edit"
+                       title="ویرایش">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+                    <form method="POST"
+                          action="{{ url_for('projects.delete_project', project_id=p.id) }}"
+                          style="display:inline"
+                          onsubmit="return confirm('از حذف «{{ p.name }}» مطمئن هستید؟')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                                class="pj-action-btn delete"
+                                title="حذف">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+
+    <!-- ===== حالت خالی ===== -->
+    <div class="pj-empty">
+        <div class="pj-empty-icon">
+            <i class="fa-solid fa-diagram-project"></i>
+        </div>
+        <h3>هنوز پروژه‌ای ثبت نشده است</h3>
+        <p>برای شروع، اولین پروژه را اضافه کنید</p>
+        <a href="{{ url_for('projects.add_project') }}" class="pj-btn pj-btn-primary">
+            <i class="fa-solid fa-plus"></i>
+            افزودن اولین پروژه
+        </a>
+    </div>
+
+    {% endif %}
+
+</div>
+
+<!-- ============================================
+     Modal Import
+     ============================================ -->
+<div class="pj-modal-backdrop" id="importModal">
+    <div class="pj-modal-box">
+        <h3>
+            <i class="fa-solid fa-file-import"></i>
+            ورود پروژه‌ها از اکسل
+        </h3>
+        <form method="POST"
+              action="{{ url_for('projects.import_excel') }}"
+              enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="file"
+                   name="file"
+                   accept=".xlsx,.xls"
+                   class="pj-modal-file-input"
+                   required>
+            <label class="pj-checkbox" style="margin-bottom:12px;">
+                <input type="checkbox" name="update_existing" value="1">
+                به‌روزرسانی رکوردهای موجود (بر اساس کد)
+            </label>
+            <div class="pj-modal-actions">
+                <button type="button"
+                        class="pj-btn pj-btn-outline"
+                        onclick="closeImportModal()">
+                    انصراف
+                </button>
+                <button type="submit"
+                        class="pj-btn pj-btn-primary">
+                    <i class="fa-solid fa-upload"></i>
+                    آپلود و Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/projects/list.js') }}"></script>{% endblock %}

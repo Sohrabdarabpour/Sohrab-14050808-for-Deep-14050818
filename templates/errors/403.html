@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}عدم دسترسی{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/errors/403.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="ep-card">
+        <div class="ep-icon">
+            <i class="fa-solid fa-lock"></i>
+        </div>
+
+        <div class="ep-code">403</div>
+
+        <h1 class="ep-title">عدم دسترسی</h1>
+
+        <p class="ep-text">
+            متأسفانه شما مجوز دسترسی به این بخش را ندارید.<br>
+            لطفاً با <strong>مدیر سیستم</strong> تماس بگیرید.
+        </p>
+
+        <div class="ep-actions">
+            <a href="{{ url_for('main.index') }}" class="ep-btn ep-btn-primary">
+                <i class="fa-solid fa-house"></i>
+                <span>بازگشت به صفحه اصلی</span>
+            </a>
+            <a href="javascript:history.back()" class="ep-btn ep-btn-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>صفحه قبل</span>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

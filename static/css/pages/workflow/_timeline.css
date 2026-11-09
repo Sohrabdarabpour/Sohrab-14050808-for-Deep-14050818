@@ -1,0 +1,542 @@
+/* استایل صفحه: workflow/_timeline.html */
+
+    /* ============================================================
+       تایم‌لاین رخدادهای یادداشت - کاملاً ریسپانسیو
+       ============================================================ */
+    .wt-timeline {
+        position: relative;
+        padding: clamp(12px, 2vw, 24px) 0;
+        direction: rtl;
+        --wt-line-color: #e2e8f0;
+        --wt-dot-size: clamp(36px, 4.5vw, 46px);
+        --wt-dot-size-sm: clamp(30px, 3.8vw, 40px);
+        --wt-gap: clamp(14px, 2vw, 22px);
+        --wt-primary: #1b698b;
+        --wt-primary-light: #167a5c;
+        --wt-radius: clamp(12px, 1.5vw, 16px);
+        --wt-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* ---- خط عمودی تایم‌لاین ---- */
+    .wt-timeline::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: calc(var(--wt-dot-size) / 2 - 1px);
+        width: 2px;
+        background: linear-gradient(180deg,
+            transparent 0%,
+            var(--wt-line-color) 5%,
+            var(--wt-line-color) 95%,
+            transparent 100%);
+        border-radius: 2px;
+    }
+
+    /* ---- هر رخداد ---- */
+    .wt-event {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        gap: var(--wt-gap);
+        padding-bottom: var(--wt-gap);
+    }
+
+    .wt-event:last-child {
+        padding-bottom: 0;
+    }
+
+    /* ---- نقطه/آیکون رخداد ---- */
+    .wt-dot {
+        position: relative;
+        z-index: 2;
+        flex-shrink: 0;
+        width: var(--wt-dot-size);
+        height: var(--wt-dot-size);
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        color: #fff;
+        font-size: clamp(0.75rem, 1vw, 0.95rem);
+        background: linear-gradient(135deg, #94a3b8, #64748b);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, .12),
+                    0 0 0 4px #fff;
+        transition: transform var(--wt-transition), box-shadow var(--wt-transition);
+    }
+
+    .wt-event:hover .wt-dot {
+        transform: scale(1.08);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .18),
+                    0 0 0 4px #fff;
+    }
+
+    /* ---- رنگ‌بندی انواع رخداد ---- */
+    .wt-dot.wt-submit  { background: linear-gradient(135deg, #1b698b, #167a5c); }
+    .wt-dot.wt-comment { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .wt-dot.wt-approve { background: linear-gradient(135deg, #16a34a, #15803d); }
+    .wt-dot.wt-reject  { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+    .wt-dot.wt-return  { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .wt-dot.wt-forward { background: linear-gradient(135deg, #7c3aed, #6d28d9); }
+    .wt-dot.wt-close   { background: linear-gradient(135deg, #475569, #334155); }
+    .wt-dot.wt-reopen  { background: linear-gradient(135deg, #0891b2, #0e7490); }
+    .wt-dot.wt-edit    { background: linear-gradient(135deg, #64748b, #475569); }
+
+    /* ---- کارت رخداد ---- */
+    .wt-card {
+        flex: 1;
+        min-width: 0;
+        background: linear-gradient(180deg, #ffffff, #f8fafc);
+        border: 1px solid #eef1f5;
+        border-radius: var(--wt-radius);
+        padding: clamp(12px, 1.6vw, 18px);
+        box-shadow: 0 2px 10px rgba(65, 151, 201, .06);
+        transition: all var(--wt-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .wt-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--wt-primary), var(--wt-primary-light));
+        opacity: .7;
+    }
+
+    .wt-event:hover .wt-card {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(65, 151, 201, .14);
+        background: #fff;
+    }
+
+    /* ---- هدر کارت ---- */
+    .wt-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .wt-who {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    /* ---- آواتار ---- */
+    .wt-avatar {
+        width: clamp(32px, 3.8vw, 40px);
+        height: clamp(32px, 3.8vw, 40px);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--wt-primary), var(--wt-primary-light));
+        color: #fff;
+        font-weight: 800;
+        font-size: clamp(0.78rem, 0.95vw, 0.92rem);
+        flex-shrink: 0;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(27, 105, 139, .25);
+    }
+
+    .wt-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* ---- اطلاعات کاربر ---- */
+    .wt-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .wt-name {
+        font-weight: 800;
+        font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+        color: #1e293b;
+        line-height: 1.4;
+        margin-bottom: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .wt-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: clamp(0.68rem, 0.8vw, 0.76rem);
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: rgba(100, 116, 139, .08);
+        color: #475569;
+        line-height: 1.4;
+    }
+
+    .wt-action i {
+        font-size: 0.7em;
+    }
+
+    /* رنگ‌بندی متن اکشن */
+    .wt-action.wt-submit  { background: rgba(27, 105, 139, .1);  color: #1b698b; }
+    .wt-action.wt-comment { background: rgba(59, 130, 246, .1);  color: #2563eb; }
+    .wt-action.wt-approve { background: rgba(22, 163, 74, .1);   color: #15803d; }
+    .wt-action.wt-reject  { background: rgba(220, 38, 38, .1);   color: #b91c1c; }
+    .wt-action.wt-return  { background: rgba(245, 158, 11, .12); color: #b45309; }
+    .wt-action.wt-forward { background: rgba(124, 58, 237, .1);  color: #6d28d9; }
+    .wt-action.wt-close   { background: rgba(71, 85, 105, .1);   color: #334155; }
+    .wt-action.wt-reopen  { background: rgba(8, 145, 178, .1);   color: #0e7490; }
+    .wt-action.wt-edit    { background: rgba(100, 116, 139, .1); color: #475569; }
+
+    /* ---- زمان ---- */
+    .wt-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: clamp(0.68rem, 0.8vw, 0.76rem);
+        color: #94a3b8;
+        font-weight: 600;
+        white-space: nowrap;
+        background: rgba(148, 163, 184, .1);
+        padding: 4px 10px;
+        border-radius: 20px;
+        flex-shrink: 0;
+    }
+
+    .wt-time i {
+        font-size: 0.85em;
+    }
+
+    /* ---- مسیر مرحله ---- */
+    .wt-steps {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 6px 8px;
+        margin-top: 12px;
+        padding: 10px 12px;
+        background: #f8fafc;
+        border-radius: 10px;
+        border-right: 3px solid var(--wt-primary);
+        font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+        color: #475569;
+        line-height: 1.6;
+    }
+
+    .wt-steps strong {
+        color: #1e293b;
+        font-weight: 700;
+        padding: 2px 8px;
+        background: #fff;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .wt-steps i.fa-arrow-left {
+        color: var(--wt-primary);
+        font-size: 0.8em;
+    }
+
+    .wt-steps span {
+        color: #64748b;
+    }
+
+    /* ---- متن پیام ---- */
+    .wt-msg {
+        margin-top: 12px;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border-radius: 10px;
+        font-size: clamp(0.76rem, 0.9vw, 0.86rem);
+        line-height: 1.8;
+        color: #334155;
+        white-space: pre-wrap;
+        word-break: break-word;
+        border-right: 3px solid #cbd5e1;
+    }
+
+    .wt-msg.wt-submit  { border-right-color: #1b698b; background: rgba(27, 105, 139, .04); }
+    .wt-msg.wt-comment { border-right-color: #3b82f6; background: rgba(59, 130, 246, .04); }
+    .wt-msg.wt-approve { border-right-color: #16a34a; background: rgba(22, 163, 74, .04); }
+    .wt-msg.wt-reject  { border-right-color: #dc2626; background: rgba(220, 38, 38, .04); }
+    .wt-msg.wt-return  { border-right-color: #f59e0b; background: rgba(245, 158, 11, .05); }
+    .wt-msg.wt-forward { border-right-color: #7c3aed; background: rgba(124, 58, 237, .04); }
+    .wt-msg.wt-close   { border-right-color: #475569; background: rgba(71, 85, 105, .04); }
+    .wt-msg.wt-reopen  { border-right-color: #0891b2; background: rgba(8, 145, 178, .04); }
+    .wt-msg.wt-edit    { border-right-color: #64748b; background: rgba(100, 116, 139, .04); }
+
+    /* ---- حالت خالی ---- */
+    .wt-empty {
+        text-align: center;
+        padding: clamp(40px, 6vw, 70px) clamp(16px, 3vw, 30px);
+        color: #94a3b8;
+    }
+
+    .wt-empty i {
+        font-size: clamp(2rem, 4vw, 3rem);
+        color: #cbd5e1;
+        margin-bottom: 14px;
+        display: block;
+    }
+
+    .wt-empty p {
+        margin: 0;
+        font-size: clamp(0.8rem, 0.95vw, 0.9rem);
+        font-weight: 600;
+    }
+
+    /* ============================================================
+       Responsive Breakpoints
+       ============================================================ */
+
+    /* تبلت */
+    @media (max-width: 768px) {
+        .wt-timeline {
+            --wt-dot-size: 36px;
+            --wt-gap: 12px;
+        }
+
+        .wt-timeline::before {
+            right: calc(var(--wt-dot-size) / 2 - 1px);
+        }
+
+        .wt-head {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 8px;
+        }
+
+        .wt-time {
+            align-self: flex-start;
+        }
+
+        .wt-card {
+            padding: 12px 14px;
+        }
+    }
+
+    /* موبایل */
+    @media (max-width: 576px) {
+        .wt-timeline {
+            --wt-dot-size: 32px;
+            --wt-gap: 10px;
+            padding: 8px 0;
+        }
+
+        .wt-timeline::before {
+            right: calc(var(--wt-dot-size) / 2 - 1px);
+            width: 2px;
+        }
+
+        .wt-dot {
+            font-size: 0.7rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .12),
+                        0 0 0 3px #fff;
+        }
+
+        .wt-card {
+            padding: 11px 12px;
+            border-radius: 12px;
+        }
+
+        .wt-card::before {
+            width: 3px;
+        }
+
+        .wt-who {
+            gap: 8px;
+        }
+
+        .wt-avatar {
+            width: 30px;
+            height: 30px;
+            font-size: 0.74rem;
+        }
+
+        .wt-name {
+            font-size: 0.8rem;
+        }
+
+        .wt-action {
+            font-size: 0.66rem;
+            padding: 2px 8px;
+        }
+
+        .wt-time {
+            font-size: 0.66rem;
+            padding: 3px 8px;
+        }
+
+        .wt-steps {
+            padding: 8px 10px;
+            font-size: 0.72rem;
+            gap: 5px 6px;
+        }
+
+        .wt-steps strong {
+            padding: 1px 6px;
+            font-size: 0.9em;
+        }
+
+        .wt-msg {
+            padding: 10px 12px;
+            font-size: 0.76rem;
+            line-height: 1.7;
+        }
+
+        .wt-empty i {
+            font-size: 1.8rem;
+        }
+
+        .wt-empty p {
+            font-size: 0.78rem;
+        }
+    }
+
+    /* موبایل بسیار کوچک */
+    @media (max-width: 360px) {
+        .wt-timeline {
+            --wt-dot-size: 28px;
+            --wt-gap: 8px;
+        }
+
+        .wt-card {
+            padding: 9px 10px;
+        }
+
+        .wt-avatar {
+            width: 26px;
+            height: 26px;
+            font-size: 0.68rem;
+        }
+
+        .wt-name {
+            font-size: 0.74rem;
+        }
+
+        .wt-action {
+            font-size: 0.62rem;
+            padding: 2px 6px;
+        }
+
+        .wt-time {
+            font-size: 0.62rem;
+            padding: 2px 7px;
+        }
+
+        .wt-msg {
+            padding: 8px 10px;
+            font-size: 0.72rem;
+        }
+
+        .wt-steps {
+            font-size: 0.68rem;
+            padding: 7px 9px;
+        }
+    }
+
+    /* حالت افقی موبایل */
+    @media (max-height: 500px) and (orientation: landscape) {
+        .wt-timeline {
+            --wt-dot-size: 30px;
+            --wt-gap: 8px;
+        }
+
+        .wt-card {
+            padding: 8px 10px;
+        }
+
+        .wt-msg {
+            padding: 6px 8px;
+            margin-top: 6px;
+        }
+
+        .wt-steps {
+            margin-top: 6px;
+            padding: 5px 8px;
+        }
+    }
+
+    /* کاهش انیمیشن */
+    @media (prefers-reduced-motion: reduce) {
+        .wt-timeline * {
+            transition: none !important;
+            animation: none !important;
+        }
+    }
+
+    /* دارک مود */
+    @media (prefers-color-scheme: dark) {
+        .wt-timeline {
+            --wt-line-color: #334155;
+        }
+
+        .wt-timeline::before {
+            background: linear-gradient(180deg,
+                transparent 0%,
+                #334155 5%,
+                #334155 95%,
+                transparent 100%);
+        }
+
+        .wt-dot {
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .4),
+                        0 0 0 4px #1e293b;
+        }
+
+        .wt-event:hover .wt-dot {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .5),
+                        0 0 0 4px #1e293b;
+        }
+
+        .wt-card {
+            background: linear-gradient(180deg, #1e293b, #0f172a);
+            border-color: #334155;
+        }
+
+        .wt-event:hover .wt-card {
+            background: #1e293b;
+        }
+
+        .wt-name {
+            color: #f1f5f9;
+        }
+
+        .wt-action {
+            background: rgba(148, 163, 184, .15);
+            color: #cbd5e1;
+        }
+
+        .wt-time {
+            background: rgba(148, 163, 184, .12);
+            color: #94a3b8;
+        }
+
+        .wt-steps {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+
+        .wt-steps strong {
+            background: #1e293b;
+            border-color: #334155;
+            color: #f1f5f9;
+        }
+
+        .wt-msg {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+
+        .wt-empty i {
+            color: #475569;
+        }
+    }

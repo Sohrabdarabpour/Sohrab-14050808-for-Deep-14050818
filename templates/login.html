@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}ورود به سامانه مدیریت اسناد نظارت عالیه{% endblock %}
+{% block body_class %}login-page{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/login.css') }}">
+{% endblock %}
+
+{% block public_content %}
+<div class="login-split-container">
+
+    <div class="login-video-side">
+        <div class="hero-logo-stage">
+            <div class="hero-orbit hero-orbit--1"></div>
+            <div class="hero-orbit hero-orbit--2"></div>
+            <div class="hero-orbit hero-orbit--3"></div>
+
+            <div class="hero-platform"></div>
+
+            <div class="hero-logo-wrap">
+                <img src="{{ url_for('static', filename='images/logo.png') }}"
+                     alt="لوگوی نظارت عالیه"
+                     class="hero-logo">
+            </div>
+        </div>
+
+        <div class="hero-text-block">
+            <div class="hero-title">نظارت عالیه</div>
+            <div class="hero-subtext">سامانه هوشمند مدیریت و کنترل مستندات</div>
+            <h3 ><div style="color: #e65100;" class="hero-subtext">شرکت مهندسین مشاور پیشگامان فولاد جنوب</div></h3>
+        </div>
+    </div>
+
+    <div class="login-form-side">
+        <div class="login-header">
+            <div class="login-logo-wrapper">
+                <div class="login-logo-ring"></div>
+                <div class="login-logo-ring ring-2"></div>
+                <div class="login-logo-circle">
+                    <img src="{{ url_for('static', filename='images/sspe.jpg') }}" alt="لوگوی شرکت">
+                </div>
+            </div>
+            <h1 class="login-title">سامانه مدیریت اسناد نظارت عالیه</h1>
+            <p class="login-subtitle">ورود به سیستم مدیریت و کنترل مستندات</p>
+            <p class="login-subtitle">تهیه شده در واحد کنترل مستندات</p>
+        </div>
+
+        <div class="login-form-body">
+            <div class="login-form">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="flash-container">
+                    {% for category, message in messages %}
+                    <div class="alert-custom alert-{{ category }}-custom">
+                        <i class="bi 
+                            {% if category == 'success' %}bi-check-circle-fill
+                            {% elif category == 'danger' %}bi-exclamation-circle-fill
+                            {% elif category == 'warning' %}bi-exclamation-triangle-fill
+                            {% else %}bi-info-circle-fill{% endif %}">
+                        </i>
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
+                <form method="POST" novalidate id="loginForm">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.username.id }}">
+                            <i class="bi bi-person"></i>{{ form.username.label.text }}
+                        </label>
+                        <div class="input-wrapper">
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""),
+                            autocomplete="username",
+                            placeholder="نام کاربری",
+                            id="usernameInput") }}
+                            <i class="bi bi-person input-icon"></i>
+                        </div>
+                        {% for error in form.username.errors %}
+                        <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="{{ form.password.id }}">
+                            <i class="bi bi-lock"></i>{{ form.password.label.text }}
+                        </label>
+                        <div class="input-wrapper">
+                            {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""),
+                            autocomplete="current-password",
+                            placeholder="رمز عبور",
+                            id="passwordInput") }}
+                            <i class="bi bi-lock input-icon"></i>
+                            <button type="button" class="password-toggle" id="togglePassword"
+                                aria-label="نمایش/مخفی کردن رمز عبور" title="نمایش/مخفی کردن رمز عبور">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                        {% for error in form.password.errors %}
+                        <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" name="remember" id="rememberMe">
+                            <span>مرا به خاطر بسپار</span>
+                        </label>
+                        <a href="#" class="forgot-link" id="forgotPassword">
+                            <i class="bi bi-question-circle"></i>
+                            رمز را فراموش کردم
+                        </a>
+                    </div>
+
+                    {{ form.submit(class="login-button", id="loginButton") }}
+                </form>
+
+                <div class="login-footer">
+                    <span><i class="bi bi-shield-check"></i> سامانه مدیریت اسناد</span>
+                    <span class="footer-divider">|</span>
+                    <a href="#" id="helpLink">راهنما</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/login.js') }}"></script>{% endblock %}
+{% endblock %}

@@ -1,0 +1,400 @@
+{% extends "base.html" %}
+{% block title %}
+گزارش بر اساس دپارتمان
+{% endblock %}
+{% block body_class %}
+page-report-department
+{% endblock %}
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/department.css') }}">
+{% endblock %}
+{% block content %}
+<div class="report-main-container">
+    <div class="report-filter">
+        <div class="report-filter-left">
+            <div class="report-filter-item">
+                <label for="yearFilter">
+                    <i class="fa-solid fa-calendar"></i>
+                    سال دریافت
+                </label>
+                <select id="yearFilter">
+                    <option value="all" {% if selected_year|string=="all" %}selected{% endif %}>همه سال‌ها</option>
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year|string==year|string %}selected{% endif %}>{{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" id="clearFilters" class="btn-clear-top">
+                <i class="fa-solid fa-filter-circle-xmark"></i>
+                پاک کردن فیلترها
+            </button>
+        </div>
+    </div>
+    <div class="report-summary">
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-file-lines"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">کل اسناد</span>
+                <strong>{{ total }}</strong>
+            </div>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-building"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">تعداد دپارتمان‌ها</span>
+                <strong>{{ departments|length }}</strong>
+            </div>
+        </div>
+        <div class="report-summary-item">
+            <span class="report-summary-icon">
+                <i class="fa-solid fa-calendar-days"></i>
+            </span>
+            <div>
+                <span class="report-summary-label">سال انتخاب‌شده</span>
+                <strong>{% if selected_year=="all" %}همه{% else %}{{ selected_year }}{% endif %}</strong>
+            </div>
+        </div>
+    </div>
+    <div class="department-report-layout">
+        <div class="department-report-cards" id="departmentCards">
+            {% for department in departments %}
+            <a href="{{ url_for('reports.department_documents',department_id=department.id,year=selected_year) }}"
+                class="department-card" data-index="{{ loop.index0 }}">
+                <div class="department-card-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div class="department-card-content">
+                    <span class="department-card-number">{{ department.count }}</span>
+                    <span class="department-card-title">{{ department.title }}</span>
+                    {% if department.code %}
+                    <span class="department-card-code">{{ department.code }}</span>
+                    {% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div class="report-chart-card">
+            <div class="report-chart-header">
+                <div class="report-chart-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    توزیع اسناد بر اساس دپارتمان
+                </div>
+                <span class="chart-update">
+                    <i class="fa-regular fa-clock"></i>
+                    لحظه‌ای
+                </span>
+            </div>
+            <div class="report-chart">
+                <canvas id="departmentReportChart"></canvas>
+                <div class="chart-percentage-label" id="chartCenterLabel">
+                    <div class="total-count" id="totalChartCount">0</div>
+                    <div class="total-label">مجموع اسناد</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    let departmentChart = null;
+    let chartResizeObserver = null;
+
+    const DEPT_COLORS = [
+        "#1b698b",
+        "#167a5c",
+        "#d69e2e",
+        "#c05621",
+        "#4a5568",
+        "#2b6cb0",
+        "#319795",
+        "#805ad5",
+        "#718096",
+        "#2f855a"
+    ];
+
+    const DEPT_COLORS_LIGHT = [
+        "#3d8bb5",
+        "#2aa07a",
+        "#e8b94a",
+        "#dd7a3d",
+        "#6b7a8f",
+        "#3d8ad4",
+        "#4fc3c0",
+        "#9f7ae8",
+        "#8fa0b5",
+        "#4aa876"
+    ];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const clearFiltersBtn = document.getElementById("clearFilters");
+        if (clearFiltersBtn) {
+            clearFiltersBtn.addEventListener("click", function () {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("year");
+                window.location.href = url.pathname;
+            });
+        }
+
+        const yearFilter = document.getElementById("yearFilter");
+        if (yearFilter) {
+            yearFilter.addEventListener("change", function () {
+                const url = new URL(window.location.href);
+                url.searchParams.set("year", this.value);
+                window.location.href = url.toString();
+            });
+        }
+
+        applyDepartmentCardColors();
+        initializeDepartmentChart();
+    });
+
+    function applyDepartmentCardColors() {
+        const cards = document.querySelectorAll("#departmentCards .department-card");
+        cards.forEach(function (card, index) {
+            const color = DEPT_COLORS[index % DEPT_COLORS.length];
+            card.style.setProperty("--dept-color", color);
+        });
+    }
+
+    function getViewMode() {
+        const w = window.innerWidth;
+        if (w <= 380) return "xxs";
+        if (w <= 576) return "xs";
+        if (w <= 768) return "sm";
+        if (w <= 992) return "md";
+        if (w <= 1200) return "lg";
+        return "xl";
+    }
+
+    function createGradient(ctx, chartArea, colorStart, colorEnd) {
+        if (!chartArea) {
+            return colorStart;
+        }
+        const gradient = ctx.createLinearGradient(
+            chartArea.left, chartArea.top,
+            chartArea.right, chartArea.bottom
+        );
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        return gradient;
+    }
+
+    function initializeDepartmentChart() {
+        const canvas = document.getElementById("departmentReportChart");
+        const departmentData = {{departments | tojson
+    }};
+
+    if (!canvas || !departmentData || departmentData.length === 0) {
+        return;
+    }
+
+    const total = departmentData.reduce((sum, item) => sum + Number(item.count || 0), 0);
+    const labels = departmentData.map(item => item.title || "بدون عنوان");
+    const data = departmentData.map(item => Number(item.count || 0));
+    const percentages = data.map(item => total > 0 ? Math.round((item / total) * 100) : 0);
+
+    const totalCountEl = document.getElementById("totalChartCount");
+    if (totalCountEl) {
+        totalCountEl.textContent = total;
+    }
+
+    Chart.register(ChartDataLabels);
+
+    const ctx = canvas.getContext("2d");
+
+    departmentChart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    const index = context.dataIndex;
+                    const colorStart = DEPT_COLORS[index % DEPT_COLORS.length];
+                    const colorEnd = DEPT_COLORS_LIGHT[index % DEPT_COLORS_LIGHT.length];
+                    return createGradient(ctx, chartArea, colorStart, colorEnd);
+                },
+                borderColor: "#ffffff",
+                borderWidth: 2,
+                /* borderRadius کم و یکنواخت برای لبه‌های تمیز */
+                borderRadius: 6,
+                /* spacing حذف شد تا شکاف بین برش‌ها ناهموار نشود */
+                hoverOffset: 10,
+                hoverBorderWidth: 3,
+                hoverBorderColor: "#ffffff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            /* cutout بیشتر → ضخامت کمتر → لبه‌های صاف‌تر */
+            cutout: "65%",
+            layout: {
+                padding: 8
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    rtl: true,
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 14,
+                        font: {
+                            family: "Vazirmatn",
+                            size: 12,
+                            weight: "600"
+                        },
+                        color: "#2d3436",
+                        generateLabels: function (chart) {
+                            const chartData = chart.data;
+                            return chartData.labels.map((label, index) => {
+                                const value = chartData.datasets[0].data[index];
+                                const percent = percentages[index];
+                                const color = DEPT_COLORS[index % DEPT_COLORS.length];
+                                return {
+                                    text: `${label}  •  ${value} (${percent}%)`,
+                                    fillStyle: color,
+                                    strokeStyle: color,
+                                    lineWidth: 0,
+                                    pointStyle: "circle",
+                                    index: index
+                                };
+                            });
+                        }
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: "rgba(45, 52, 54, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    titleFont: {
+                        family: "Vazirmatn",
+                        size: 13,
+                        weight: "700"
+                    },
+                    bodyFont: {
+                        family: "Vazirmatn",
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxPadding: 6,
+                    callbacks: {
+                        label: function (context) {
+                            const value = Number(context.raw || 0);
+                            const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                            return `  ${value} سند  (${percentage}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: "#ffffff",
+                    font: {
+                        weight: "700",
+                        size: 13,
+                        family: "Vazirmatn"
+                    },
+                    textStrokeColor: "rgba(0, 0, 0, 0.35)",
+                    textStrokeWidth: 3,
+                    textShadowBlur: 4,
+                    textShadowColor: "rgba(0, 0, 0, 0.35)",
+                    formatter: function (value, context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold ? `${percentage}%` : "";
+                    },
+                    anchor: "center",
+                    align: "center",
+                    offset: 0,
+                    display: function (context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold;
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1200,
+                easing: "easeOutQuart"
+            }
+        },
+        plugins: [ChartDataLabels]
+    });
+
+    setupChartResizeObserver();
+    }
+
+    function getDatalabelThreshold() {
+        const w = window.innerWidth;
+        if (w <= 380) return 12;
+        if (w <= 576) return 9;
+        if (w <= 768) return 7;
+        return 5;
+    }
+
+    function setupChartResizeObserver() {
+        const container = document.querySelector(".page-report-department .report-chart");
+        if (!container || !departmentChart) return;
+
+        if (chartResizeObserver) {
+            chartResizeObserver.disconnect();
+        }
+
+        let lastMode = getViewMode();
+
+        chartResizeObserver = new ResizeObserver(function () {
+            const currentMode = getViewMode();
+            if (currentMode !== lastMode) {
+                lastMode = currentMode;
+                updateChartOptionsForMode(currentMode);
+            }
+        });
+
+        chartResizeObserver.observe(container);
+    }
+
+    function updateChartOptionsForMode(mode) {
+        if (!departmentChart) return;
+
+        const isSmall = mode === "xs" || mode === "xxs";
+
+        const legendLabels = departmentChart.options.plugins.legend.labels;
+        legendLabels.font.size = isSmall ? 10 : 12;
+        legendLabels.padding = isSmall ? 8 : 14;
+        legendLabels.boxWidth = isSmall ? 8 : 10;
+        legendLabels.boxHeight = isSmall ? 8 : 10;
+
+        const dataset = departmentChart.data.datasets[0];
+        dataset.borderWidth = isSmall ? 2 : 2;
+        dataset.borderRadius = isSmall ? 4 : 6;
+        dataset.hoverOffset = isSmall ? 6 : 10;
+        dataset.hoverBorderWidth = isSmall ? 2 : 3;
+
+        departmentChart.options.cutout = isSmall ? "67%" : "65%";
+        departmentChart.options.layout.padding = isSmall ? 4 : 8;
+
+        departmentChart.options.plugins.datalabels.font.size = isSmall ? 11 : 13;
+        departmentChart.options.plugins.datalabels.textStrokeWidth = isSmall ? 2 : 3;
+
+        departmentChart.update("none");
+    }
+</script>
+{% endblock %}

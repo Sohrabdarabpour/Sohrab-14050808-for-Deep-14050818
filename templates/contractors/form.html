@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+{% block title %}{% if mode == 'add' %}افزودن پیمانکار{% else %}ویرایش پیمانکار{% endif %}{% endblock %}
+{% block body_class %}page-contractor-form{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/contractors/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="cf-wrap">
+    <div class="cf-card">
+
+        <!-- ============================================
+             هدر
+             ============================================ -->
+        <div class="cf-header">
+            <div class="cf-header-info">
+                <div class="cf-header-icon">
+                    <i class="fa-solid {% if mode == 'add' %}fa-plus{% else %}fa-pen{% endif %}"></i>
+                </div>
+                <div class="cf-header-text">
+                    <h1 class="cf-title">
+                        {% if mode == 'add' %}
+                            افزودن پیمانکار جدید
+                        {% else %}
+                            ویرایش پیمانکار
+                        {% endif %}
+                    </h1>
+                    <p class="cf-subtitle">
+                        {% if mode == 'add' %}
+                            اطلاعات پیمانکار جدید را وارد کنید
+                        {% else %}
+                            {{ contractor.get('name', '') or 'ویرایش اطلاعات' }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <a href="{{ url_for('contractors.list_contractors') }}"
+               class="cf-back-btn">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به لیست
+            </a>
+        </div>
+
+        <!-- ============================================
+             فرم
+             ============================================ -->
+        <form method="POST" id="contractorForm" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="cf-body">
+
+                <!-- ============ بخش ۱: اطلاعات هویتی ============ -->
+                <div class="cf-section">
+                    <div class="cf-section-header">
+                        <div class="cf-section-icon">
+                            <i class="fa-solid fa-id-card"></i>
+                        </div>
+                        <h2 class="cf-section-title">اطلاعات هویتی</h2>
+                    </div>
+
+                    <div class="cf-grid">
+                        <div class="cf-field cf-col-12">
+                            <label for="field_name" class="cf-label">
+                                <span class="cf-req">*</span>
+                                <i class="fa-solid fa-building"></i>
+                                نام پیمانکار
+                            </label>
+                            <input type="text"
+                                   id="field_name"
+                                   name="name"
+                                   class="cf-input"
+                                   value="{{ contractor.get('name', '') or '' }}"
+                                   placeholder="مثال: شرکت عمرانی پارس"
+                                   required>
+                            <span class="cf-error" data-error-for="name">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span></span>
+                            </span>
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_code" class="cf-label">
+                                <i class="fa-solid fa-barcode"></i>
+                                کد پیمانکار
+                            </label>
+                            <input type="text"
+                                   id="field_code"
+                                   name="code"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('code', '') or '' }}"
+                                   placeholder="CON-001">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_national_id" class="cf-label">
+                                <i class="fa-solid fa-fingerprint"></i>
+                                کد ملی / شناسه ملی
+                            </label>
+                            <input type="text"
+                                   id="field_national_id"
+                                   name="national_id"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('national_id', '') or '' }}"
+                                   placeholder="1234567890"
+                                   maxlength="11">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_economic_code" class="cf-label">
+                                <i class="fa-solid fa-hashtag"></i>
+                                کد اقتصادی
+                            </label>
+                            <input type="text"
+                                   id="field_economic_code"
+                                   name="economic_code"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('economic_code', '') or '' }}"
+                                   placeholder="411234567890">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_registration_number" class="cf-label">
+                                <i class="fa-solid fa-file-signature"></i>
+                                شماره ثبت
+                            </label>
+                            <input type="text"
+                                   id="field_registration_number"
+                                   name="registration_number"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('registration_number', '') or '' }}"
+                                   placeholder="12345">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_manager_name" class="cf-label">
+                                <i class="fa-solid fa-user-tie"></i>
+                                نام مدیرعامل
+                            </label>
+                            <input type="text"
+                                   id="field_manager_name"
+                                   name="manager_name"
+                                   class="cf-input"
+                                   value="{{ contractor.get('manager_name', '') or '' }}"
+                                   placeholder="مثال: علی رضایی">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_grade" class="cf-label">
+                                <i class="fa-solid fa-ranking-star"></i>
+                                رتبه / گرید
+                            </label>
+                            <input type="text"
+                                   id="field_grade"
+                                   name="grade"
+                                   class="cf-input"
+                                   value="{{ contractor.get('grade', '') or '' }}"
+                                   placeholder="مثال: ۱">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ============ بخش ۲: اطلاعات تماس ============ -->
+                <div class="cf-section">
+                    <div class="cf-section-header">
+                        <div class="cf-section-icon">
+                            <i class="fa-solid fa-address-book"></i>
+                        </div>
+                        <h2 class="cf-section-title">اطلاعات تماس</h2>
+                    </div>
+
+                    <div class="cf-grid">
+                        <div class="cf-field cf-col-4">
+                            <label for="field_phone" class="cf-label">
+                                <i class="fa-solid fa-phone"></i>
+                                تلفن ثابت
+                            </label>
+                            <input type="text"
+                                   id="field_phone"
+                                   name="phone"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('phone', '') or '' }}"
+                                   placeholder="02188776655">
+                        </div>
+
+                        <div class="cf-field cf-col-4">
+                            <label for="field_mobile" class="cf-label">
+                                <i class="fa-solid fa-mobile-screen"></i>
+                                موبایل
+                            </label>
+                            <input type="text"
+                                   id="field_mobile"
+                                   name="mobile"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('mobile', '') or '' }}"
+                                   placeholder="09121234567"
+                                   maxlength="11">
+                            <span class="cf-error" data-error-for="mobile">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span></span>
+                            </span>
+                        </div>
+
+                        <div class="cf-field cf-col-4">
+                            <label for="field_email" class="cf-label">
+                                <i class="fa-solid fa-envelope"></i>
+                                ایمیل
+                            </label>
+                            <input type="email"
+                                   id="field_email"
+                                   name="email"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('email', '') or '' }}"
+                                   placeholder="info@company.com">
+                            <span class="cf-error" data-error-for="email">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span></span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <!-- ============ بخش ۳: اطلاعات مکانی ============ -->
+                <div class="cf-section">
+                    <div class="cf-section-header">
+                        <div class="cf-section-icon">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <h2 class="cf-section-title">اطلاعات مکانی</h2>
+                    </div>
+
+                    <div class="cf-grid">
+                        <div class="cf-field cf-col-6">
+                            <label for="field_province" class="cf-label">
+                                <i class="fa-solid fa-map"></i>
+                                استان
+                            </label>
+                            <input type="text"
+                                   id="field_province"
+                                   name="province"
+                                   class="cf-input"
+                                   value="{{ contractor.get('province', '') or '' }}"
+                                   placeholder="مثال: تهران">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_city" class="cf-label">
+                                <i class="fa-solid fa-city"></i>
+                                شهر
+                            </label>
+                            <input type="text"
+                                   id="field_city"
+                                   name="city"
+                                   class="cf-input"
+                                   value="{{ contractor.get('city', '') or '' }}"
+                                   placeholder="مثال: تهران">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_postal_code" class="cf-label">
+                                <i class="fa-solid fa-mail-bulk"></i>
+                                کد پستی
+                            </label>
+                            <input type="text"
+                                   id="field_postal_code"
+                                   name="postal_code"
+                                   class="cf-input ltr"
+                                   value="{{ contractor.get('postal_code', '') or '' }}"
+                                   placeholder="1234567890"
+                                   maxlength="10">
+                        </div>
+
+                        <div class="cf-field cf-col-6">
+                            <label for="field_grade" class="cf-label">
+                                <i class="fa-solid fa-ranking-star"></i>
+                                رتبه / گرید
+                            </label>
+                            <input type="text"
+                                   id="field_grade"
+                                   name="grade"
+                                   class="cf-input"
+                                   value="{{ contractor.get('grade', '') or '' }}"
+                                   placeholder="مثال: ۱">
+                        </div>
+
+                        <div class="cf-field cf-col-12">
+                            <label for="field_address" class="cf-label">
+                                <i class="fa-solid fa-location-dot"></i>
+                                آدرس کامل
+                            </label>
+                            <textarea id="field_address"
+                                      name="address"
+                                      class="cf-textarea"
+                                      rows="3"
+                                      placeholder="آدرس دقیق پیمانکار...">{{ contractor.get('address', '') or '' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <!-- ============ بخش ۴: توضیحات و وضعیت ============ -->
+                <div class="cf-section">
+                    <div class="cf-section-header">
+                        <div class="cf-section-icon">
+                            <i class="fa-solid fa-comment-dots"></i>
+                        </div>
+                        <h2 class="cf-section-title">توضیحات و وضعیت</h2>
+                    </div>
+
+                    <div class="cf-grid">
+                        <div class="cf-field cf-col-12">
+                            <label for="field_description" class="cf-label">
+                                <i class="fa-solid fa-align-right"></i>
+                                توضیحات
+                            </label>
+                            <textarea id="field_description"
+                                      name="description"
+                                      class="cf-textarea"
+                                      rows="3"
+                                      placeholder="توضیحات اختیاری...">{{ contractor.get('description', '') or '' }}</textarea>
+                        </div>
+
+                        <div class="cf-field cf-col-12">
+                            <label class="cf-switch-wrap" for="field_is_active">
+                                <div class="cf-switch-info">
+                                    <i class="fa-solid fa-power-off"></i>
+                                    <div class="cf-switch-text">
+                                        <strong>وضعیت فعال</strong>
+                                        <small>در صورت فعال بودن، پیمانکار در لیست‌ها نمایش داده می‌شود</small>
+                                    </div>
+                                </div>
+                                <div class="cf-switch">
+                                    <input type="checkbox"
+                                           id="field_is_active"
+                                           name="is_active"
+                                           value="1"
+                                           {% if contractor.get('is_active') %}checked{% endif %}>
+                                    <span class="cf-switch-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ============================================
+                 اکشن‌های پایین
+                 ============================================ -->
+            <div class="cf-actions">
+                <div class="cf-actions-note">
+                    <i class="fa-solid fa-circle-info"></i>
+                    فیلدهای دارای <span style="color:#dc2626;font-weight:900;">*</span> الزامی هستند
+                </div>
+
+                <div class="cf-actions-buttons">
+                    <a href="{{ url_for('contractors.list_contractors') }}"
+                       class="cf-btn cf-btn-cancel">
+                        <i class="fa-solid fa-xmark"></i>
+                        انصراف
+                    </a>
+                    <button type="submit" class="cf-btn cf-btn-save">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        {% if mode == 'add' %}
+                            ذخیره پیمانکار
+                        {% else %}
+                            ذخیره تغییرات
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- ============================================
+     دکمه شناور ذخیره (فقط موبایل)
+     ============================================ -->
+<button type="submit"
+        form="contractorForm"
+        class="cf-mobile-save">
+    <i class="fa-solid fa-floppy-disk"></i>
+    {% if mode == 'add' %}ذخیره پیمانکار{% else %}ذخیره تغییرات{% endif %}
+</button>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/contractors/form.js') }}"></script>{% endblock %}

@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت کاربران{% endblock %}
+
+{% block body_class %}page-users{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-users" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/panel/users.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="usr-wrap">
+
+    <div class="usr-heading">
+        <div class="usr-heading-info">
+            <div class="usr-heading-icon">
+                <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="usr-heading-text">
+                <h1>مدیریت کاربران</h1>
+                <p>ایجاد، ویرایش و مدیریت دسترسی کاربران سیستم</p>
+            </div>
+        </div>
+
+        <div class="usr-heading-actions">
+            <!-- ★★★ خروجی اکسل ★★★ -->
+            <a href="{{ url_for('panel.users_export_excel') }}" class="usr-export-btn"
+                title="خروجی اکسل از لیست کاربران">
+                <i class="fa-solid fa-file-excel"></i>
+                خروجی اکسل
+            </a>
+
+            <!-- ★★★ ورود از اکسل ★★★ -->
+            <button type="button" class="usr-import-btn" id="usrImportBtn" title="ورود کاربران از فایل اکسل">
+                <i class="fa-solid fa-file-import"></i>
+                ورود از اکسل
+            </button>
+
+            <!-- ★ فرم مخفی برای آپلود فایل ★ -->
+            <form id="usrImportForm" method="POST" action="{{ url_for('panel.users_import_excel') }}"
+                enctype="multipart/form-data" style="display:none;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="file" name="file" id="usrImportFile" accept=".xlsx,.xls">
+            </form>
+
+            <a href="{{ url_for('panel.add_user') }}" class="usr-add-btn">
+                <i class="fa-solid fa-user-plus"></i>
+                افزودن کاربر
+            </a>
+        </div>
+    </div>
+
+    <div class="usr-search-box">
+        <div class="usr-search-wrapper">
+            <span class="usr-search-icon">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="userSearchInput" placeholder="جستجو در کاربران ... (نام، نام کاربری، نقش)"
+                autocomplete="off">
+            <span class="usr-search-clear" id="userSearchClear">
+                <i class="fa-solid fa-xmark"></i>
+            </span>
+        </div>
+        <div class="usr-search-info" id="userSearchInfo">
+            <span id="userSearchCount">0</span>
+            نتیجه برای جستجوی
+            "<strong id="userSearchQuery"></strong>"
+        </div>
+    </div>
+
+    <div class="usr-grid" id="usersGrid">
+
+        {% for user in users %}
+        <!-- ★★★ data-href برای کلیک روی کل کارت ★★★ -->
+        <div class="usr-card" data-href="{{ url_for('panel.user_detail', user_id=user.id) }}"
+            data-user-id="{{ user.id }}" data-role="{{ user.role if user.role else '' }}"
+            data-search="{{ user.full_name if user.full_name else '' }} {{ user.username if user.username else '' }} {{ user.role if user.role else '' }}">
+
+            <div class="usr-card-top">
+                <div class="usr-card-top-content">
+
+                    <div class="usr-avatar">
+                        <span class="usr-avatar-ring"></span>
+                        <span class="usr-avatar-ring ring-2"></span>
+
+                        {% if user.avatar and user.avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                            {# آواتار اختصاصی کاربر #}
+                            <img src="{{ url_for('static', filename='uploads/avatar/' + user.avatar) }}"
+                                alt="{{ user.full_name or 'کاربر' }}"
+                                onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                        {% elif user.gender == 'female' %}
+                            {# آواتار پیش‌فرض خانم #}
+                            <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                                alt="{{ user.full_name or 'کاربر' }}" />
+                        {% else %}
+                            {# آواتار پیش‌فرض آقا #}
+                            <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                                alt="{{ user.full_name or 'کاربر' }}" />
+                        {% endif %}
+
+                        {% set is_online = user.is_online == 1 and user.last_seen %}
+                        <span class="usr-status-dot {{ 'online' if is_online else 'offline' }}"
+                            data-user-id="{{ user.id }}" title="{{ 'آنلاین' if is_online else 'آفلاین' }}"></span>
+                    </div>
+
+                    <div class="usr-info">
+                        <h3 class="usr-name">{{ user.full_name }}</h3>
+                        <span class="usr-username">
+                            <i class="fa-solid fa-at"></i>
+                            {{ user.username }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="usr-card-body">
+                <div class="usr-role-row">
+                    <i class="fa-solid fa-id-badge"></i>
+                    <span class="label">نقش:</span>
+
+                    {% if user.role == 'admin' %}
+                    <span class="usr-role-badge usr-role-admin">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        مدیر نرم افزار
+                    </span>
+                    {% elif user.role == 'manager' %}
+                    <span class="usr-role-badge usr-role-manager">
+                        <i class="fa-solid fa-user-tie"></i>
+                        مدیر
+                    </span>
+                    {% elif user.role == 'supervisor' %}
+                    <span class="usr-role-badge usr-role-supervisor">
+                        <i class="fa-solid fa-user-check"></i>
+                        سرپرست
+                    </span>
+                    {% else %}
+                    <span class="usr-role-badge usr-role-expert">
+                        <i class="fa-solid fa-user-gear"></i>
+                        کارشناس
+                    </span>
+                    {% endif %}
+                </div>
+
+                <!-- ★ جنسیت و وضعیت -->
+                <div class="usr-meta-row">
+                    <div class="usr-meta-item">
+                        <i class="fa-solid fa-venus-mars"></i>
+                        <span class="usr-meta-label">جنسیت:</span>
+                        {% if user.gender == 'female' %}
+                        <span class="usr-gender-badge usr-gender-female">
+                            <i class="fa-solid fa-venus"></i>
+                            خانم
+                        </span>
+                        {% else %}
+                        <span class="usr-gender-badge usr-gender-male">
+                            <i class="fa-solid fa-mars"></i>
+                            آقا
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <div class="usr-meta-item">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span class="usr-meta-label">وضعیت:</span>
+                        {% if user.is_active == 1 %}
+                        <span class="usr-active-badge usr-active-yes">
+                            <i class="fa-solid fa-check"></i>
+                            فعال
+                        </span>
+                        {% else %}
+                        <span class="usr-active-badge usr-active-no">
+                            <i class="fa-solid fa-xmark"></i>
+                            غیرفعال
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ★★★ آخرین ورود و آخرین فعالیت ★★★ -->
+                <div class="usr-activity-row">
+                    <div class="usr-activity-item">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        <span class="usr-activity-label">آخرین ورود:</span>
+                        <span class="usr-activity-value ltr">
+                            {% if user.last_login %}
+                            {{ user.last_login_jalali }}
+                            {% else %}
+                            <span class="usr-muted">—</span>
+                            {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="usr-activity-item">
+                        <i class="fa-solid fa-eye"></i>
+                        <span class="usr-activity-label">آخرین فعالیت:</span>
+                        <span class="usr-activity-value ltr">
+                            {% if user.last_seen %}
+                            {{ user.last_seen_jalali }}
+                            {% else %}
+                            <span class="usr-muted">—</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="usr-card-footer">
+                <a href="{{ url_for('panel.edit_user', user_id=user.id) }}" class="usr-btn usr-btn-edit">
+                    <i class="fa-solid fa-pen"></i>
+                    ویرایش
+                </a>
+
+                <form method="POST" action="{{ url_for('panel.delete_user', user_id=user.id) }}"
+                    style="display: inline-flex; margin: 0;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="usr-btn usr-btn-delete"
+                        onclick="return confirm('حذف این کاربر انجام شود؟')">
+                        <i class="fa-solid fa-trash"></i>
+                        حذف
+                    </button>
+                </form>
+            </div>
+
+        </div>
+        {% else %}
+        <div class="usr-empty">
+            <i class="fa-solid fa-users-slash"></i>
+            <p>کاربری وجود ندارد</p>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/panel/users.js') }}"></script>{% endblock %}

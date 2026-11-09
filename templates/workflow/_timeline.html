@@ -1,0 +1,90 @@
+{#
+    تایم‌لاین رخدادهای یادداشت
+    متغیرها: events (لیست رخدادها با event_type جدید)
+    استایل‌ها به صورت inline در همین فایل تعریف شده‌اند
+#}
+
+
+
+{% if events and events|length > 0 %}
+<div class="wt-timeline">
+    {% for e in events %}
+
+    {# نگاشت نوع رخداد → کلاس، آیکن، عنوان #}
+    {% set type_map = {
+        'submit':  {'cls': 'wt-submit',  'icon': 'fa-paper-plane',    'title': 'ثبت یادداشت'},
+        'comment': {'cls': 'wt-comment', 'icon': 'fa-comment',        'title': 'کامنت'},
+        'approve': {'cls': 'wt-approve', 'icon': 'fa-circle-check',   'title': 'تایید'},
+        'reject':  {'cls': 'wt-reject',  'icon': 'fa-circle-xmark',   'title': 'رد'},
+        'return':  {'cls': 'wt-return',  'icon': 'fa-rotate-left',    'title': 'برگشت'},
+        'forward': {'cls': 'wt-forward', 'icon': 'fa-share',          'title': 'ارجاع'},
+        'close':   {'cls': 'wt-close',   'icon': 'fa-flag-checkered', 'title': 'خاتمه'},
+        'reopen':  {'cls': 'wt-reopen',  'icon': 'fa-lock-open',      'title': 'بازگشایی'},
+        'edit':    {'cls': 'wt-edit',    'icon': 'fa-pen',            'title': 'ویرایش'},
+    } %}
+    {% set info = type_map.get(e.event_type, {'cls': 'wt-edit', 'icon': 'fa-circle-info', 'title': e.event_type or 'رخداد'}) %}
+
+    <div class="wt-event">
+        <div class="wt-dot {{ info.cls }}">
+            <i class="fa-solid {{ info.icon }}"></i>
+        </div>
+
+        <div class="wt-card">
+            <div class="wt-head">
+                <div class="wt-who">
+                    <div class="wt-avatar">
+                        {% if e.user_avatar %}
+                            <img src="{{ url_for('static', filename='uploads/avatar/' ~ e.user_avatar) }}"
+                                 alt="{{ e.user_full_name }}"
+                                 onerror="this.style.display='none';this.parentElement.textContent='{{ (e.user_full_name or '?')[0] }}';">
+                        {% else %}
+                            {{ (e.user_full_name or '?')[0] }}
+                        {% endif %}
+                    </div>
+                    <div class="wt-info">
+                        <div class="wt-name">{{ e.user_full_name or 'کاربر' }}</div>
+                        <div class="wt-action {{ info.cls }}">
+                            <i class="fa-solid {{ info.icon }}"></i>
+                            {{ info.title }}
+                        </div>
+                    </div>
+                </div>
+                <div class="wt-time">
+                    <i class="fa-regular fa-clock"></i>
+                    {{ e.created_at_jalali or '—' }}
+                </div>
+            </div>
+
+            {# مسیر مرحله #}
+            {% if e.from_step_title or e.to_step_title %}
+            <div class="wt-steps">
+                {% if e.from_step_title %}
+                    <strong>{{ e.from_step_title }}</strong>
+                {% endif %}
+                {% if e.from_step_title and e.to_step_title %}
+                    <i class="fa-solid fa-arrow-left"></i>
+                {% endif %}
+                {% if e.to_step_title %}
+                    <strong>{{ e.to_step_title }}</strong>
+                {% endif %}
+                {% if e.to_user_name %}
+                    <span style="color:#94a3b8;">→</span>
+                    <span>{{ e.to_user_name }}</span>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {# متن پیام #}
+            {% if e.message %}
+            <div class="wt-msg {{ info.cls }}">{{ e.message }}</div>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="wt-empty">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    <p>هنوز رخدادی ثبت نشده است</p>
+</div>
+{% endif %}

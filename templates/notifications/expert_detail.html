@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block title %}یادداشت‌های {{ expert.full_name }}{% endblock %}
+{% block body_class %}page-expert-detail{% endblock %}
+
+{% block css %}
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/notifications/expert_detail.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="ed-wrap">
+
+    <!-- ===== بازگشت ===== -->
+    <a href="{{ url_for('notifications.by_expert') }}" class="ed-back">
+        <i class="fa-solid fa-arrow-right"></i>
+        بازگشت به لیست کارشناسان
+    </a>
+
+    <!-- ===== پروفایل کارشناس ===== -->
+    <div class="ed-profile">
+        {% if expert.avatar %}
+        <img src="{{ url_for('static', filename='uploads/avatar/' ~ expert.avatar) }}"
+             alt="{{ expert.full_name }}"
+             class="ed-avatar"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div class="ed-avatar-placeholder" style="display:none;">
+            {{ expert.full_name[0] if expert.full_name else '؟' }}
+        </div>
+        {% else %}
+        <div class="ed-avatar-placeholder">
+            {{ expert.full_name[0] if expert.full_name else '؟' }}
+        </div>
+        {% endif %}
+
+        <div class="ed-profile-info">
+            <h1>{{ expert.full_name }}</h1>
+            <p class="ed-username">@{{ expert.username }}</p>
+        </div>
+
+        <div class="ed-stats">
+            <div class="ed-stat-box">
+                <span class="num" id="edTotalNum">{{ stats.total }}</span>
+                <span class="lbl">یادداشت</span>
+            </div>
+            <div class="ed-stat-box unread" id="edUnreadBox"
+                 {% if stats.unread == 0 %}style="display:none;"{% endif %}>
+                <span class="num" id="edUnreadNum">{{ stats.unread }}</span>
+                <span class="lbl">نخوانده</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== نوار ابزار ===== -->
+    <div class="ed-toolbar">
+        <div class="ed-toolbar-title" id="edListTitle">
+            {{ notes|length }} یادداشت
+        </div>
+
+        <div class="ed-toolbar-actions">
+            <button type="button"
+                    class="ed-btn ed-btn-primary"
+                    id="edMarkAllBtn"
+                    onclick="edMarkAllRead()">
+                <i class="fa-solid fa-check-double"></i>
+                همه خوانده شد
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== لیست کارت‌های یادداشت ===== -->
+    {% if notes %}
+    <div class="ed-list" id="edList">
+        {% for n in notes %}
+
+        {# ★ وضعیت → رنگ + آیکن + متن #}
+        {% set status_map = {
+            'final':    {'label': 'تایید نهایی',      'icon': 'fa-circle-check',        'cls': 'ed-status-final'},
+            'approved': {'label': 'تایید شده',         'icon': 'fa-circle-check',        'cls': 'ed-status-approved'},
+            'rejected': {'label': 'رد شده',            'icon': 'fa-circle-xmark',        'cls': 'ed-status-rejected'},
+            'returned': {'label': 'برگشت داده شده',   'icon': 'fa-arrow-rotate-left',   'cls': 'ed-status-returned'},
+            'edited':   {'label': 'ویرایش شده',        'icon': 'fa-pen',                 'cls': 'ed-status-edited'},
+            'pending':  {'label': 'در انتظار بررسی',  'icon': 'fa-clock',               'cls': 'ed-status-pending'},
+            'info':     {'label': 'اطلاع‌رسانی',        'icon': 'fa-circle-info',         'cls': 'ed-status-info'},
+        } %}
+        {% set st = status_map.get(n.latest_status, status_map['info']) %}
+
+        <div class="ed-note-card {% if n.unread_count > 0 %}unread{% endif %}"
+             data-note-id="{{ n.note_id }}"
+             data-notification-id="{{ n.notification_id }}">
+
+            <!-- ★ نوار وضعیت رنگی -->
+            <div class="ed-status-bar {{ st.cls }}">
+                <div class="ed-status-left">
+                    <i class="fa-solid {{ st.icon }}"></i>
+                    <span>{{ st.label }}</span>
+                </div>
+                <div class="ed-status-right">
+                    <i class="fa-regular fa-clock"></i>
+                    {{ n.latest_at or '—' }}
+                </div>
+            </div>
+
+            <!-- ★ بدنه کارت -->
+            <div class="ed-note-body">
+                <a href="{{ url_for('notifications.click', notification_id=n.notification_id) }}"
+                   class="ed-note-link"
+                   data-action="open"
+                   data-notification-id="{{ n.notification_id }}">
+                    <div class="ed-doc-icon">
+                        <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <div class="ed-note-content">
+                        <div class="ed-doc-subject">
+                            {{ n.document_subject }}
+                        </div>
+                        {% if n.document_code %}
+                        <div class="ed-doc-code">
+                            <i class="fa-solid fa-hashtag"></i>
+                            {{ n.document_code }}
+                        </div>
+                        {% endif %}
+                        {% if n.latest_message %}
+                        <div class="ed-note-msg">{{ n.latest_message }}</div>
+                        {% endif %}
+                        <div class="ed-note-meta">
+                            <span>
+                                <i class="fa-solid fa-bell"></i>
+                                {{ n.notifications|length }} نوتیف
+                            </span>
+                            {% if n.unread_count > 0 %}
+                            <span class="ed-unread-pill">
+                                {{ n.unread_count }} نخوانده
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+
+                <div class="ed-note-actions">
+                    {% if n.unread_count > 0 %}
+                    <button type="button"
+                            class="ed-act-btn read"
+                            title="خواندم"
+                            data-action="read-note"
+                            data-note-id="{{ n.note_id }}">
+                        <i class="fa-solid fa-check"></i>
+                    </button>
+                    {% endif %}
+                    <button type="button"
+                            class="ed-act-btn dismiss"
+                            title="حذف همه نوتیف‌های این یادداشت"
+                            data-action="dismiss-note"
+                            data-note-id="{{ n.note_id }}">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="ed-empty" id="edEmpty">
+        <i class="fa-solid fa-bell-slash"></i>
+        <h3>هیچ یادداشتی برای این کارشناس نیست</h3>
+        <p>وقتی روی یادداشت‌هاش فعالیتی انجام بشه، اینجا نمایش داده می‌شه.</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+    (function () {
+        'use strict';
+
+        // ============================================================
+        // ★★★ توابع کمکی
+        // ============================================================
+        function getHeaders() {
+            return {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            };
+        }
+
+        function updateUnreadBox(delta) {
+            const box = document.getElementById('edUnreadBox');
+            const num = document.getElementById('edUnreadNum');
+            if (!box || !num) return;
+
+            const current = parseInt(num.textContent || '0', 10) || 0;
+            const newCount = Math.max(0, current + delta);
+
+            if (newCount > 0) {
+                num.textContent = newCount;
+                box.style.display = 'flex';
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
+        function updateTotalNum(delta) {
+            const total = document.getElementById('edTotalNum');
+            if (!total) return;
+
+            const current = parseInt(total.textContent || '0', 10) || 0;
+            total.textContent = Math.max(0, current + delta);
+        }
+
+        function updateListTitle(delta) {
+            const title = document.getElementById('edListTitle');
+            if (!title) return;
+
+            const match = title.textContent.match(/^(\d+)/);
+            if (match) {
+                const newCount = Math.max(0, parseInt(match[1], 10) + delta);
+                title.textContent = title.textContent.replace(/^\d+/, newCount);
+            }
+        }
+
+        function showEmptyIfNeeded() {
+            const list = document.getElementById('edList');
+            if (!list) return;
+
+            const remaining = list.querySelectorAll('.ed-note-card');
+            if (remaining.length === 0) {
+                list.outerHTML = `
+                    <div class="ed-empty" id="edEmpty">
+                        <i class="fa-solid fa-bell-slash"></i>
+                        <h3>هیچ یادداشتی برای این کارشناس نیست</h3>
+                        <p>وقتی روی یادداشت‌هاش فعالیتی انجام بشه، اینجا نمایش داده می‌شه.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ============================================================
+        // ★★★ Event Delegation
+        // ============================================================
+        document.addEventListener('click', async function (e) {
+            const btn = e.target.closest('[data-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-action');
+
+            // ★ باز کردن لینک — فقط علامت خوانده بزن
+            if (action === 'open') {
+                const notifId = btn.getAttribute('data-notification-id');
+                if (notifId) {
+                    try {
+                        fetch('/notifications/' + notifId + '/read', {
+                            method: 'POST',
+                            headers: getHeaders()
+                        });
+                    } catch (err) {}
+                }
+                return;
+            }
+
+            // ★ خواندم یادداشت (همه نوتیف‌های اون یادداشت)
+            if (action === 'read-note') {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (btn.classList.contains('loading')) return;
+                btn.classList.add('loading');
+
+                const noteId = btn.getAttribute('data-note-id');
+                const card = document.querySelector(
+                    '.ed-note-card[data-note-id="' + noteId + '"]'
+                );
+                if (!card) return;
+
+                try {
+                    const res = await fetch(
+                        '/notifications/note/' + noteId + '/read-all',
+                        {
+                            method: 'POST',
+                            headers: getHeaders()
+                        }
+                    );
+                    const data = await res.json();
+
+                    if (data.success) {
+                        card.classList.remove('unread');
+                        const pill = card.querySelector('.ed-unread-pill');
+                        if (pill) pill.remove();
+                        btn.remove();
+                        updateUnreadBox(-1);
+                    }
+                } catch (err) {
+                    console.error('Read note error:', err);
+                } finally {
+                    btn.classList.remove('loading');
+                }
+                return;
+            }
+
+            // ★ حذف یادداشت (همه نوتیف‌های اون یادداشت)
+            if (action === 'dismiss-note') {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!confirm('همه نوتیف‌های این یادداشت حذف بشن؟')) return;
+                if (btn.classList.contains('loading')) return;
+                btn.classList.add('loading');
+
+                const noteId = btn.getAttribute('data-note-id');
+                const card = document.querySelector(
+                    '.ed-note-card[data-note-id="' + noteId + '"]'
+                );
+                if (!card) return;
+
+                const wasUnread = card.classList.contains('unread');
+
+                try {
+                    const res = await fetch(
+                        '/notifications/note/' + noteId + '/dismiss-all',
+                        {
+                            method: 'POST',
+                            headers: getHeaders()
+                        }
+                    );
+                    const data = await res.json();
+
+                    if (data.success) {
+                        card.classList.add('removing');
+                        setTimeout(function () {
+                            card.remove();
+                            updateListTitle(-1);
+                            updateTotalNum(-1);
+                            if (wasUnread) updateUnreadBox(-1);
+                            showEmptyIfNeeded();
+                        }, 350);
+                    }
+                } catch (err) {
+                    console.error('Dismiss note error:', err);
+                } finally {
+                    btn.classList.remove('loading');
+                }
+                return;
+            }
+        });
+
+        // ============================================================
+        // ★★★ «همه خوانده شد» برای کل این کارشناس
+        // ============================================================
+        window.edMarkAllRead = async function () {
+            const btn = document.getElementById('edMarkAllBtn');
+            if (!btn || btn.disabled) return;
+
+            const unreadCards = document.querySelectorAll('.ed-note-card.unread');
+            if (unreadCards.length === 0) return;
+
+            btn.disabled = true;
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال انجام...';
+
+            try {
+                const expertId = {{ expert.id }};
+                const res = await fetch(
+                    '/notifications/expert/' + expertId + '/read-all',
+                    {
+                        method: 'POST',
+                        headers: getHeaders()
+                    }
+                );
+                const data = await res.json();
+
+                if (data.success) {
+                    unreadCards.forEach(function (card) {
+                        card.classList.remove('unread');
+                        const pill = card.querySelector('.ed-unread-pill');
+                        if (pill) pill.remove();
+                        const readBtn = card.querySelector('.ed-act-btn.read');
+                        if (readBtn) readBtn.remove();
+                    });
+
+                    const box = document.getElementById('edUnreadBox');
+                    if (box) box.style.display = 'none';
+                    const num = document.getElementById('edUnreadNum');
+                    if (num) num.textContent = '0';
+                }
+            } catch (err) {
+                console.error('Mark all expert read error:', err);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        };
+
+    })();
+</script>
+{% endblock %}

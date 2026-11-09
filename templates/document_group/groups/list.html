@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}مدیریت گروه‌های سند{% endblock %}
+
+{% block body_class %}page-document-groups{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/groups/list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dg-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="dg-header">
+        <div class="dg-header-title">
+            <div class="dg-header-icon">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div class="dg-header-text">
+                <h1>مدیریت گروه‌های سند</h1>
+                <p>ایجاد، ویرایش و مدیریت گروه‌های سند و زیرگروه‌های آنها</p>
+            </div>
+        </div>
+
+        <div class="dg-header-actions">
+
+            <!-- ★ کانتینر جدا برای ایمپورت/اکسپورت -->
+            <div class="dg-io-container">
+                <a href="{{ url_for('document_group.group_export_excel') }}"
+                   class="dg-btn dg-btn-export"
+                   title="خروجی اکسل از لیست گروه‌ها">
+                    <i class="fa-solid fa-file-excel"></i>
+                    خروجی اکسل
+                </a>
+
+                <a href="{{ url_for('document_group.group_import') }}"
+                   class="dg-btn dg-btn-import"
+                   title="ایمپورت گروه‌ها از فایل اکسل">
+                    <i class="fa-solid fa-file-import"></i>
+                    ایمپورت از اکسل
+                </a>
+            </div>
+
+            <!-- دکمه‌های اصلی -->
+            <a href="{{ url_for('document_group.subgroup_list') }}"
+               class="dg-btn dg-btn-secondary">
+                <i class="fa-solid fa-sitemap"></i>
+                مدیریت زیرگروه‌ها
+            </a>
+
+            <a href="{{ url_for('document_group.group_add') }}"
+               class="dg-btn dg-btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                گروه جدید
+            </a>
+        </div>
+    </header>
+
+    <!-- ===== آمار ===== -->
+    <section class="dg-stats-grid">
+        <div class="dg-stat-card" style="--stat-color: #2b6cb0;">
+            <div class="dg-stat-icon blue">
+                <i class="fa-solid fa-layer-group"></i>
+            </div>
+            <div>
+                <span class="dg-stat-label">کل گروه‌ها</span>
+                <span class="dg-stat-value">{{ stats.total_groups }}</span>
+            </div>
+        </div>
+
+        <div class="dg-stat-card" style="--stat-color: #167a5c;">
+            <div class="dg-stat-icon green">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+                <span class="dg-stat-label">گروه‌های فعال</span>
+                <span class="dg-stat-value">{{ stats.active_groups }}</span>
+            </div>
+        </div>
+
+        <div class="dg-stat-card" style="--stat-color: #d69e2e;">
+            <div class="dg-stat-icon orange">
+                <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <div>
+                <span class="dg-stat-label">گروه‌های غیرفعال</span>
+                <span class="dg-stat-value">{{ stats.inactive_groups }}</span>
+            </div>
+        </div>
+
+        <div class="dg-stat-card" style="--stat-color: #805ad5;">
+            <div class="dg-stat-icon purple">
+                <i class="fa-solid fa-sitemap"></i>
+            </div>
+            <div>
+                <span class="dg-stat-label">کل زیرگروه‌ها</span>
+                <span class="dg-stat-value">{{ stats.total_subgroups }}</span>
+            </div>
+        </div>
+
+        <div class="dg-stat-card" style="--stat-color: #319795;">
+            <div class="dg-stat-icon teal">
+                <i class="fa-solid fa-link"></i>
+            </div>
+            <div>
+                <span class="dg-stat-label">کل ارتباطات</span>
+                <span class="dg-stat-value">{{ stats.total_links }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== فیلتر ===== -->
+    <section class="dg-filter-panel">
+        <form method="GET" class="dg-filter-form">
+            <div class="dg-search-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="search" name="search" value="{{ search }}"
+                       placeholder="جستجو در عنوان یا کد گروه...">
+            </div>
+
+            <select name="department_id" class="dg-select">
+                <option value="">— همه دپارتمان‌ها —</option>
+                {% for dept in departments %}
+                <option value="{{ dept.id }}"
+                        {% if selected_department_id == dept.id %}selected{% endif %}>
+                    {{ dept.title }}
+                </option>
+                {% endfor %}
+            </select>
+
+            <label class="dg-checkbox-wrap">
+                <input type="checkbox" name="active" value="1"
+                       {% if active_only %}checked{% endif %}>
+                فقط فعال‌ها
+            </label>
+
+            <button type="submit" class="dg-btn dg-btn-primary">
+                <i class="fa-solid fa-filter"></i>
+                اعمال
+            </button>
+        </form>
+    </section>
+
+    <!-- ===== لیست گروه‌ها ===== -->
+    <section class="dg-groups-grid">
+
+        {% if groups %}
+
+            {% for group in groups %}
+            <article class="dg-group-card" style="--gr-color: {{ group.color or '#1b698b' }};">
+
+                <!-- ★ ستون ۱: هدر -->
+                <div class="dg-group-header">
+                    <div class="dg-group-icon">
+                        <i class="fa-solid fa-folder-open"></i>
+                    </div>
+
+                    <div class="dg-group-info">
+                        <h3 class="dg-group-title" title="{{ group.title }}">
+                            {{ group.title }}
+                        </h3>
+                        <div class="dg-group-meta">
+                            {% if group.code %}
+                            <span class="dg-group-code">
+                                <i class="fa-solid fa-hashtag"></i>
+                                {{ group.code }}
+                            </span>
+                            {% endif %}
+
+                            {% if group.is_active %}
+                            <span class="dg-badge dg-badge-active">
+                                <i class="fa-solid fa-circle"></i>
+                                فعال
+                            </span>
+                            {% else %}
+                            <span class="dg-badge dg-badge-inactive">
+                                <i class="fa-solid fa-circle"></i>
+                                غیرفعال
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <form method="POST"
+                          action="{{ url_for('document_group.group_toggle', group_id=group.id) }}"
+                          class="dg-toggle-form"
+                          title="{% if group.is_active %}غیرفعال کردن{% else %}فعال کردن{% endif %}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="dg-toggle-btn">
+                            <i class="fa-solid {% if group.is_active %}fa-toggle-on{% else %}fa-toggle-off{% endif %}"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ★ ستون ۲: بدنه -->
+                <div class="dg-group-body">
+                    <div class="dg-group-stats">
+                        <div class="dg-group-stat">
+                            <i class="fa-solid fa-sitemap"></i>
+                            زیرگروه
+                            <strong>{{ group.subgroups_count }}</strong>
+                        </div>
+                        <div class="dg-group-stat">
+                            <i class="fa-solid fa-sort"></i>
+                            ترتیب
+                            <strong>{{ group.sort_order }}</strong>
+                        </div>
+                    </div>
+
+                    {% if group.description %}
+                    <p class="dg-group-description">
+                        {{ group.description }}
+                    </p>
+                    {% endif %}
+
+                    <div class="dg-subgroups-section">
+                        <div class="dg-subgroups-title">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            زیرگروه‌های مرتبط
+                            {% if group.subgroups %}
+                            <span class="dg-count">{{ group.subgroups|length }}</span>
+                            {% endif %}
+                        </div>
+
+                        {% if group.subgroups %}
+                        <div class="dg-subgroups-list">
+                            {% for sg in group.subgroups[:6] %}
+                            <a href="{{ url_for('document_group.subgroup_detail', subgroup_id=sg.id) }}"
+                               class="dg-subgroup-chip"
+                               title="{{ sg.title }}{% if sg.department_title %} — {{ sg.department_title }}{% endif %}">
+                                <i class="fa-solid fa-tag"></i>
+                                {{ sg.title }}
+                            </a>
+                            {% endfor %}
+
+                            {% if group.subgroups|length > 6 %}
+                            <a href="{{ url_for('document_group.group_detail', group_id=group.id) }}"
+                               class="dg-subgroups-more"
+                               title="مشاهده همه زیرگروه‌ها">
+                                <i class="fa-solid fa-plus"></i>
+                                {{ group.subgroups|length - 6 }} مورد دیگر
+                            </a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <span class="dg-subgroups-empty">
+                            <i class="fa-solid fa-circle-info"></i>
+                            هنوز زیرگروهی به این گروه متصل نشده
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- ★ ستون ۳: اکشن‌ها (عمودی) -->
+                <div class="dg-group-actions">
+                    <a href="{{ url_for('document_group.group_detail', group_id=group.id) }}"
+                       class="dg-action-btn dg-action-view">
+                        <i class="fa-solid fa-eye"></i>
+                        مشاهده
+                    </a>
+
+                    <a href="{{ url_for('document_group.group_edit', group_id=group.id) }}"
+                       class="dg-action-btn dg-action-edit">
+                        <i class="fa-solid fa-pen"></i>
+                        ویرایش
+                    </a>
+
+                    <form method="POST"
+                          action="{{ url_for('document_group.group_delete', group_id=group.id) }}"
+                          onsubmit="return confirm('حذف گروه «{{ group.title }}»؟\n\nتوجه: ارتباط این گروه با زیرگروه‌ها قطع می‌شود.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit"
+                                class="dg-action-btn dg-action-delete">
+                            <i class="fa-solid fa-trash"></i>
+                            حذف
+                        </button>
+                    </form>
+                </div>
+
+            </article>
+            {% endfor %}
+
+        {% else %}
+
+            <div class="dg-empty">
+                <i class="fa-solid fa-folder-open"></i>
+                <h3>هیچ گروهی یافت نشد</h3>
+                <p>هنوز هیچ گروه سندی ایجاد نکرده‌اید یا نتیجه‌ای برای جستجو وجود ندارد.</p>
+                <a href="{{ url_for('document_group.group_add') }}"
+                   class="dg-btn dg-btn-primary">
+                    <i class="fa-solid fa-plus"></i>
+                    ایجاد اولین گروه
+                </a>
+            </div>
+
+        {% endif %}
+
+    </section>
+
+</div>
+{% endblock %}

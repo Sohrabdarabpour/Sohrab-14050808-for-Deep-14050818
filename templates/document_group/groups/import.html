@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}ایمپورت گروه‌های سند{% endblock %}
+
+{% block body_class %}page-document-group-import{% endblock %}
+
+{% block css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/document_group/groups/import.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="im-wrap">
+
+    <!-- ===== هدر ===== -->
+    <header class="im-header">
+        <div class="im-header-info">
+            <div class="im-header-icon">
+                <i class="fa-solid fa-file-import"></i>
+            </div>
+            <div class="im-header-text">
+                <h1>ایمپورت گروه‌های سند از اکسل</h1>
+                <p>فایل اکسل حاوی گروه‌های سند را آپلود کنید</p>
+            </div>
+        </div>
+
+        <a href="{{ url_for('document_group.group_list') }}" class="im-back-btn">
+            <i class="fa-solid fa-arrow-right"></i>
+            بازگشت به لیست
+        </a>
+    </header>
+
+    <!-- ===== کارت اصلی ===== -->
+    <div class="im-card">
+
+        <!-- ★ دانلود قالب -->
+        <div class="im-template-box">
+            <div class="im-template-icon">
+                <i class="fa-solid fa-download"></i>
+            </div>
+            <div class="im-template-text">
+                <h3>ابتدا قالب را دانلود کنید</h3>
+                <p>
+                    برای اطمینان از صحت ساختار فایل، ابتدا قالب استاندارد را دانلود کنید
+                    و اطلاعات خود را در آن وارد نمایید.
+                </p>
+            </div>
+            <a href="{{ url_for('document_group.group_import_template') }}"
+               class="im-template-btn">
+                <i class="fa-solid fa-file-excel"></i>
+                دانلود قالب
+            </a>
+        </div>
+
+        <!-- ★ فرم آپلود -->
+        <form method="POST"
+              action="{{ url_for('document_group.group_import_process') }}"
+              enctype="multipart/form-data"
+              id="importForm">
+
+            {{ csrf_token() if csrf_token is defined }}
+
+            <h3 class="im-section-title">
+                <i class="fa-solid fa-upload"></i>
+                آپلود فایل اکسل
+            </h3>
+
+            <!-- انتخاب فایل -->
+            <div class="im-form-row">
+                <label class="im-label">
+                    <i class="fa-solid fa-file-excel"></i>
+                    فایل اکسل
+                    <span class="required">*</span>
+                </label>
+
+                <label class="im-file-wrapper" for="fileInput">
+                    <div class="im-file-icon">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                    </div>
+                    <div class="im-file-text">
+                        <span class="im-file-title">فایل خود را انتخاب کنید</span>
+                        <span class="im-file-hint">فرمت‌های مجاز: xlsx, xls</span>
+                    </div>
+                    <span class="im-file-browse">انتخاب فایل</span>
+                    <input type="file"
+                           name="file"
+                           id="fileInput"
+                           accept=".xlsx,.xls"
+                           required>
+                </label>
+
+                <div class="im-file-info" id="fileInfo">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span id="fileName">فایلی انتخاب نشده</span>
+                    <button type="button" id="removeFile" title="حذف فایل">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- حالت ایمپورت -->
+            <h3 class="im-section-title">
+                <i class="fa-solid fa-sliders"></i>
+                حالت ایمپورت
+            </h3>
+
+            <div class="im-modes">
+                <label class="im-mode-card">
+                    <input type="radio" name="mode" value="append" checked>
+                    <div class="im-mode-content">
+                        <div class="im-mode-title">
+                            <i class="fa-solid fa-plus" style="color:#38a169;"></i>
+                            افزودن به داده‌های موجود
+                        </div>
+                        <span class="im-mode-desc">
+                            گروه‌های جدید به لیست فعلی اضافه می‌شوند.
+                            گروه‌های تکراری نادیده گرفته می‌شوند.
+                        </span>
+                    </div>
+                </label>
+
+                <label class="im-mode-card">
+                    <input type="radio" name="mode" value="replace">
+                    <div class="im-mode-content">
+                        <div class="im-mode-title">
+                            <i class="fa-solid fa-rotate" style="color:#e53e3e;"></i>
+                            جایگزینی کامل
+                        </div>
+                        <span class="im-mode-desc">
+                            تمام گروه‌های قبلی حذف و با داده‌های فایل جدید جایگزین می‌شوند.
+                            (نیازمند عدم وابستگی اسناد)
+                        </span>
+                    </div>
+                </label>
+            </div>
+
+            <!-- دکمه‌ها -->
+            <div class="im-actions">
+                <a href="{{ url_for('document_group.group_list') }}" class="im-btn im-btn-secondary">
+                    <i class="fa-solid fa-xmark"></i>
+                    انصراف
+                </a>
+
+                <button type="submit" class="im-btn im-btn-primary" id="submitBtn" disabled>
+                    <i class="fa-solid fa-file-import"></i>
+                    شروع ایمپورت
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    <!-- ===== راهنما ===== -->
+    <div class="im-help">
+        <h3 class="im-help-title">
+            <i class="fa-solid fa-circle-info"></i>
+            راهنمای فایل اکسل
+        </h3>
+        <ul class="im-help-list">
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    ستون <code>عنوان گروه</code> اجباری است.
+                </span>
+            </li>
+
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    ستون‌های اختیاری:
+                    <code>کد گروه</code>,
+                    <code>رنگ</code>,
+                    <code>توضیحات</code>,
+                    <code>ترتیب نمایش</code>,
+                    <code>وضعیت</code>
+                </span>
+            </li>
+
+            <!-- ★ ستون زیرگروه‌ها (M:N) -->
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    ستون <code>زیرگروه‌ها</code> (اختیاری):
+                    برای اتصال زیرگروه‌ها به گروه.
+                    چند زیرگروه را با <strong>کاما</strong> جدا کنید.
+                    <span class="im-hint-multi">
+                        مثال: استخدام، آموزش، قوانین
+                    </span>
+                </span>
+            </li>
+
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    مقدار <code>وضعیت</code> می‌تواند یکی از این‌ها باشد:
+                    <code>فعال</code> یا <code>غیرفعال</code>
+                </span>
+            </li>
+
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    در حالت <code>افزودن</code>، گروه‌های تکراری (بر اساس عنوان) نادیده گرفته می‌شوند.
+                </span>
+            </li>
+
+            <li>
+                <i class="fa-solid fa-circle"></i>
+                <span>
+                    در حالت <code>جایگزینی</code>، اگر اسنادی به گروه‌های موجود وابسته باشند،
+                    عملیات متوقف می‌شود.
+                </span>
+            </li>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/pages/document_group/groups/import.js') }}"></script>{% endblock %}

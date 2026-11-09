@@ -1,0 +1,961 @@
+/* استایل صفحه: document_group/groups/list.html */
+
+    .page-document-groups {
+        --dg-primary: #1b698b;
+        --dg-primary-light: #167a5c;
+        --dg-text: #2d3e4a;
+        --dg-text-secondary: #6b7d8a;
+        --dg-border: #d8e6ed;
+        --dg-radius-lg: 20px;
+        --dg-radius-md: 14px;
+        --dg-shadow-sm: 0 2px 12px rgba(91, 155, 181, .08);
+        --dg-shadow-md: 0 8px 24px rgba(27, 105, 139, .10);
+        --dg-shadow-lg: 0 16px 40px rgba(27, 105, 139, .16);
+        --dg-transition: .3s cubic-bezier(.25, .46, .45, .94);
+    }
+
+    /* ============================================ */
+    /* ★ تمام‌عرض */
+    /* ============================================ */
+    .page-document-groups .dg-wrap {
+        width: 100%;
+        margin: 0;
+        padding: clamp(12px, 1.6vw, 28px);
+    }
+
+    /* ============================================ */
+    /* هدر */
+    /* ============================================ */
+    .page-document-groups .dg-header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        flex-wrap: wrap;
+        padding: clamp(20px, 2.2vw, 32px);
+        background: linear-gradient(135deg, #f0f7fa 0%, #eaf5f0 50%, #f0f9f4 100%);
+        border: 1.5px solid var(--dg-border);
+        border-radius: var(--dg-radius-lg);
+        box-shadow: var(--dg-shadow-sm);
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .page-document-groups .dg-header::before {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -10%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(27, 105, 139, .06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-document-groups .dg-header::after {
+        content: "";
+        position: absolute;
+        bottom: -60%;
+        right: -5%;
+        width: 380px;
+        height: 380px;
+        background: radial-gradient(circle, rgba(22, 122, 92, .06) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .page-document-groups .dg-header-title {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-document-groups .dg-header-icon {
+        width: 66px;
+        height: 66px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--dg-primary), var(--dg-primary-light));
+        color: #fff;
+        font-size: 1.5rem;
+        box-shadow: 0 10px 24px rgba(27, 105, 139, .30);
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    .page-document-groups .dg-header-icon::after {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, var(--dg-primary), var(--dg-primary-light));
+        opacity: .2;
+        z-index: -1;
+        filter: blur(8px);
+    }
+
+    .page-document-groups .dg-header-text h1 {
+        margin: 0;
+        color: var(--dg-text);
+        font-size: clamp(1.2rem, 1.4vw, 1.55rem);
+        font-weight: 900;
+        letter-spacing: -.3px;
+    }
+
+    .page-document-groups .dg-header-text p {
+        margin: 6px 0 0;
+        color: var(--dg-text-secondary);
+        font-size: .85rem;
+    }
+
+    .page-document-groups .dg-header-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ============================================ */
+    /* ★ کانتینر جدا برای ایمپورت/اکسپورت */
+    /* ============================================ */
+    .page-document-groups .dg-io-container {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px;
+        background: rgba(255, 255, 255, .65);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255, 255, 255, .9);
+        border-radius: 14px;
+        box-shadow: 0 2px 8px rgba(27, 105, 139, .08);
+    }
+
+    /* ============================================ */
+    /* دکمه‌ها */
+    /* ============================================ */
+    .page-document-groups .dg-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 20px;
+        border-radius: 12px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .84rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--dg-transition);
+        border: 1.5px solid transparent;
+        white-space: nowrap;
+    }
+
+    .page-document-groups .dg-io-container .dg-btn {
+        min-height: 38px;
+        padding: 8px 16px;
+        font-size: .8rem;
+        border-radius: 10px;
+    }
+
+    .page-document-groups .dg-btn-primary {
+        background: linear-gradient(135deg, var(--dg-primary), var(--dg-primary-light));
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .28);
+    }
+
+    .page-document-groups .dg-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(27, 105, 139, .42);
+        color: #fff;
+    }
+
+    .page-document-groups .dg-btn-secondary {
+        background: #fff;
+        border-color: var(--dg-border);
+        color: var(--dg-text-secondary);
+    }
+
+    .page-document-groups .dg-btn-secondary:hover {
+        background: #f7fafc;
+        border-color: #b8d4e0;
+        color: var(--dg-primary);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(27, 105, 139, .10);
+    }
+
+    .page-document-groups .dg-btn-export {
+        background: linear-gradient(135deg, #1d6f42 0%, #2e8b57 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(29, 111, 66, .28);
+    }
+
+    .page-document-groups .dg-btn-export:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(29, 111, 66, .42);
+        color: #ffffff;
+    }
+
+    .page-document-groups .dg-btn-import {
+        background: linear-gradient(135deg, #2b6cb0 0%, #4299e1 100%);
+        color: #ffffff;
+        box-shadow: 0 4px 14px rgba(43, 108, 176, .28);
+    }
+
+    .page-document-groups .dg-btn-import:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(43, 108, 176, .42);
+        color: #ffffff;
+    }
+
+    /* ============================================ */
+    /* آمار */
+    /* ============================================ */
+    .page-document-groups .dg-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .page-document-groups .dg-stat-card {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 20px;
+        background: #fff;
+        border: 1.5px solid var(--dg-border);
+        border-radius: var(--dg-radius-md);
+        box-shadow: var(--dg-shadow-sm);
+        transition: all var(--dg-transition);
+        overflow: hidden;
+    }
+
+    .page-document-groups .dg-stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--stat-color, var(--dg-primary));
+        border-radius: 0 4px 4px 0;
+    }
+
+    .page-document-groups .dg-stat-card:hover {
+        transform: translateY(-6px);
+        box-shadow: var(--dg-shadow-md);
+        border-color: #b8d4e0;
+    }
+
+    .page-document-groups .dg-stat-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, .12);
+    }
+
+    .page-document-groups .dg-stat-icon.blue { background: linear-gradient(135deg, #2b6cb0, #3d8ad4); }
+    .page-document-groups .dg-stat-icon.green { background: linear-gradient(135deg, #167a5c, #2aa07a); }
+    .page-document-groups .dg-stat-icon.orange { background: linear-gradient(135deg, #d69e2e, #e8b94a); }
+    .page-document-groups .dg-stat-icon.purple { background: linear-gradient(135deg, #805ad5, #9f7ae8); }
+    .page-document-groups .dg-stat-icon.teal { background: linear-gradient(135deg, #319795, #4fd1c5); }
+
+    .page-document-groups .dg-stat-label {
+        display: block;
+        color: var(--dg-text-secondary);
+        font-size: .76rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .page-document-groups .dg-stat-value {
+        display: block;
+        color: var(--dg-text);
+        font-size: 1.65rem;
+        font-weight: 900;
+        line-height: 1.1;
+        letter-spacing: -.5px;
+    }
+
+    /* ============================================ */
+    /* فیلتر */
+    /* ============================================ */
+    .page-document-groups .dg-filter-panel {
+        background: #fff;
+        border: 1.5px solid var(--dg-border);
+        border-radius: var(--dg-radius-md);
+        padding: 18px;
+        margin-bottom: 24px;
+        box-shadow: var(--dg-shadow-sm);
+    }
+
+    .page-document-groups .dg-filter-form {
+        display: grid;
+        grid-template-columns: 1fr auto auto auto;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .page-document-groups .dg-search-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 4px 16px;
+        transition: all var(--dg-transition);
+    }
+
+    .page-document-groups .dg-search-wrapper:focus-within {
+        background: #fff;
+        border-color: var(--dg-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .12);
+    }
+
+    .page-document-groups .dg-search-wrapper i {
+        color: var(--dg-text-secondary);
+        margin-left: 10px;
+    }
+
+    .page-document-groups .dg-search-wrapper input {
+        flex: 1;
+        border: none;
+        outline: none;
+        padding: 11px 0;
+        font-family: inherit;
+        font-size: .86rem;
+        background: transparent;
+        color: var(--dg-text);
+    }
+
+    .page-document-groups .dg-select {
+        padding: 11px 16px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: var(--dg-text);
+        font-family: inherit;
+        font-size: .84rem;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+        transition: all var(--dg-transition);
+        min-height: 46px;
+    }
+
+    .page-document-groups .dg-select:focus {
+        background: #fff;
+        border-color: var(--dg-primary);
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, .12);
+    }
+
+    .page-document-groups .dg-checkbox-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 16px;
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        cursor: pointer;
+        user-select: none;
+        font-size: .84rem;
+        font-weight: 600;
+        color: var(--dg-text-secondary);
+        transition: all var(--dg-transition);
+        min-height: 46px;
+    }
+
+    .page-document-groups .dg-checkbox-wrap:hover {
+        border-color: #b8d4e0;
+        color: var(--dg-primary);
+        background: #f0f7fa;
+    }
+
+    .page-document-groups .dg-checkbox-wrap input {
+        accent-color: var(--dg-primary);
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+    }
+
+    /* ============================================ */
+    /* ★ گرید — یک کارت در هر ردیف */
+    /* ============================================ */
+    .page-document-groups .dg-groups-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    /* ============================================ */
+    /* ★ کارت گروه — چیدمان افقی */
+    /* ============================================ */
+    .page-document-groups .dg-group-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(0, 1.6fr) auto;
+        align-items: stretch;
+        gap: 0;
+        background: #fff;
+        border: 1.5px solid var(--dg-border);
+        border-radius: var(--dg-radius-lg);
+        overflow: hidden;
+        transition: all var(--dg-transition);
+    }
+
+    /* ★ نوار رنگی کناری (سمت راست) */
+    .page-document-groups .dg-group-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        width: 6px;
+        background: linear-gradient(180deg,
+            var(--gr-color, var(--dg-primary)) 0%,
+            color-mix(in srgb, var(--gr-color, var(--dg-primary)) 60%, #fff) 100%);
+        z-index: 3;
+        transition: width .35s ease;
+    }
+
+    .page-document-groups .dg-group-card:hover::before {
+        width: 8px;
+    }
+
+    .page-document-groups .dg-group-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--dg-shadow-lg);
+        border-color: color-mix(in srgb, var(--gr-color, var(--dg-primary)) 30%, #fff);
+    }
+
+    /* ============================================ */
+    /* ★ ستون ۱: هدر (آیکون + عنوان + کد + بج + toggle) */
+    /* ============================================ */
+    .page-document-groups .dg-group-header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 22px 26px;
+        background: linear-gradient(135deg,
+            color-mix(in srgb, var(--gr-color, var(--dg-primary)) 8%, #fff) 0%,
+            color-mix(in srgb, var(--gr-color, var(--dg-primary)) 2%, #fff) 100%);
+        border-left: 1px solid color-mix(in srgb, var(--gr-color, var(--dg-primary)) 15%, #fff);
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-document-groups .dg-group-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 17px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg,
+                color-mix(in srgb, var(--gr-color, var(--dg-primary)) 18%, #fff),
+                color-mix(in srgb, var(--gr-color, var(--dg-primary)) 8%, #fff));
+        color: var(--gr-color, var(--dg-primary));
+        font-size: 1.45rem;
+        flex-shrink: 0;
+        border: 1.5px solid color-mix(in srgb, var(--gr-color, var(--dg-primary)) 25%, #fff);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--gr-color, var(--dg-primary)) 15%, transparent);
+        transition: all var(--dg-transition);
+    }
+
+    .page-document-groups .dg-group-card:hover .dg-group-icon {
+        transform: scale(1.06) rotate(-3deg);
+        box-shadow: 0 8px 20px color-mix(in srgb, var(--gr-color, var(--dg-primary)) 30%, transparent);
+    }
+
+    .page-document-groups .dg-group-info {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .page-document-groups .dg-group-title {
+        margin: 0 0 8px;
+        color: var(--dg-text);
+        font-size: 1.1rem;
+        font-weight: 900;
+        line-height: 1.4;
+        letter-spacing: -.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .page-document-groups .dg-group-meta {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: .74rem;
+    }
+
+    .page-document-groups .dg-group-code {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 11px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        font-family: "SF Mono", Monaco, monospace;
+        font-size: .7rem;
+        font-weight: 700;
+        direction: ltr;
+    }
+
+    .page-document-groups .dg-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 11px;
+        border-radius: 20px;
+        font-size: .7rem;
+        font-weight: 700;
+        border: 1px solid transparent;
+    }
+
+    .page-document-groups .dg-badge-active {
+        background: #eaf6f1;
+        color: #276749;
+        border-color: #c8e6d8;
+    }
+
+    .page-document-groups .dg-badge-inactive {
+        background: #fdecea;
+        color: #c53030;
+        border-color: #f8d0cc;
+    }
+
+    /* دکمه toggle */
+    .page-document-groups .dg-toggle-form {
+        margin: 0;
+        flex-shrink: 0;
+    }
+
+    .page-document-groups .dg-toggle-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        background: #fff;
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .9rem;
+        transition: all var(--dg-transition);
+        flex-shrink: 0;
+    }
+
+    .page-document-groups .dg-toggle-btn:hover {
+        background: #f0f7fa;
+        border-color: #b8d4e0;
+        color: var(--dg-primary);
+        transform: scale(1.08);
+    }
+
+    /* ============================================ */
+    /* ★ ستون ۲: بدنه (آمار + توضیحات + زیرگروه‌ها) */
+    /* ============================================ */
+    .page-document-groups .dg-group-body {
+        padding: 22px 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .page-document-groups .dg-group-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+
+    .page-document-groups .dg-group-stat {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: .78rem;
+        color: var(--dg-text-secondary);
+        font-weight: 600;
+        transition: all var(--dg-transition);
+    }
+
+    .page-document-groups .dg-group-stat:hover {
+        background: #fff;
+        border-color: #b8d4e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, .08);
+    }
+
+    .page-document-groups .dg-group-stat i {
+        color: var(--gr-color, var(--dg-primary));
+        font-size: .9rem;
+    }
+
+    .page-document-groups .dg-group-stat strong {
+        color: var(--dg-text);
+        font-weight: 900;
+        margin-right: auto;
+        direction: ltr;
+        font-size: .95rem;
+    }
+
+    .page-document-groups .dg-group-description {
+        margin: 0;
+        color: #64748b;
+        font-size: .79rem;
+        line-height: 1.7;
+        padding: 10px 14px;
+        background: #fafcfd;
+        border-right: 3px solid color-mix(in srgb, var(--gr-color, var(--dg-primary)) 40%, #fff);
+        border-radius: 8px;
+    }
+
+    /* زیرگروه‌ها */
+    .page-document-groups .dg-subgroups-section {
+        padding-top: 12px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
+    .page-document-groups .dg-subgroups-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: .76rem;
+        font-weight: 800;
+        color: var(--dg-text-secondary);
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    .page-document-groups .dg-subgroups-title i {
+        color: var(--gr-color, var(--dg-primary));
+        font-size: .85rem;
+    }
+
+    .page-document-groups .dg-subgroups-title .dg-count {
+        margin-right: auto;
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 9px;
+        background: color-mix(in srgb, var(--gr-color, var(--dg-primary)) 12%, #fff);
+        color: var(--gr-color, var(--dg-primary));
+        border-radius: 12px;
+        font-size: .68rem;
+        font-weight: 900;
+        direction: ltr;
+    }
+
+    .page-document-groups .dg-subgroups-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .page-document-groups .dg-subgroup-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 11px;
+        background: #f0f7fa;
+        color: #1b698b;
+        border: 1px solid #cce2f3;
+        border-radius: 18px;
+        font-size: .72rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all var(--dg-transition);
+    }
+
+    .page-document-groups .dg-subgroup-chip:hover {
+        background: #e0eff7;
+        border-color: #a3cbe0;
+        color: #145a7a;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(27, 105, 139, .15);
+    }
+
+    .page-document-groups .dg-subgroups-empty {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 12px 16px;
+        background: #fafcfd;
+        border: 1.5px dashed #e2e8f0;
+        border-radius: 10px;
+        font-size: .76rem;
+        color: #a0aeb8;
+        font-style: italic;
+        width: 100%;
+    }
+
+    .page-document-groups .dg-subgroups-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px 11px;
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px dashed #cbd5e0;
+        border-radius: 18px;
+        font-size: .72rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all var(--dg-transition);
+    }
+
+    .page-document-groups .dg-subgroups-more:hover {
+        background: #e2e8f0;
+        color: #475569;
+        transform: translateY(-2px);
+    }
+
+    /* ============================================ */
+    /* ★ ستون ۳: اکشن‌ها (عمودی کنار) */
+    /* ============================================ */
+    .page-document-groups .dg-group-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 8px;
+        padding: 22px 20px;
+        background: linear-gradient(180deg, #fafcfd 0%, #f5f8fa 100%);
+        border-right: 1px solid #eef3f6;
+        min-width: 180px;
+    }
+
+    .page-document-groups .dg-action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        padding: 10px 16px;
+        min-height: 40px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-family: inherit;
+        font-size: .8rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all var(--dg-transition);
+        border: 1.5px solid #e2e8f0;
+        white-space: nowrap;
+        background: #fff;
+        color: #64748b;
+        width: 100%;
+    }
+
+    .page-document-groups .dg-action-view:hover {
+        background: #eaf4fb;
+        border-color: #cce2f3;
+        color: #2b6cb0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(43, 108, 176, .15);
+    }
+
+    .page-document-groups .dg-action-edit:hover {
+        background: #fdf6e3;
+        border-color: #f4e4b8;
+        color: #b7791f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(183, 121, 31, .15);
+    }
+
+    .page-document-groups .dg-action-delete:hover {
+        background: #fdecea;
+        border-color: #f8d0cc;
+        color: #c53030;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(197, 48, 48, .15);
+    }
+
+    .page-document-groups .dg-group-actions form {
+        margin: 0;
+    }
+
+    /* ============================================ */
+    /* خالی */
+    /* ============================================ */
+    .page-document-groups .dg-empty {
+        text-align: center;
+        padding: 80px 20px;
+        background: linear-gradient(135deg, #fafcfd 0%, #f5f8fa 100%);
+        border: 2px dashed #e2e8f0;
+        border-radius: var(--dg-radius-lg);
+    }
+
+    .page-document-groups .dg-empty i {
+        font-size: 3.5rem;
+        color: #cbd5e0;
+        display: block;
+        margin-bottom: 18px;
+    }
+
+    .page-document-groups .dg-empty h3 {
+        margin: 0 0 10px;
+        color: var(--dg-text);
+        font-size: 1.15rem;
+        font-weight: 800;
+    }
+
+    .page-document-groups .dg-empty p {
+        margin: 0 0 24px;
+        color: var(--dg-text-secondary);
+        font-size: .88rem;
+    }
+
+    /* ============================================ */
+    /* ★ ریسپانسیو */
+    /* ============================================ */
+
+    /* تبلت بزرگ: کارت به 2 ستون (هدر بالا، بقیه کنار) */
+    @media (max-width: 1200px) {
+        .page-document-groups .dg-group-card {
+            grid-template-columns: 1fr auto;
+        }
+
+        .page-document-groups .dg-group-header {
+            grid-column: 1 / -1;
+            border-left: none;
+            border-bottom: 1px solid color-mix(in srgb, var(--gr-color, var(--dg-primary)) 15%, #fff);
+        }
+
+        .page-document-groups .dg-group-actions {
+            min-width: 160px;
+        }
+    }
+
+    /* تبلت: 1 ستون */
+    @media (max-width: 900px) {
+        .page-document-groups .dg-group-card {
+            grid-template-columns: 1fr;
+        }
+
+        .page-document-groups .dg-group-header {
+            border-bottom: 1px solid color-mix(in srgb, var(--gr-color, var(--dg-primary)) 15%, #fff);
+        }
+
+        .page-document-groups .dg-group-actions {
+            flex-direction: row;
+            border-right: none;
+            border-top: 1px solid #eef3f6;
+            min-width: 0;
+            padding: 16px 22px 18px;
+        }
+
+        .page-document-groups .dg-action-btn {
+            flex: 1;
+            width: auto;
+        }
+
+        .page-document-groups .dg-filter-form {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .page-document-groups .dg-search-wrapper {
+            grid-column: 1 / -1;
+        }
+
+        .page-document-groups .dg-stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+    }
+
+    /* موبایل */
+    @media (max-width: 640px) {
+        .page-document-groups .dg-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .page-document-groups .dg-header-actions {
+            width: 100%;
+            flex-direction: column;
+        }
+
+        .page-document-groups .dg-io-container {
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .page-document-groups .dg-io-container .dg-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-document-groups .dg-header-actions > .dg-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .page-document-groups .dg-stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .page-document-groups .dg-filter-form {
+            grid-template-columns: 1fr;
+        }
+
+        .page-document-groups .dg-group-header {
+            padding: 18px 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .page-document-groups .dg-group-body {
+            padding: 18px 20px;
+        }
+
+        .page-document-groups .dg-group-actions {
+            padding: 12px 20px 16px;
+            flex-wrap: wrap;
+        }
+
+        .page-document-groups .dg-action-btn {
+            min-width: calc(50% - 4px);
+        }
+
+        .page-document-groups .dg-group-stats {
+            grid-template-columns: 1fr;
+        }
+
+        .page-document-groups .dg-group-icon {
+            width: 52px;
+            height: 52px;
+            font-size: 1.25rem;
+        }
+
+        .page-document-groups .dg-group-title {
+            font-size: 1rem;
+        }
+    }

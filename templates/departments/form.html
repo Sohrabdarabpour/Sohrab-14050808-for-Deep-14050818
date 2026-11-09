@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'ویرایش دپارتمان' if department else 'افزودن دپارتمان' }}{% endblock %}
+
+{% block body_class %}page-departments{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-department-form" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/departments/form.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dp-wrap">
+
+    <div class="dp-form-card">
+
+        <!-- ===== هدر فرم ===== -->
+        <div class="dp-form-header">
+            <div class="dp-form-header-icon">
+                <i class="fa-solid {{ 'fa-pen-to-square' if department else 'fa-building-circle-arrow-right' }}"></i>
+            </div>
+            <div class="dp-form-header-text">
+                <h1 class="dp-form-title">
+                    {{ 'ویرایش دپارتمان' if department else 'افزودن دپارتمان' }}
+                </h1>
+                <p class="dp-form-subtitle">
+                    اطلاعات دپارتمان و سرپرست مربوطه را وارد کنید.
+                </p>
+            </div>
+        </div>
+
+        <!-- ===== بدنه فرم ===== -->
+        <div class="dp-form-body">
+            <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="dp-form-grid">
+
+                    <!-- عنوان دپارتمان -->
+                    <div class="dp-field">
+                        <label class="dp-label" for="title">
+                            <i class="fa-solid fa-building"></i>
+                            عنوان دپارتمان
+                            <span class="required">*</span>
+                        </label>
+                        <input type="text" id="title" name="title" class="dp-input"
+                            value="{{ department.title if department else '' }}" placeholder="مثلاً دفتر فنی"
+                            maxlength="150" required>
+                    </div>
+
+                    <!-- کد دپارتمان -->
+                    <div class="dp-field">
+                        <label class="dp-label" for="code">
+                            <i class="fa-solid fa-hashtag"></i>
+                            کد دپارتمان
+                        </label>
+                        <input type="text" id="code" name="code" class="dp-input"
+                            value="{{ department.code if department else '' }}" placeholder="مثلاً technical_office"
+                            maxlength="100" dir="ltr">
+                        <span class="dp-help">
+                            <i class="fa-solid fa-circle-info"></i>
+                            کد باید یکتا باشد.
+                        </span>
+                    </div>
+
+                    <!-- سرپرست -->
+                    <div class="dp-field">
+                        <label class="dp-label" for="supervisor_id">
+                            <i class="fa-solid fa-user-tie"></i>
+                            سرپرست دپارتمان
+                        </label>
+                        <select id="supervisor_id" name="supervisor_id" class="dp-select">
+                            <option value="">بدون سرپرست</option>
+                            {% for supervisor in supervisors %}
+                            <option value="{{ supervisor.id }}" {% if department and
+                                department.supervisor_id==supervisor.id %}selected{% endif %}>
+                                {{ supervisor.full_name }}{% if supervisor.username %} ({{ supervisor.username }}){%
+                                endif
+                                %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <span class="dp-help">
+                            <i class="fa-solid fa-circle-info"></i>
+                            فقط سرپرستان فعال نمایش داده می‌شوند.
+                        </span>
+                    </div>
+
+                    <!-- ترتیب نمایش -->
+                    <div class="dp-field">
+                        <label class="dp-label" for="sort_order">
+                            <i class="fa-solid fa-sort-numeric-down"></i>
+                            ترتیب نمایش
+                        </label>
+                        <input type="number" id="sort_order" name="sort_order" class="dp-input"
+                            value="{{ department.sort_order if department else 0 }}" min="0">
+                        <span class="dp-help">
+                            <i class="fa-solid fa-circle-info"></i>
+                            عدد کوچک‌تر در ابتدا نمایش داده می‌شود.
+                        </span>
+                    </div>
+
+                    <!-- چک‌باکس فعال بودن -->
+                    <div class="dp-field full-width">
+                        <label class="dp-checkbox-wrapper" for="is_active">
+                            <input type="checkbox" id="is_active" name="is_active" class="dp-checkbox" {% if not
+                                department or department.is_active %}checked{% endif %}>
+                            <div class="dp-checkbox-text">
+                                <strong>دپارتمان فعال باشد</strong>
+                                <small>دپارتمان‌های غیرفعال در گزارش‌ها نمایش داده نمی‌شوند.</small>
+                            </div>
+                        </label>
+                    </div>
+
+                </div>
+
+                <!-- ===== دکمه‌ها ===== -->
+                <div class="dp-form-actions">
+
+                    <button type="submit" class="dp-btn dp-btn-primary">
+                        <i class="fa-solid {{ 'fa-floppy-disk' if department else 'fa-plus' }}"></i>
+                        {{ 'ذخیره تغییرات' if department else 'ثبت دپارتمان' }}
+                    </button>
+
+                    <a href="{{ url_for('departments.department_list') }}" class="dp-btn dp-btn-secondary">
+                        <i class="fa-solid fa-xmark"></i>
+                        انصراف
+                    </a>
+
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

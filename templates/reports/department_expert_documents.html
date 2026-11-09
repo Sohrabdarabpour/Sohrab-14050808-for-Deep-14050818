@@ -1,0 +1,1032 @@
+{% extends "base.html" %}
+
+{% block title %}
+اسناد کارشناس {{ expert.full_name }}
+{% endblock %}
+
+{% block body_class %}
+page-dashboard
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/department_expert_documents.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-main-container">
+
+    <div class="expert-page-header">
+        <div class="expert-page-title">
+            <div class="expert-page-title-icon">
+                <span class="expert-header-ring"></span>
+                <span class="expert-header-ring ring-2"></span>
+
+                {% set ex_avatar = expert.avatar %}
+                {% set ex_gender = expert.gender or 'male' %}
+
+                {% if ex_avatar and ex_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                    {# آواتار اختصاصی #}
+                    <img src="{{ url_for('static', filename='uploads/avatar/' + ex_avatar) }}"
+                        alt="{{ expert.full_name or 'کارشناس' }}"
+                        onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                {% elif ex_gender == 'female' %}
+                    {# آواتار پیش‌فرض خانم #}
+                    <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                        alt="{{ expert.full_name or 'کارشناس' }}" />
+                {% else %}
+                    {# آواتار پیش‌فرض آقا #}
+                    <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                        alt="{{ expert.full_name or 'کارشناس' }}" />
+                {% endif %}
+            </div>
+
+            <div class="expert-page-title-content">
+                <h1>اسناد کارشناس {{ expert.full_name }}</h1>
+                <span>
+                    دپارتمان {{ department['title'] }}
+                    {% if department['code'] %}— {{ department['code'] }}{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <div class="back-buttons-group">
+            {% if request.args.get('from') == 'view_department' %}
+            <a href="{{ url_for('departments.view_department', department_id=department['id'], year=selected_year) }}"
+                class="btn-back">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به دپارتمان
+            </a>
+            {% else %}
+            <a href="{{ url_for('reports.department_report', year=selected_year) }}" class="btn-back">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به گزارش دپارتمان
+            </a>
+
+            {% if department['area_id'] is defined and department['area_id'] %}
+            <a href="{{ url_for('reports.area_departments', area_id=department['area_id'], year=selected_year) }}"
+                class="btn-back btn-back-secondary">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به دپارتمان‌های ناحیه
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-filter">
+        <div class="filter-field">
+            <label for="yearFilter">
+                <i class="fa-solid fa-calendar"></i>
+                سال دریافت
+            </label>
+            <select id="yearFilter">
+                <option value="all" {% if selected_year=="all" %}selected{% endif %}>همه سال‌ها</option>
+                {% for year in available_years %}
+                <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>{{ year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="filter-status-info" id="statusFilterInfo">
+            <i class="fa-solid fa-filter"></i>
+            <span>وضعیت: <strong id="currentStatusLabel">همه</strong></span>
+            <span id="filteredCount"></span>
+            <button id="clearStatusFilter" type="button">
+                <i class="fa-solid fa-xmark"></i>
+                پاک کردن
+            </button>
+        </div>
+    </div>
+
+    <div class="dashboard-stats-chart-row">
+        <div class="stats-grid-side" id="statsGrid">
+            {% set total_count = statuses | sum(attribute='count') %}
+            {% for status in statuses %}
+            {% set percent = ((status.count / total_count * 100) | round(0, 'floor')) if total_count > 0 else 0 %}
+            <div class="stat-card" style="--stat-color:{{ status.color }};" data-status="{{ status.code }}"
+                data-count="{{ status.count }}" data-total="{{ total_count }}"
+                onclick="filterByStatus('{{ status.code }}')">
+
+                <!-- بج فعال -->
+                <span class="stat-active-badge">
+                    <i class="fa-solid fa-check"></i>
+                    فعال
+                </span>
+
+                <!-- آیکون -->
+                <div class="stat-icon">
+                    {% if status.code == "completed" %}<i class="fa-solid fa-circle-check"></i>
+                    {% elif status.code == "in_progress" %}<i class="fa-solid fa-spinner"></i>
+                    {% elif status.code == "informational" %}<i class="fa-solid fa-circle-info"></i>
+                    {% elif status.code == "stopped" %}<i class="fa-solid fa-circle-pause"></i>
+                    {% elif status.code == "deleted" %}<i class="fa-solid fa-trash"></i>
+                    {% else %}<i class="fa-solid fa-file"></i>
+                    {% endif %}
+                </div>
+
+                <!-- متن -->
+                <div class="stat-content">
+                    <div class="stat-label">{{ status.title }}</div>
+                    <div class="stat-subtitle">
+                        {% if status.code == "completed" %}اسناد تکمیل‌شده
+                        {% elif status.code == "in_progress" %}در حال پیگیری
+                        {% elif status.code == "informational" %}اطلاع‌رسانی
+                        {% elif status.code == "stopped" %}متوقف‌شده
+                        {% elif status.code == "deleted" %}حذف‌شده
+                        {% else %}اسناد{% endif %}
+                    </div>
+                </div>
+
+                <!-- عدد + درصد -->
+                <div class="stat-count-box">
+                    <div class="stat-number">{{ status.count }}</div>
+                    <div class="stat-percent">{{ percent }}%</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="dashboard-chart-container-side">
+            <div class="chart-header">
+                <div class="chart-title">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    توزیع وضعیت مدارک
+                </div>
+                <span class="chart-update">
+                    <i class="fa-regular fa-clock"></i>
+                    لحظه‌ای
+                </span>
+            </div>
+
+            <div class="dashboard-chart-wrapper-side">
+                <canvas id="statusChart"></canvas>
+                <div class="chart-percentage-label" id="chartCenterLabel">
+                    <div class="total-count" id="totalCount">0</div>
+                    <div class="total-label">مجموع مدارک</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-search-box">
+        <div class="search-wrapper">
+            <span class="search-icon">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </span>
+            <input type="text" id="searchInput"
+                placeholder="جستجو در تمام فیلدهای اسناد ... (موضوع، کد DFC، پیمانکار، تاریخ، شماره‌ها و ...)"
+                autocomplete="off">
+            <span class="search-clear" id="searchClear">
+                <i class="fa-solid fa-xmark"></i>
+            </span>
+            <span class="search-shortcut">Ctrl+K</span>
+        </div>
+        <div class="search-results-info" id="searchResultsInfo">
+            <span id="searchResultCount">0</span>
+            نتیجه برای جستجوی
+            "<strong id="searchQueryText"></strong>"
+        </div>
+    </div>
+
+    <!-- ============================================================
+         ★ بخش اسناد — با Lazy Loading + AJAX
+         ============================================================ -->
+    <div class="documents-section" id="documentsSection">
+
+        <div class="docs-header">
+            <div class="docs-title">
+                <i class="fa-solid fa-file-lines"></i>
+                اسناد کارشناس
+                <span id="statusFilterBadge"></span>
+            </div>
+            <span class="docs-count" id="docsCount">
+                <i class="fa-solid fa-file"></i>
+                <span id="docsCountNumber">—</span>
+            </span>
+        </div>
+
+        <!-- ★ Placeholder — قبل از لود -->
+        <div class="documents-placeholder" id="documentsPlaceholder">
+            <div class="placeholder-icon">
+                <i class="fa-solid fa-file-circle-info"></i>
+            </div>
+            <h3>آماده برای نمایش اسناد</h3>
+            <p>
+                برای دیدن اسناد، روی یکی از کارت‌های وضعیت بالا کلیک کنید<br>
+                یا دکمه زیر را بزنید.
+            </p>
+            <button type="button" class="btn-load-all" id="btnLoadAll">
+                <i class="fa-solid fa-list"></i>
+                نمایش همه اسناد
+            </button>
+        </div>
+
+        <!-- ★ لودر -->
+        <div class="documents-loader" id="documentsLoader" style="display:none;">
+            <div class="loader-spinner"></div>
+            <p>در حال بارگذاری اسناد...</p>
+        </div>
+
+        <!-- ★ لیست اسناد (با AJAX پر می‌شه) -->
+        <div class="document-grid" id="documentGrid"></div>
+
+        <!-- ★ دکمه "بیشتر" -->
+        <div class="documents-pagination" id="documentsPagination" style="display:none;">
+            <button type="button" class="btn-load-more" id="btnLoadMore">
+                <i class="fa-solid fa-arrow-down"></i>
+                نمایش بیشتر
+            </button>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
+<script>
+    // ============================================================
+    // ★ متغیرهای سراسری
+    // ============================================================
+    let statusChart = null;
+    let statusChartResizeObserver = null;
+    let searchTimeout = null;
+
+    // ★ متغیرهای AJAX
+    let currentStatus = null;
+    let currentPage = 1;
+    let isLoading = false;
+    let hasMore = false;
+    let hasLoadedOnce = false;
+
+    const departmentId = {{department['id'] }};
+    const expertId = {{expert['id'] }};
+    const selectedYear = "{{ selected_year }}";
+    const areaIdParam = "{{ area_id if area_id else 'all' }}";
+    const expertFullName = "{{ expert.full_name|e }}";
+
+    const STATUS_COLORS_LIGHT_FALLBACK = [
+        "#3d8bb5", "#2aa07a", "#e8b94a", "#dd7a3d", "#6b7a8f",
+        "#3d8ad4", "#4fc3c0", "#9f7ae8", "#8fa0b5", "#4aa876"
+    ];
+
+    const SCROLL_HEADER_OFFSET = 80;
+
+    // ============================================================
+    // ★ DOM refs
+    // ============================================================
+    const placeholder = document.getElementById('documentsPlaceholder');
+    const loader = document.getElementById('documentsLoader');
+    const grid = document.getElementById('documentGrid');
+    const pagination = document.getElementById('documentsPagination');
+    const btnLoadMore = document.getElementById('btnLoadMore');
+    const btnLoadAll = document.getElementById('btnLoadAll');
+    const docsCountNumber = document.getElementById('docsCountNumber');
+    const statusFilterBadge = document.getElementById('statusFilterBadge');
+    const clearBtn = document.getElementById('clearStatusFilter');
+    const currentStatusLabel = document.getElementById('currentStatusLabel');
+    const filteredCount = document.getElementById('filteredCount');
+    const searchInput = document.getElementById('searchInput');
+    const searchClear = document.getElementById('searchClear');
+    const searchResultsInfo = document.getElementById('searchResultsInfo');
+    const searchResultCount = document.getElementById('searchResultCount');
+    const searchQueryText = document.getElementById('searchQueryText');
+
+    // ============================================================
+    // ★ راه‌اندازی
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeChart();
+
+        // سال
+        document.getElementById('yearFilter')?.addEventListener('change', function () {
+            const url = new URL(window.location.href);
+            if (this.value === 'all') {
+                url.searchParams.delete('year');
+            } else {
+                url.searchParams.set('year', this.value);
+            }
+            window.location.href = url.toString();
+        });
+
+        // پاک کردن فیلتر وضعیت
+        clearBtn?.addEventListener('click', clearStatusFilter);
+
+        // دکمه "نمایش همه"
+        btnLoadAll?.addEventListener('click', function () {
+            currentStatus = null;
+            loadDocuments(null, 1, false);
+        });
+
+        // دکمه "بیشتر"
+        btnLoadMore?.addEventListener('click', function () {
+            if (hasMore && !isLoading) {
+                loadDocuments(currentStatus, currentPage + 1, true);
+            }
+        });
+
+        // جستجو
+        searchInput?.addEventListener('input', function () {
+            clearTimeout(searchTimeout);
+            const value = this.value.trim();
+
+            if (value) {
+                searchClear?.classList.add('visible');
+            } else {
+                searchClear?.classList.remove('visible');
+            }
+
+            searchTimeout = setTimeout(function () {
+                if (hasLoadedOnce) {
+                    loadDocuments(currentStatus, 1, false);
+                } else if (value) {
+                    loadDocuments(currentStatus, 1, false);
+                }
+            }, 400);
+        });
+
+        searchClear?.addEventListener('click', function () {
+            searchInput.value = '';
+            searchClear.classList.remove('visible');
+            searchResultsInfo.classList.remove('visible');
+            if (hasLoadedOnce) {
+                loadDocuments(currentStatus, 1, false);
+            }
+        });
+
+        // Ctrl+K
+        document.addEventListener('keydown', function (e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                searchInput?.focus();
+            }
+            if (e.key === 'Escape' && document.activeElement === searchInput) {
+                searchInput.blur();
+            }
+        });
+    });
+
+    // ============================================================
+    // ★★★ لود اسناد از سرور (AJAX) ★★★
+    // ============================================================
+    async function loadDocuments(statusCode, page = 1, append = false) {
+        if (isLoading) return;
+        isLoading = true;
+        hasLoadedOnce = true;
+
+        if (page === 1) {
+            placeholder.style.display = 'none';
+            grid.innerHTML = '';
+            loader.style.display = 'block';
+            pagination.style.display = 'none';
+        } else {
+            btnLoadMore.disabled = true;
+            btnLoadMore.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...';
+        }
+
+        try {
+            const params = new URLSearchParams({
+                year: selectedYear,
+                area_id: areaIdParam,
+                page: page
+            });
+
+            if (statusCode) params.set('status', statusCode);
+
+            const searchVal = searchInput?.value.trim();
+            if (searchVal) params.set('search', searchVal);
+
+            const response = await fetch(
+                `/reports/department/${departmentId}/expert/${expertId}/documents.json?${params}`,
+                {
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                }
+            );
+
+            if (!response.ok) throw new Error('خطا در دریافت اسناد');
+
+            const data = await response.json();
+            loader.style.display = 'none';
+
+            // نمایش نتیجه جستجو
+            if (searchVal) {
+                searchResultsInfo.classList.add('visible');
+                searchResultCount.textContent = data.total.toLocaleString('fa-IR');
+                searchQueryText.textContent = searchVal;
+            } else {
+                searchResultsInfo.classList.remove('visible');
+            }
+
+            // خالی
+            if (!data.records || data.records.length === 0) {
+                if (page === 1) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fa-solid fa-file-circle-xmark"></i>
+                            <p>${searchVal ? 'نتیجه‌ای یافت نشد' : 'سندی یافت نشد'}</p>
+                        </div>
+                    `;
+                    docsCountNumber.textContent = '0';
+                }
+                pagination.style.display = 'none';
+                return;
+            }
+
+            // رندر کارت‌ها
+            const html = data.records.map(renderDocumentCard).join('');
+
+            if (append) {
+                grid.insertAdjacentHTML('beforeend', html);
+            } else {
+                grid.innerHTML = html;
+            }
+
+            // آپدیت شمارنده
+            docsCountNumber.textContent = data.total.toLocaleString('fa-IR');
+
+            // آپدیت شمارنده فیلتر
+            if (statusCode) {
+                filteredCount.textContent = `${data.total} سند`;
+            } else {
+                filteredCount.textContent = '';
+            }
+
+            // صفحه‌بندی
+            hasMore = data.has_more;
+            currentPage = data.page;
+
+            pagination.style.display = hasMore ? 'block' : 'none';
+
+            // اسکرول فقط در لود اول
+            if (page === 1) {
+                scrollToDocuments();
+            }
+
+        } catch (err) {
+            console.error(err);
+            loader.style.display = 'none';
+            if (page === 1) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                        <p>خطا در بارگذاری اسناد. لطفاً دوباره تلاش کنید.</p>
+                    </div>
+                `;
+            }
+        } finally {
+            isLoading = false;
+            btnLoadMore.disabled = false;
+            btnLoadMore.innerHTML = '<i class="fa-solid fa-arrow-down"></i> نمایش بیشتر';
+        }
+    }
+
+    // ============================================================
+    // ★★★ رندر کارت سند (از JSON) ★★★
+    // ============================================================
+    function renderDocumentCard(record) {
+        const statusColor = record.status_color || '#3D8499';
+        const statusCode = record.status_code || '';
+        const subject = record.subject || 'بدون موضوع';
+
+        // escape برای امنیت
+        const esc = function (v) {
+            if (v === null || v === undefined) return '';
+            return String(v)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        };
+
+        // فیلدهای شرطی
+        const dateLetter = record.date_letter_jalali
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-calendar-day"></i> تاریخ نامه</span>
+                <span class="field-value ltr">${esc(record.date_letter_jalali)}</span>
+               </div>` : '';
+
+        const automationNumber = record.automation_number
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-barcode"></i> شماره اتوماسیون</span>
+                <span class="field-value ltr">${esc(record.automation_number)}</span>
+               </div>` : '';
+
+        const contractorLetter = record.contractor_letter_number
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-envelope"></i> شماره نامه پیمانکار</span>
+                <span class="field-value ltr">${esc(record.contractor_letter_number)}</span>
+               </div>` : '';
+
+        const contractNumber = record.contract_number
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-file-contract"></i> شماره قرارداد</span>
+                <span class="field-value ltr">${esc(record.contract_number)}</span>
+               </div>` : '';
+
+        const deadline = record.deadline_jalali
+            ? `<div class="doc-field">
+                <span class="field-label" style="color:rgb(220,38,38);">
+                    <i class="fa-solid fa-hourglass-half"></i> مهلت پاسخ
+                </span>
+                <span class="field-value ltr" style="color:rgb(220,38,38);">${esc(record.deadline_jalali)}</span>
+               </div>` : '';
+
+        // expandable
+        const contractor = record.contractor
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-building"></i> پیمانکار</span>
+                <span class="field-value">${esc(record.contractor)}</span>
+               </div>` : '';
+
+        const areaField = record.area_title || record.area
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-location-dot"></i> ناحیه</span>
+                <span class="field-value">${esc(record.area_title || record.area)}</span>
+               </div>` : '';
+
+        const dateReceived = record.date_received_jalali
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-calendar-plus"></i> تاریخ دریافت</span>
+                <span class="field-value ltr">${esc(record.date_received_jalali)}</span>
+               </div>` : '';
+
+        const dateReferral = record.date_referral_jalali
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-share-from-square"></i> تاریخ ارجاع</span>
+                <span class="field-value ltr">${esc(record.date_referral_jalali)}</span>
+               </div>` : '';
+
+        const unit = record.unit
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-building-columns"></i> واحد</span>
+                <span class="field-value">${esc(record.unit)}</span>
+               </div>` : '';
+
+        const department = record.department_title
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-sitemap"></i> دپارتمان</span>
+                <span class="field-value">${esc(record.department_title)}</span>
+               </div>` : '';
+
+        const documentGroup = record.document_group
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-folder"></i> گروه مدرک</span>
+                <span class="field-value">${esc(record.document_group)}</span>
+               </div>` : '';
+
+        const subGroup = record.sub_group
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-layer-group"></i> زیرگروه</span>
+                <span class="field-value">${esc(record.sub_group)}</span>
+               </div>` : '';
+
+        const docResponseStatus = record.doc_response_status
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-clipboard-check"></i> وضعیت پاسخ مدرک</span>
+                <span class="field-value" style="color:rgb(22,163,74); font-weight:700;">${esc(record.doc_response_status)}</span>
+               </div>` : '';
+
+        const finalLetterNumber = record.final_letter_number
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-file-signature"></i> شماره نامه نهایی</span>
+                <span class="field-value ltr">${esc(record.final_letter_number)}</span>
+               </div>` : '';
+
+        const finalDelay = record.final_delay
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-hourglass-end"></i> تاخیر نهایی</span>
+                <span class="field-value ltr">${esc(record.final_delay)}</span>
+               </div>` : '';
+
+        const createdAt = record.created_at_jalali
+            ? `<div class="doc-field">
+                <span class="field-label"><i class="fa-solid fa-calendar-plus"></i> تاریخ ایجاد</span>
+                <span class="field-value ltr">${esc(record.created_at_jalali)}</span>
+               </div>` : '';
+
+        // متا
+        const codeDfc = record.code_dfc
+            ? `<span><i class="fa-solid fa-hashtag"></i> DFC:${esc(record.code_dfc)}</span>` : '';
+
+        const contractorMeta = record.contractor
+            ? `<span><i class="fa-solid fa-building"></i> ${esc(record.contractor)}</span>` : '';
+
+        const subGroupMeta = record.sub_group
+            ? `<span><i class="fa-solid fa-layer-group"></i> ${esc(record.sub_group)}</span>` : '';
+
+        const projectName = record.project_name
+            ? `<div class="doc-project">
+                <div class="doc-project-content">
+                    <span class="doc-project-label">پروژه:</span>
+                    <span class="doc-project-name" title="${esc(record.project_name)}">${esc(record.project_name)}</span>
+                </div>
+               </div>` : '';
+
+        const statusBadge = record.status_title
+            ? `<span class="doc-status-badge">
+                <i class="fa-solid fa-circle"></i>
+                ${esc(record.status_title)}
+               </span>` : '';
+
+        return `
+            <div class="document-card" data-status="${esc(statusCode)}" style="--status-color:${esc(statusColor)};">
+                <div class="doc-header">
+                    <div class="doc-title-group">
+                        <div class="doc-subject">
+                            <i class="fa-solid fa-file-pen"></i>
+                            <span>${esc(subject)}</span>
+                        </div>
+                        ${projectName}
+                        <div class="doc-meta">
+                            ${codeDfc}
+                            ${contractorMeta}
+                            <span><i class="fa-solid fa-user-tie"></i> ${esc(expertFullName)}</span>
+                            ${subGroupMeta}
+                        </div>
+                    </div>
+                    ${statusBadge}
+                </div>
+
+                <div class="doc-body">
+                    <div class="doc-body-row">
+                        ${dateLetter}
+                        ${automationNumber}
+                        ${contractorLetter}
+                        ${contractNumber}
+                        ${deadline}
+                    </div>
+
+                    <div class="doc-expandable-wrapper">
+                        <button class="doc-expand-btn" onclick="toggleExpand(this)">
+                            <i class="fa-solid fa-plus"></i>
+                            <span class="btn-text">نمایش جزئیات بیشتر</span>
+                        </button>
+
+                        <div class="doc-expand-content">
+                            <div class="doc-expand-content-inner">
+                                <div class="doc-body-row">
+                                    ${contractor}
+                                    ${areaField}
+                                    ${dateReceived}
+                                    ${dateReferral}
+                                    ${unit}
+                                </div>
+                                <div class="doc-body-row">
+                                    ${department}
+                                    ${documentGroup}
+                                    ${subGroup}
+                                </div>
+                                <div class="doc-body-row">
+                                    ${docResponseStatus}
+                                    ${finalLetterNumber}
+                                    ${finalDelay}
+                                    ${createdAt}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // ============================================================
+    // ★ فیلتر با کلیک روی کارت وضعیت
+    // ============================================================
+    function filterByStatus(statusCode) {
+        const cards = document.querySelectorAll(".stats-grid-side .stat-card");
+
+        // اگه روی همون کارت فعال دوباره کلیک شد، پاک کن
+        if (currentStatus === statusCode) {
+            clearStatusFilter();
+            return;
+        }
+
+        cards.forEach(card => card.classList.remove("active"));
+
+        const clickedCard = document.querySelector(
+            `.stats-grid-side .stat-card[data-status="${statusCode}"]`
+        );
+        if (clickedCard) clickedCard.classList.add("active");
+
+        const statusTitle = clickedCard
+            ? clickedCard.querySelector(".stat-label").textContent
+            : "";
+
+        currentStatus = statusCode;
+        currentStatusLabel.textContent = statusTitle || "همه";
+        statusFilterBadge.textContent = statusTitle || "";
+        statusFilterBadge.style.display = statusTitle ? "inline-block" : "none";
+        clearBtn.style.display = statusTitle ? "inline-block" : "none";
+
+        loadDocuments(statusCode, 1, false);
+    }
+
+    // ============================================================
+    // ★ پاک کردن فیلتر وضعیت
+    // ============================================================
+    function clearStatusFilter() {
+        const cards = document.querySelectorAll(".stats-grid-side .stat-card");
+        cards.forEach(card => card.classList.remove("active"));
+
+        currentStatus = null;
+        currentStatusLabel.textContent = "همه";
+        statusFilterBadge.textContent = "";
+        statusFilterBadge.style.display = "none";
+        clearBtn.style.display = "none";
+        filteredCount.textContent = "";
+
+        // ★ برگرد به placeholder
+        placeholder.style.display = "block";
+        grid.innerHTML = "";
+        pagination.style.display = "none";
+        docsCountNumber.textContent = "—";
+        hasLoadedOnce = false;
+
+        // پاک کردن جستجو هم
+        if (searchInput) searchInput.value = "";
+        if (searchClear) searchClear.classList.remove("visible");
+        searchResultsInfo.classList.remove("visible");
+
+        scrollToDocuments();
+    }
+
+    // ============================================================
+    // ★ toggle expand
+    // ============================================================
+    function toggleExpand(btn) {
+        const wrapper = btn.closest(".doc-expandable-wrapper");
+        const content = wrapper.querySelector(".doc-expand-content");
+        const text = btn.querySelector(".btn-text");
+
+        content.classList.toggle("open");
+        btn.classList.toggle("expanded");
+
+        text.textContent = content.classList.contains("open")
+            ? "بستن جزئیات"
+            : "نمایش جزئیات بیشتر";
+    }
+
+    // ============================================================
+    // ★ اسکرول به بخش اسناد
+    // ============================================================
+    function scrollToDocuments() {
+        const documentsSection = document.getElementById("documentsSection");
+        if (!documentsSection) return;
+
+        const rect = documentsSection.getBoundingClientRect();
+        const isAlreadyVisible = rect.top >= SCROLL_HEADER_OFFSET &&
+            rect.top <= window.innerHeight * 0.5;
+
+        if (isAlreadyVisible) return;
+
+        const offsetPosition = rect.top + window.pageYOffset - SCROLL_HEADER_OFFSET;
+
+        window.scrollTo({top: offsetPosition, behavior: "smooth"});
+
+        documentsSection.style.backgroundColor = "rgba(27, 105, 139, 0.06)";
+        setTimeout(() => {
+            documentsSection.style.backgroundColor = "transparent";
+        }, 900);
+    }
+
+    // ============================================================
+    // ★★★ نمودار ★★★
+    // ============================================================
+    function getViewMode() {
+        const w = window.innerWidth;
+        if (w <= 380) return "xxs";
+        if (w <= 576) return "xs";
+        if (w <= 768) return "sm";
+        if (w <= 992) return "md";
+        if (w <= 1200) return "lg";
+        return "xl";
+    }
+
+    function getDatalabelThreshold() {
+        const w = window.innerWidth;
+        if (w <= 380) return 12;
+        if (w <= 576) return 9;
+        if (w <= 768) return 7;
+        return 5;
+    }
+
+    function createGradient(ctx, chartArea, colorStart, colorEnd) {
+        if (!chartArea) return colorStart;
+        const gradient = ctx.createLinearGradient(
+            chartArea.left, chartArea.top,
+            chartArea.right, chartArea.bottom
+        );
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        return gradient;
+    }
+
+    function lightenColor(hex, amount = 0.25) {
+        if (!hex || typeof hex !== "string" || !hex.startsWith("#")) {
+            return hex || "#3D8499";
+        }
+        let c = hex.substring(1);
+        if (c.length === 3) {
+            c = c.split("").map(x => x + x).join("");
+        }
+        const num = parseInt(c, 16);
+        let r = (num >> 16) & 255;
+        let g = (num >> 8) & 255;
+        let b = num & 255;
+
+        r = Math.min(255, Math.round(r + (255 - r) * amount));
+        g = Math.min(255, Math.round(g + (255 - g) * amount));
+        b = Math.min(255, Math.round(b + (255 - b) * amount));
+
+        return "#" + [r, g, b].map(v => v.toString(16).padStart(2, "0")).join("");
+    }
+
+    function initializeChart() {
+        const canvas = document.getElementById("statusChart");
+        const statusData = {{statuses | tojson
+    }};
+
+    if (!canvas || !statusData || statusData.length === 0) return;
+
+    const total = statusData.reduce((sum, item) => sum + Number(item.count || 0), 0);
+    const labels = statusData.map(item => item.title || "بدون عنوان");
+    const data = statusData.map(item => Number(item.count || 0));
+
+    const baseColors = statusData.map((item, i) =>
+        item.color || STATUS_COLORS_LIGHT_FALLBACK[i % STATUS_COLORS_LIGHT_FALLBACK.length]
+    );
+    const lightColors = baseColors.map(c => lightenColor(c, 0.28));
+
+    const percentages = statusData.map(item =>
+        total > 0 ? Math.round(Number(item.count || 0) / total * 100) : 0
+    );
+
+    const totalCountEl = document.getElementById("totalCount");
+    if (totalCountEl) totalCountEl.textContent = total.toLocaleString("fa-IR");
+
+    if (typeof ChartDataLabels !== "undefined") {
+        Chart.register(ChartDataLabels);
+    }
+
+    statusChart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    const index = context.dataIndex;
+                    return createGradient(ctx, chartArea, baseColors[index], lightColors[index]);
+                },
+                borderColor: "#ffffff",
+                borderWidth: 2,
+                borderRadius: 6,
+                hoverOffset: 10,
+                hoverBorderWidth: 3,
+                hoverBorderColor: "#ffffff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "65%",
+            layout: {padding: 8},
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    rtl: true,
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 14,
+                        color: "#2d3436",
+                        font: {family: "Vazirmatn", size: 12, weight: "600"},
+                        generateLabels: function (chart) {
+                            const chartData = chart.data;
+                            return chartData.labels.map((label, index) => {
+                                const value = chartData.datasets[0].data[index];
+                                const percent = percentages[index];
+                                const color = baseColors[index];
+                                return {
+                                    text: `${label}  •  ${value} (${percent}%)`,
+                                    fillStyle: color,
+                                    strokeStyle: color,
+                                    lineWidth: 0,
+                                    pointStyle: "circle",
+                                    index: index
+                                };
+                            });
+                        }
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: "rgba(45, 52, 54, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    titleFont: {family: "Vazirmatn", size: 13, weight: "700"},
+                    bodyFont: {family: "Vazirmatn", size: 12},
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxPadding: 6,
+                    callbacks: {
+                        label: function (context) {
+                            const value = Number(context.raw || 0);
+                            const percentage = total > 0 ? Math.round(value / total * 100) : 0;
+                            return `  ${value} سند  (${percentage}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: "#ffffff",
+                    font: {weight: "700", size: 13, family: "Vazirmatn"},
+                    textStrokeColor: "rgba(0, 0, 0, 0.35)",
+                    textStrokeWidth: 3,
+                    textShadowBlur: 4,
+                    textShadowColor: "rgba(0, 0, 0, 0.35)",
+                    formatter: function (value, context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold ? `${percentage}%` : "";
+                    },
+                    anchor: "center",
+                    align: "center",
+                    offset: 0,
+                    display: function (context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold;
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1200,
+                easing: "easeOutQuart"
+            }
+        },
+        plugins: typeof ChartDataLabels !== "undefined" ? [ChartDataLabels] : []
+    });
+
+    setupChartResizeObserver();
+    }
+
+    function setupChartResizeObserver() {
+        const container = document.querySelector(".page-dashboard .dashboard-chart-wrapper-side");
+        if (!container || !statusChart) return;
+
+        if (statusChartResizeObserver) statusChartResizeObserver.disconnect();
+
+        let lastMode = getViewMode();
+
+        statusChartResizeObserver = new ResizeObserver(function () {
+            const currentMode = getViewMode();
+            if (currentMode !== lastMode) {
+                lastMode = currentMode;
+                updateChartOptionsForMode(currentMode);
+            }
+        });
+
+        statusChartResizeObserver.observe(container);
+    }
+
+    function updateChartOptionsForMode(mode) {
+        if (!statusChart) return;
+
+        const isSmall = mode === "xs" || mode === "xxs";
+        const legendLabels = statusChart.options.plugins.legend.labels;
+
+        legendLabels.font.size = isSmall ? 10 : 12;
+        legendLabels.padding = isSmall ? 8 : 14;
+        legendLabels.boxWidth = isSmall ? 8 : 10;
+        legendLabels.boxHeight = isSmall ? 8 : 10;
+
+        const dataset = statusChart.data.datasets[0];
+        dataset.borderWidth = 2;
+        dataset.borderRadius = isSmall ? 4 : 6;
+        dataset.hoverOffset = isSmall ? 6 : 10;
+        dataset.hoverBorderWidth = isSmall ? 2 : 3;
+
+        statusChart.options.cutout = isSmall ? "67%" : "65%";
+        statusChart.options.layout.padding = isSmall ? 4 : 8;
+
+        statusChart.options.plugins.datalabels.font.size = isSmall ? 11 : 13;
+        statusChart.options.plugins.datalabels.textStrokeWidth = isSmall ? 2 : 3;
+
+        statusChart.update("none");
+    }
+</script>
+
+{% endblock %}

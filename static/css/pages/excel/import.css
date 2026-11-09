@@ -1,0 +1,693 @@
+/* استایل صفحه: excel/import.html */
+
+    /* ============================================
+       SCOPE: #page-excel-wrapper
+       ============================================ */
+
+    #page-excel-wrapper {
+        --xl-primary: #1b698b;
+        --xl-primary-light: #167a5c;
+        --xl-primary-dark: #14506a;
+        --xl-shadow-sm: 0 4px 20px rgba(65, 151, 201, .08);
+        --xl-shadow-md: 0 12px 35px rgba(65, 151, 201, .16);
+        --xl-transition: .3s cubic-bezier(.25, .46, .45, .94);
+        --xl-radius-lg: 20px;
+        --xl-radius-md: 14px;
+
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: clamp(12px, 2vw, 24px);
+        box-sizing: border-box;
+    }
+
+    #page-excel-wrapper *,
+    #page-excel-wrapper *::before,
+    #page-excel-wrapper *::after {
+        box-sizing: border-box;
+    }
+
+    /* ============================================
+       عنوان بالای کارت‌ها
+       ============================================ */
+    #page-excel-wrapper .xl-heading {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        min-width: 0;
+    }
+
+    #page-excel-wrapper .xl-heading-icon {
+        width: clamp(46px, 4.5vw, 56px);
+        height: clamp(46px, 4.5vw, 56px);
+        min-width: clamp(46px, 4.5vw, 56px);
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--xl-primary) 0%, var(--xl-primary-light) 100%);
+        color: #fff;
+        font-size: clamp(1.15rem, 1.4vw, 1.4rem);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, .28);
+        flex-shrink: 0;
+    }
+
+    #page-excel-wrapper .xl-heading-text {
+        min-width: 0;
+    }
+
+    #page-excel-wrapper .xl-heading h1 {
+        margin: 0;
+        color: #183b4d;
+        font-size: clamp(1.05rem, 1.5vw, 1.35rem);
+        font-weight: 800;
+        word-break: break-word;
+    }
+
+    #page-excel-wrapper .xl-heading p {
+        margin: 4px 0 0;
+        color: #718096;
+        font-size: clamp(.72rem, .88vw, .82rem);
+    }
+
+    /* ============================================
+       گرید کارت‌ها — ۳ ستون در دسکتاپ
+       ============================================ */
+    #page-excel-wrapper .xl-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 24px;
+    }
+
+    /* ============================================
+       کارت
+       ============================================ */
+    #page-excel-wrapper .xl-card {
+        position: relative;
+        overflow: hidden;
+        height: 100%;
+        padding: clamp(18px, 2vw, 24px);
+        border: 1px solid #e1ecea;
+        border-radius: var(--xl-radius-lg);
+        background: #ffffff;
+        box-shadow: var(--xl-shadow-sm);
+        transition: transform var(--xl-transition), box-shadow var(--xl-transition);
+        isolation: isolate;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #page-excel-wrapper .xl-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 5px;
+        height: 100%;
+        background: linear-gradient(180deg,
+                var(--xl-card-color, var(--xl-primary)) 0%,
+                var(--xl-card-color-light, var(--xl-primary-light)) 100%);
+        z-index: 2;
+    }
+
+    #page-excel-wrapper .xl-card::after {
+        content: "";
+        position: absolute;
+        bottom: -40px;
+        left: -40px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: var(--xl-card-color, var(--xl-primary));
+        opacity: .04;
+        transition: all .6s ease;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    #page-excel-wrapper .xl-card:hover::after {
+        transform: scale(1.6);
+        opacity: .08;
+    }
+
+    #page-excel-wrapper .xl-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--xl-shadow-md);
+    }
+
+    /* رنگ‌بندی کارت‌ها */
+    #page-excel-wrapper .xl-card.template {
+        --xl-card-color: #6b46c1;
+        --xl-card-color-light: #805ad5;
+    }
+
+    #page-excel-wrapper .xl-card.export {
+        --xl-card-color: #1b698b;
+        --xl-card-color-light: #3d8bb5;
+    }
+
+    #page-excel-wrapper .xl-card.import {
+        --xl-card-color: #167a5c;
+        --xl-card-color-light: #2aa07a;
+    }
+
+    /* ============================================
+       هدر کارت
+       ============================================ */
+    #page-excel-wrapper .xl-card-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+        position: relative;
+        z-index: 1;
+    }
+
+    #page-excel-wrapper .xl-card-icon {
+        width: clamp(46px, 4.5vw, 56px);
+        height: clamp(46px, 4.5vw, 56px);
+        min-width: clamp(46px, 4.5vw, 56px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg,
+                var(--xl-card-color, var(--xl-primary)) 0%,
+                var(--xl-card-color-light, var(--xl-primary-light)) 100%);
+        color: #fff;
+        font-size: clamp(1.1rem, 1.4vw, 1.4rem);
+        box-shadow: 0 6px 16px rgba(27, 105, 139, .25);
+        transition: transform var(--xl-transition);
+    }
+
+    #page-excel-wrapper .xl-card:hover .xl-card-icon {
+        transform: scale(1.08) rotate(-6deg);
+    }
+
+    #page-excel-wrapper .xl-card-icon i {
+        color: inherit;
+        line-height: 1;
+    }
+
+    #page-excel-wrapper .xl-card-title {
+        margin: 0;
+        color: #2d3436;
+        font-size: clamp(.92rem, 1.05vw, 1.05rem);
+        font-weight: 800;
+    }
+
+    #page-excel-wrapper .xl-card-description {
+        margin: 5px 0 0;
+        color: #636e72;
+        font-size: clamp(.72rem, .85vw, .8rem);
+        line-height: 1.7;
+    }
+
+    #page-excel-wrapper .xl-card-body {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+
+    /* ============================================
+       Info Box
+       ============================================ */
+    #page-excel-wrapper .xl-info {
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f7fafb 0%, #f1f5f8 100%);
+        border: 1px solid #e8eff3;
+        color: #5a6c78;
+        font-size: clamp(.7rem, .82vw, .78rem);
+        line-height: 1.8;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        flex: 1;
+    }
+
+    #page-excel-wrapper .xl-info i {
+        color: var(--xl-card-color, var(--xl-primary));
+        font-size: 1rem;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+    #page-excel-wrapper .xl-info strong {
+        display: block;
+        color: #2d3436;
+        font-size: .82rem;
+        margin-bottom: 4px;
+    }
+
+    #page-excel-wrapper .xl-info-list {
+        margin: 6px 0 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    #page-excel-wrapper .xl-info-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 6px;
+        font-size: .72rem;
+        color: #5a6c78;
+    }
+
+    #page-excel-wrapper .xl-info-list li::before {
+        content: "•";
+        color: var(--xl-card-color, var(--xl-primary));
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    /* ============================================
+       فایل آپلود + Drag & Drop
+       ============================================ */
+    #page-excel-wrapper .xl-file-wrapper {
+        position: relative;
+    }
+
+    #page-excel-wrapper .xl-file-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 110px;
+        padding: 18px 14px;
+        border: 2px dashed #cfdeda;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fbfdfd 0%, #f5fbfa 100%);
+        color: #636e72;
+        font-size: clamp(.78rem, .9vw, .86rem);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all var(--xl-transition);
+        font-family: inherit;
+        text-align: center;
+    }
+
+    #page-excel-wrapper .xl-file-label i {
+        font-size: 1.8rem;
+        color: var(--xl-card-color, var(--xl-primary));
+        transition: transform var(--xl-transition);
+    }
+
+    #page-excel-wrapper .xl-file-label .xl-file-label-title {
+        color: #315466;
+        font-weight: 700;
+    }
+
+    #page-excel-wrapper .xl-file-label .xl-file-label-hint {
+        color: #7c909b;
+        font-size: clamp(.68rem, .8vw, .74rem);
+        font-weight: 500;
+    }
+
+    #page-excel-wrapper .xl-file-label:hover {
+        border-color: var(--xl-card-color, var(--xl-primary));
+        background: #eef9f7;
+        color: var(--xl-primary-dark);
+        transform: translateY(-2px);
+    }
+
+    #page-excel-wrapper .xl-file-label:hover i {
+        transform: scale(1.15);
+    }
+
+    #page-excel-wrapper .xl-file-label.xl-dragover {
+        border-color: var(--xl-card-color, var(--xl-primary));
+        background: #e0f2ee;
+        border-style: solid;
+        transform: scale(1.02);
+        box-shadow: 0 8px 25px rgba(22, 122, 92, .25);
+    }
+
+    #page-excel-wrapper .xl-file-label.xl-dragover i {
+        transform: scale(1.25) translateY(-4px);
+        animation: xl-bounce 0.6s ease infinite alternate;
+    }
+
+    @keyframes xl-bounce {
+        from { transform: scale(1.25) translateY(-4px); }
+        to { transform: scale(1.25) translateY(0); }
+    }
+
+    #page-excel-wrapper .xl-file-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        opacity: 0;
+    }
+
+    #page-excel-wrapper .xl-file-selected {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding: 10px 12px;
+        margin-top: 10px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #eef9f7 0%, #e5f4f1 100%);
+        border: 1px solid rgba(22, 122, 92, .20);
+    }
+
+    #page-excel-wrapper .xl-file-selected.show {
+        display: flex;
+    }
+
+    #page-excel-wrapper .xl-file-selected-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    #page-excel-wrapper .xl-file-selected-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #167a5c 0%, #2aa07a 100%);
+        color: #fff;
+        font-size: .92rem;
+        box-shadow: 0 4px 10px rgba(22, 122, 92, .25);
+    }
+
+    #page-excel-wrapper .xl-file-selected-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    #page-excel-wrapper .xl-file-selected-name {
+        display: block;
+        color: #2d3436;
+        font-size: clamp(.75rem, .88vw, .82rem);
+        font-weight: 700;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #page-excel-wrapper .xl-file-selected-size {
+        display: block;
+        color: #7c909b;
+        font-size: .68rem;
+        margin-top: 2px;
+    }
+
+    #page-excel-wrapper .xl-file-remove {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: none;
+        background: rgba(225, 112, 85, .12);
+        color: #e17055;
+        font-size: .82rem;
+        cursor: pointer;
+        transition: all var(--xl-transition);
+        flex-shrink: 0;
+    }
+
+    #page-excel-wrapper .xl-file-remove:hover {
+        background: #e17055;
+        color: #fff;
+        transform: rotate(90deg);
+    }
+
+    /* ============================================
+       رادیو باتن‌ها
+       ============================================ */
+    #page-excel-wrapper .xl-import-mode {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    #page-excel-wrapper .xl-mode-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #315466;
+        font-size: clamp(.74rem, .86vw, .82rem);
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+
+    #page-excel-wrapper .xl-mode-title i {
+        color: var(--xl-card-color, var(--xl-primary));
+    }
+
+    #page-excel-wrapper .xl-mode-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 2px solid #e1ecea;
+        border-radius: 11px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: all var(--xl-transition);
+        font-family: inherit;
+    }
+
+    #page-excel-wrapper .xl-mode-option:hover {
+        border-color: #a8d5cc;
+        background: #f5fbfa;
+        transform: translateY(-2px);
+    }
+
+    #page-excel-wrapper .xl-mode-option input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        margin-top: 2px;
+        border: 2px solid #cfdeda;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        transition: all var(--xl-transition);
+        position: relative;
+        flex-shrink: 0;
+    }
+
+    #page-excel-wrapper .xl-mode-option input[type="radio"]:checked {
+        border-color: var(--xl-card-color, var(--xl-primary));
+        background: var(--xl-card-color, var(--xl-primary));
+    }
+
+    #page-excel-wrapper .xl-mode-option input[type="radio"]:checked::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ffffff;
+    }
+
+    #page-excel-wrapper .xl-mode-option:has(input[type="radio"]:checked) {
+        border-color: var(--xl-card-color, var(--xl-primary));
+        background: #f0f9f7;
+        box-shadow: 0 4px 12px rgba(22, 122, 92, .15);
+    }
+
+    #page-excel-wrapper .xl-mode-option>span {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    #page-excel-wrapper .xl-mode-option strong {
+        color: #2d3436;
+        font-size: clamp(.75rem, .86vw, .82rem);
+        font-weight: 700;
+    }
+
+    #page-excel-wrapper .xl-mode-option small {
+        color: #7c909b;
+        font-size: clamp(.65rem, .78vw, .72rem);
+        line-height: 1.6;
+    }
+
+    /* ============================================
+       دکمه‌ها
+       ============================================ */
+    #page-excel-wrapper .xl-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 11px;
+        background: linear-gradient(135deg,
+                var(--xl-card-color, var(--xl-primary)) 0%,
+                var(--xl-card-color-light, var(--xl-primary-light)) 100%);
+        color: #ffffff;
+        font-family: inherit;
+        font-size: clamp(.78rem, .9vw, .86rem);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all var(--xl-transition);
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .28);
+        white-space: nowrap;
+        width: 100%;
+        margin-top: auto;
+    }
+
+    #page-excel-wrapper .xl-button i {
+        font-size: .95rem;
+    }
+
+    #page-excel-wrapper .xl-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(27, 105, 139, .38);
+        color: #ffffff;
+    }
+
+    #page-excel-wrapper .xl-button:active {
+        transform: translateY(0);
+    }
+
+    #page-excel-wrapper .xl-button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+
+    /* ============================================
+       Notice
+       ============================================ */
+    #page-excel-wrapper .xl-notice {
+        margin-top: 20px;
+        padding: 14px 18px;
+        border-right: 4px solid var(--xl-primary);
+        border-radius: 12px;
+        background: linear-gradient(135deg, #eef9f7 0%, #e5f4f1 100%);
+        color: #49635f;
+        font-size: clamp(.72rem, .85vw, .8rem);
+        line-height: 1.9;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        box-shadow: 0 4px 14px rgba(27, 105, 139, .08);
+    }
+
+    #page-excel-wrapper .xl-notice i {
+        color: var(--xl-primary);
+        font-size: 1.15rem;
+        flex-shrink: 0;
+        margin-top: 3px;
+    }
+
+    /* ============================================
+       ریسپانسیو
+       ============================================ */
+
+    @media (max-width: 1100px) {
+        #page-excel-wrapper .xl-actions {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        #page-excel-wrapper .xl-actions {
+            grid-template-columns: 1fr;
+            gap: 16px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        #page-excel-wrapper .xl-card {
+            padding: 18px;
+            border-radius: 16px;
+        }
+
+        #page-excel-wrapper .xl-card-header {
+            gap: 12px;
+        }
+
+        #page-excel-wrapper .xl-card-icon {
+            width: 44px;
+            height: 44px;
+            min-width: 44px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+        }
+
+        #page-excel-wrapper .xl-file-label {
+            min-height: 100px;
+            padding: 16px 12px;
+            font-size: .78rem;
+        }
+
+        #page-excel-wrapper .xl-file-label i {
+            font-size: 1.6rem;
+        }
+
+        #page-excel-wrapper .xl-mode-option {
+            padding: 9px 11px;
+        }
+
+        #page-excel-wrapper .xl-button {
+            min-height: 42px;
+        }
+    }
+
+    @media (max-width: 380px) {
+        #page-excel-wrapper {
+            padding: 8px;
+        }
+
+        #page-excel-wrapper .xl-card {
+            padding: 14px;
+        }
+
+        #page-excel-wrapper .xl-card-icon {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            font-size: 1rem;
+        }
+
+        #page-excel-wrapper .xl-file-selected-name {
+            font-size: .7rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #page-excel-wrapper *,
+        #page-excel-wrapper *::before,
+        #page-excel-wrapper *::after {
+            transition: none !important;
+            animation: none !important;
+        }
+    }

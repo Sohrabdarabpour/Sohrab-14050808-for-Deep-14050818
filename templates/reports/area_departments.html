@@ -1,0 +1,446 @@
+{% extends "base.html" %}
+
+{% block title %}دپارتمان‌های ناحیه {{ area.title }}{% endblock %}
+
+{% block body_class %}page-report-area-departments{% endblock %}
+
+{% block css %}
+<link id="fa-cdn-area-depts" rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/reports/area_departments.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="page-report-area-departments">
+    <div class="report-container">
+
+        <!-- ===== دکمه بازگشت + عنوان صفحه ===== -->
+        <div class="back-row">
+            <div class="page-heading">
+                <div class="page-heading-icon">
+                    <i class="fa-solid fa-building"></i>
+                </div>
+                <div class="page-heading-text">
+                    <h1>دپارتمان‌های ناحیه {{ area.title }}</h1>
+                    {% if area.code %}
+                    <span class="area-code">کد ناحیه: {{ area.code }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <a href="{{ url_for('reports.area_report') }}" class="back-button">
+                <i class="fa-solid fa-arrow-right"></i>
+                <span>بازگشت به ناحیه‌ها</span>
+            </a>
+        </div>
+
+        <!-- ===== فیلتر سال ===== -->
+        <div class="filter-card">
+            <div class="filter-title">
+                <i class="fa-solid fa-calendar"></i>
+                <span>فیلتر سال</span>
+            </div>
+
+            <form method="GET" class="year-form">
+                <select name="year" class="year-select" onchange="this.form.submit()">
+                    <option value="all" {% if selected_year=="all" %}selected{% endif %}>
+                        همه سال‌ها
+                    </option>
+
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year|string==year|string %}selected{% endif %}>
+                        {{ year }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="filter-button">
+                    <i class="fa-solid fa-filter"></i>
+                    اعمال فیلتر
+                </button>
+            </form>
+        </div>
+
+        {% if departments %}
+
+        <!-- ===== چیدمان: کارت‌ها + نمودار ===== -->
+        <div class="departments-layout">
+
+            <!-- کارت‌های دپارتمان (لینک‌دار) -->
+            <div class="departments-grid" id="departmentsGrid">
+                {% for department in departments %}
+                    <a href="{{ url_for('reports.department_documents', department_id=department.id, year=selected_year, area_id=area_id) }}"
+                        class="department-card" data-dept-index="{{ loop.index0 }}">
+
+                    <div class="department-card-top">
+                        <div class="department-icon">
+                            <i class="fa-solid fa-building"></i>
+                        </div>
+
+                        <div class="department-info">
+                            <h3>{{ department.title }}</h3>
+
+                            {% if department.code %}
+                            <span class="department-code">
+                                کد: {{ department.code }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="department-card-bottom">
+                        <div class="work-label">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>تعداد کارها</span>
+                        </div>
+
+                        <div class="work-count">
+                            {{ "{:,}".format(department.count or 0) }}
+                        </div>
+                    </div>
+
+                </a>
+                {% endfor %}
+            </div>
+
+            <!-- نمودار دونات -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fa-solid fa-chart-pie"></i>
+                        توزیع کارها بین دپارتمان‌ها
+                    </div>
+                    <span class="chart-update">
+                        <i class="fa-regular fa-clock"></i>
+                        لحظه‌ای
+                    </span>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="deptChart"></canvas>
+                    <div class="chart-center-label">
+                        <div class="total-count" id="totalDeptCount">0</div>
+                        <div class="total-label">مجموع کارها</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% else %}
+
+        <!-- ===== حالت خالی ===== -->
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fa-solid fa-folder-open"></i>
+            </div>
+
+            <h3>داده‌ای برای نمایش وجود ندارد</h3>
+
+            <p>
+                برای ناحیه {{ area.title }}
+                {% if selected_year != "all" %}
+                در سال {{ selected_year }}
+                {% endif %}
+                هیچ کاری ثبت نشده است.
+            </p>
+
+            <a href="{{ url_for('reports.area_report') }}" class="empty-button">
+                <i class="fa-solid fa-arrow-right"></i>
+                بازگشت به ناحیه‌ها
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        applyDeptCardColors();
+        initializeDeptChart();
+    });
+
+    const DEPT_COLORS = [
+        "#1b698b",
+        "#167a5c",
+        "#d69e2e",
+        "#c05621",
+        "#4a5568",
+        "#2b6cb0",
+        "#319795",
+        "#805ad5",
+        "#718096",
+        "#2f855a"
+    ];
+
+    const DEPT_COLORS_LIGHT = [
+        "#3d8bb5",
+        "#2aa07a",
+        "#e8b94a",
+        "#dd7a3d",
+        "#6b7a8f",
+        "#3d8ad4",
+        "#4fc3c0",
+        "#9f7ae8",
+        "#8fa0b5",
+        "#4aa876"
+    ];
+
+    function applyDeptCardColors() {
+        const cards = document.querySelectorAll("#departmentsGrid .department-card");
+        cards.forEach(function (card, index) {
+            const color = DEPT_COLORS[index % DEPT_COLORS.length];
+            const colorLight = DEPT_COLORS_LIGHT[index % DEPT_COLORS_LIGHT.length];
+            card.style.setProperty("--dept-color", color);
+            card.style.setProperty("--dept-color-light", colorLight);
+        });
+    }
+
+    function getViewMode() {
+        const w = window.innerWidth;
+        if (w <= 380) return "xxs";
+        if (w <= 576) return "xs";
+        if (w <= 768) return "sm";
+        if (w <= 992) return "md";
+        if (w <= 1200) return "lg";
+        return "xl";
+    }
+
+    function getDatalabelThreshold() {
+        const w = window.innerWidth;
+        if (w <= 380) return 12;
+        if (w <= 576) return 9;
+        if (w <= 768) return 7;
+        return 5;
+    }
+
+    function createGradient(ctx, chartArea, colorStart, colorEnd) {
+        if (!chartArea) return colorStart;
+        const gradient = ctx.createLinearGradient(
+            chartArea.left, chartArea.top,
+            chartArea.right, chartArea.bottom
+        );
+        gradient.addColorStop(0, colorStart);
+        gradient.addColorStop(1, colorEnd);
+        return gradient;
+    }
+
+    let deptChart = null;
+    let deptChartResizeObserver = null;
+
+    function initializeDeptChart() {
+        const canvas = document.getElementById("deptChart");
+        const deptData = {{departments | tojson
+    }};
+
+    if (!canvas || !deptData || deptData.length === 0) {
+        return;
+    }
+
+    const total = deptData.reduce((sum, item) => sum + Number(item.count || 0), 0);
+    const labels = deptData.map(item => item.title || "بدون عنوان");
+    const data = deptData.map(item => Number(item.count || 0));
+
+    const baseColors = data.map((_, i) => DEPT_COLORS[i % DEPT_COLORS.length]);
+    const lightColors = data.map((_, i) => DEPT_COLORS_LIGHT[i % DEPT_COLORS_LIGHT.length]);
+
+    const percentages = data.map(item =>
+        total > 0 ? Math.round((item / total) * 100) : 0
+    );
+
+    const totalCountEl = document.getElementById("totalDeptCount");
+    if (totalCountEl) {
+        totalCountEl.textContent = total.toLocaleString("fa-IR");
+    }
+
+    if (typeof ChartDataLabels !== "undefined") {
+        Chart.register(ChartDataLabels);
+    }
+
+    deptChart = new Chart(canvas, {
+        type: "doughnut",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: function (context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    const index = context.dataIndex;
+                    return createGradient(
+                        ctx, chartArea,
+                        baseColors[index],
+                        lightColors[index]
+                    );
+                },
+                borderColor: "#ffffff",
+                borderWidth: 2,
+                borderRadius: 6,
+                hoverOffset: 10,
+                hoverBorderWidth: 3,
+                hoverBorderColor: "#ffffff"
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "65%",
+            layout: {
+                padding: 8
+            },
+            plugins: {
+                legend: {
+                    position: "bottom",
+                    rtl: true,
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: "circle",
+                        boxWidth: 10,
+                        boxHeight: 10,
+                        padding: 14,
+                        color: "#2d3436",
+                        font: {
+                            family: "Vazirmatn",
+                            size: 12,
+                            weight: "600"
+                        },
+                        generateLabels: function (chart) {
+                            const chartData = chart.data;
+                            return chartData.labels.map((label, index) => {
+                                const value = chartData.datasets[0].data[index];
+                                const percent = percentages[index];
+                                const color = baseColors[index];
+                                return {
+                                    text: `${label}  •  ${value} (${percent}%)`,
+                                    fillStyle: color,
+                                    strokeStyle: color,
+                                    lineWidth: 0,
+                                    pointStyle: "circle",
+                                    index: index
+                                };
+                            });
+                        }
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: "rgba(45, 52, 54, 0.95)",
+                    titleColor: "#fff",
+                    bodyColor: "#fff",
+                    titleFont: {
+                        family: "Vazirmatn",
+                        size: 13,
+                        weight: "700"
+                    },
+                    bodyFont: {
+                        family: "Vazirmatn",
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 10,
+                    displayColors: true,
+                    boxPadding: 6,
+                    callbacks: {
+                        label: function (context) {
+                            const value = Number(context.raw || 0);
+                            const percentage = total > 0 ? Math.round(value / total * 100) : 0;
+                            return `  ${value} کار  (${percentage}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: "#ffffff",
+                    font: {
+                        weight: "700",
+                        size: 13,
+                        family: "Vazirmatn"
+                    },
+                    textStrokeColor: "rgba(0, 0, 0, 0.35)",
+                    textStrokeWidth: 3,
+                    textShadowBlur: 4,
+                    textShadowColor: "rgba(0, 0, 0, 0.35)",
+                    formatter: function (value, context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold ? `${percentage}%` : "";
+                    },
+                    anchor: "center",
+                    align: "center",
+                    offset: 0,
+                    display: function (context) {
+                        const percentage = percentages[context.dataIndex];
+                        const threshold = getDatalabelThreshold();
+                        return percentage >= threshold;
+                    }
+                }
+            },
+            animation: {
+                animateRotate: true,
+                animateScale: true,
+                duration: 1200,
+                easing: "easeOutQuart"
+            }
+        },
+        plugins: typeof ChartDataLabels !== "undefined" ? [ChartDataLabels] : []
+    });
+
+    setupDeptChartResizeObserver();
+    }
+
+    function setupDeptChartResizeObserver() {
+        const container = document.querySelector(".page-report-area-departments .chart-wrapper");
+        if (!container || !deptChart) return;
+
+        if (deptChartResizeObserver) {
+            deptChartResizeObserver.disconnect();
+        }
+
+        let lastMode = getViewMode();
+
+        deptChartResizeObserver = new ResizeObserver(function () {
+            const currentMode = getViewMode();
+            if (currentMode !== lastMode) {
+                lastMode = currentMode;
+                updateDeptChartOptionsForMode(currentMode);
+            }
+        });
+
+        deptChartResizeObserver.observe(container);
+    }
+
+    function updateDeptChartOptionsForMode(mode) {
+        if (!deptChart) return;
+
+        const isSmall = mode === "xs" || mode === "xxs";
+
+        const legendLabels = deptChart.options.plugins.legend.labels;
+        legendLabels.font.size = isSmall ? 10 : 12;
+        legendLabels.padding = isSmall ? 8 : 14;
+        legendLabels.boxWidth = isSmall ? 8 : 10;
+        legendLabels.boxHeight = isSmall ? 8 : 10;
+
+        const dataset = deptChart.data.datasets[0];
+        dataset.borderWidth = 2;
+        dataset.borderRadius = isSmall ? 4 : 6;
+        dataset.hoverOffset = isSmall ? 6 : 10;
+        dataset.hoverBorderWidth = isSmall ? 2 : 3;
+
+        deptChart.options.cutout = isSmall ? "67%" : "65%";
+        deptChart.options.layout.padding = isSmall ? 4 : 8;
+
+        deptChart.options.plugins.datalabels.font.size = isSmall ? 11 : 13;
+        deptChart.options.plugins.datalabels.textStrokeWidth = isSmall ? 2 : 3;
+
+        deptChart.update("none");
+    }
+</script>
+{% endblock %}

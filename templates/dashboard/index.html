@@ -1,0 +1,1093 @@
+{% extends "base.html" %}
+
+{% block title %}داشبورد اسناد من{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages/dashboard/index.css') }}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-main-container">
+
+    
+    <!-- محاسبه آمارها قبل از هدر تا در دسترس باشند -->
+    {% set in_progress_status = statuses | selectattr('code', 'equalto', 'in_progress') | first %}
+    {% set other_statuses = statuses | rejectattr('code', 'equalto', 'in_progress') | list %}
+    {% set total_count = statuses | sum(attribute='count') %}
+
+    <!-- HERO HEADER -->
+    <header class="hero-header">
+        <div class="hero-content">
+            <div class="hero-user">
+                <div class="hero-avatar">
+                    {% set av = session.get('avatar') %}
+                    {% set gen = session.get('gender', 'male') %}
+                    {% if av and av not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                    <img src="{{ url_for('static', filename='uploads/avatar/' + av) }}" alt="{{ session.get('full_name', 'کاربر') }}"
+                         onerror="this.onerror=null;this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';">
+                    {% elif gen == 'female' %}
+                    <img src="{{ url_for('static', filename='images/default-profile-female.png') }}" alt="{{ session.get('full_name', 'کاربر') }}">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/default-profile-male.png') }}" alt="{{ session.get('full_name', 'کاربر') }}">
+                    {% endif %}
+                </div>
+                <div class="hero-user-text">
+                    <h1>داشبورد اسناد من</h1>
+                    <p>
+                        {% if current_user %}
+                            <span><i class="fa-solid fa-user"></i> {{ current_user.full_name }}</span>
+                            {% if current_user.department_title %}
+                            <span class="hero-sep">•</span>
+                            <span><i class="fa-solid fa-sitemap"></i> {{ current_user.department_title }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span><i class="fa-solid fa-hand-sparkles"></i> خوش آمدید</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="hero-meta">
+                <div class="hero-meta-card">
+                    <div class="hero-meta-icon"><i class="fa-solid fa-file-lines"></i></div>
+                    <div class="hero-meta-info">
+                        <span class="hero-meta-label">کل اسناد</span>
+                        <span class="hero-meta-value" id="heroTotalDocs">{{ total_count or 0 }}</span>
+                    </div>
+                </div>
+                <div class="hero-meta-card">
+                    <div class="hero-meta-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                    <div class="hero-meta-info">
+                        <span class="hero-meta-label">سال دریافت</span>
+                        <span class="hero-meta-value">{{ selected_year if selected_year != 'all' else 'همه' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-left">
+            <div class="year-picker">
+                <i class="fa-solid fa-calendar calendar-icon"></i>
+                <select id="yearFilter" aria-label="فیلتر سال دریافت">
+                    <option value="all" {% if selected_year=='all' %}selected{% endif %}>همه سال‌ها</option>
+                    {% for year in available_years %}
+                    <option value="{{ year }}" {% if selected_year==year %}selected{% endif %}>{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <label class="layout-toggle" for="compactLayoutToggle" title="چیدمان فشرده ۲×۲">
+                <input type="checkbox" id="compactLayoutToggle">
+                <span class="layout-toggle-track"><span class="layout-toggle-thumb"></span></span>
+                <span class="layout-toggle-label"><i class="fa-solid fa-table-cells-large"></i> چیدمان ۲×۲</span>
+            </label>
+
+            <div id="activeFilterChipHolder"></div>
+        </div>
+        <div class="toolbar-right">
+            <button id="clearStatusFilter" type="button" style="display:none; background:none; border:none; color:#e17055; cursor:pointer; font-size:.82rem; font-weight:700; padding:6px 12px; border-radius:8px;">
+                <i class="fa-solid fa-xmark"></i> پاک کردن فیلتر
+            </button>
+        </div>
+    </div>
+
+    {% set in_progress_status = statuses | selectattr('code', 'equalto', 'in_progress') | first %}
+    {% set other_statuses = statuses | rejectattr('code', 'equalto', 'in_progress') | list %}
+    {% set total_count = statuses | sum(attribute='count') %}
+
+    <!-- STATS + CHART -->
+    <div class="dashboard-stats-chart-row">
+        <div class="stats-grid-side" id="statsGrid">
+
+            {% if in_progress_status %}
+            {% set status = in_progress_status %}
+            {% set percent = ((status.count / total_count * 100) | round(0, 'floor')) if total_count > 0 else 0 %}
+            {% set bd = status.deadline_breakdown if status.deadline_breakdown else {} %}
+            <div class="stat-card card-in-progress" style="--stat-color:{{ status.color }};"
+                 data-status="{{ status.code }}" data-count="{{ status.count }}" data-total="{{ total_count }}"
+                 role="button" tabindex="0"
+                 aria-label="فیلتر بر اساس {{ status.title }}"
+                 onclick="filterByStatus('{{ status.code }}')"
+                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                <span class="stat-active-badge"><i class="fa-solid fa-check"></i> فعال</span>
+                <div class="stat-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+                <div class="stat-content">
+                    <div class="stat-label">{{ status.title }}</div>
+                    <div class="stat-subtitle">در حال پیگیری</div>
+                </div>
+
+                {% if bd and bd.total is defined and bd.total > 0 %}
+                <div class="deadline-inline-tiles" onclick="event.stopPropagation();">
+                    <!-- ۱. گذشته از مهلت -->
+                    <div class="deadline-inline-tile tile-overdue {% if bd.overdue > 0 %}has-value{% endif %}"
+                         data-tile-deadline="overdue" title="گذشته از مهلت — {{ bd.overdue }} سند"
+                         role="button" tabindex="0"
+                         onclick="filterByDeadline('overdue');"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                        <span class="inline-tile-icon"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                        <span class="inline-tile-count">{{ bd.overdue }}</span>
+                    </div>
+                    <!-- ۲. نزدیک به مهلت -->
+                    <div class="deadline-inline-tile tile-near {% if bd.near > 0 %}has-value{% endif %}"
+                         data-tile-deadline="near" title="نزدیک به مهلت — {{ bd.near }} سند"
+                         role="button" tabindex="0"
+                         onclick="filterByDeadline('near');"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                        <span class="inline-tile-icon"><i class="fa-solid fa-hourglass-half"></i></span>
+                        <span class="inline-tile-count">{{ bd.near }}</span>
+                    </div>
+                    <!-- ۳. در حال پیگیری عادی -->
+                    <div class="deadline-inline-tile tile-normal" data-tile-deadline="normal"
+                         title="در حال پیگیری عادی — {{ bd.normal }} سند"
+                         role="button" tabindex="0"
+                         onclick="filterByDeadline('normal');"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                        <span class="inline-tile-icon"><i class="fa-solid fa-clock"></i></span>
+                        <span class="inline-tile-count">{{ bd.normal }}</span>
+                    </div>
+                    <!-- ۴. در انتظار امضای مدیریت (تایل جدید) -->
+                    <div class="deadline-inline-tile tile-manager {% if manager_approval_count|default(0) > 0 %}has-value{% endif %}"
+                         data-tile-deadline="manager_approval" title="در انتظار امضای مدیریت — {{ manager_approval_count|default(0) }} سند"
+                         role="button" tabindex="0"
+                         onclick="filterByDeadline('manager_approval');"
+                         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                        <span class="inline-tile-icon"><i class="fa-solid fa-user-shield"></i></span>
+                        <span class="inline-tile-count">{{ manager_approval_count|default(0) }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="stat-count-box">
+                    <div class="stat-number">{{ status.count }}</div>
+                    <div class="stat-percent">{{ percent }}%</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="stats-other-cards">
+                {% for status in other_statuses %}
+                {% set percent = ((status.count / total_count * 100) | round(0, 'floor')) if total_count > 0 else 0 %}
+                {% set icon_map = {'completed': 'fa-circle-check', 'informational': 'fa-circle-info', 'stopped': 'fa-circle-pause', 'deleted': 'fa-trash'} %}
+                {% set subtitle_map = {'completed': 'اسناد تکمیل‌شده', 'informational': 'اطلاع‌رسانی', 'stopped': 'متوقف‌شده', 'deleted': 'حذف‌شده'} %}
+                <div class="stat-card" style="--stat-color:{{ status.color }};" data-status="{{ status.code }}"
+                     data-count="{{ status.count }}" data-total="{{ total_count }}"
+                     role="button" tabindex="0"
+                     aria-label="فیلتر بر اساس {{ status.title }}"
+                     onclick="filterByStatus('{{ status.code }}')"
+                     onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
+                    <span class="stat-active-badge"><i class="fa-solid fa-check"></i> فعال</span>
+                    <div class="stat-icon"><i class="fa-solid {{ icon_map.get(status.code, 'fa-file') }}"></i></div>
+                    <div class="stat-content">
+                        <div class="stat-label">{{ status.title }}</div>
+                        <div class="stat-subtitle">{{ subtitle_map.get(status.code, 'اسناد') }}</div>
+                    </div>
+                    <div class="stat-count-box">
+                        <div class="stat-number">{{ status.count }}</div>
+                        <div class="stat-percent">{{ percent }}%</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="dashboard-chart-container-side">
+            <div class="chart-header">
+                <div class="chart-title"><i class="fa-solid fa-chart-pie"></i> نمودار وضعیت مدارک</div>
+                <span class="chart-update"><i class="fa-regular fa-clock"></i> لحظه‌ای</span>
+            </div>
+            <div class="dashboard-chart-wrapper-side">
+                <canvas id="statusChart" role="img" aria-label="نمودار دایره‌ای وضعیت اسناد"></canvas>
+                <div class="chart-percentage-label">
+                    <div class="total-count" id="totalCount">{{ total }}</div>
+                    <div class="total-label">مجموع مدارک</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- QUICK FILTER — SEGMENTED -->
+    {% if in_progress_status and in_progress_status.deadline_breakdown and in_progress_status.deadline_breakdown.get('total', 0) > 0 %}
+    {% set bd = in_progress_status.deadline_breakdown %}
+    <div class="quick-filter-wrap" id="deadlineFilterBar">
+        <span class="quick-filter-label"><i class="fa-solid fa-filter"></i> فیلتر سریع</span>
+        <button type="button" class="deadline-filter-btn filter-overdue" data-deadline-filter="overdue" onclick="filterByDeadline('overdue')">
+            <span class="btn-ico"><i class="fa-solid fa-circle-exclamation"></i></span>
+            گذشته از مهلت <span class="count-badge">{{ bd.overdue }}</span>
+        </button>
+        <button type="button" class="deadline-filter-btn filter-near" data-deadline-filter="near" onclick="filterByDeadline('near')">
+            <span class="btn-ico"><i class="fa-solid fa-hourglass-half"></i></span>
+            نزدیک به مهلت <span class="count-badge">{{ bd.near }}</span>
+        </button>
+        <button type="button" class="deadline-filter-btn filter-normal" data-deadline-filter="normal" onclick="filterByDeadline('normal')">
+            <span class="btn-ico"><i class="fa-solid fa-clock"></i></span>
+            در حال پیگیری <span class="count-badge">{{ bd.normal }}</span>
+        </button>
+        <button type="button" class="deadline-filter-btn filter-manager-approval" data-deadline-filter="manager_approval" onclick="filterByDeadline('manager_approval')">
+            <span class="btn-ico"><i class="fa-solid fa-user-shield"></i></span>
+            در انتظار تایید مدیریت <span class="count-badge">{{ manager_approval_count|default(0) }}</span>
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- SEARCH -->
+    <div class="dashboard-search-box">
+        <div class="search-wrapper">
+            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="search" id="searchInput"
+                   placeholder="جستجو در موضوع، کد DFC، پیمانکار، تاریخ و ..."
+                   autocomplete="off"
+                   aria-label="جستجو در اسناد">
+            <span class="search-kbd"><i class="fa-brands fa-windows"></i> Ctrl+K</span>
+            <span class="search-clear" id="searchClear" role="button" tabindex="0" aria-label="پاک کردن جستجو">
+                <i class="fa-solid fa-xmark"></i>
+            </span>
+        </div>
+        <div class="search-results-info" id="searchResultsInfo">
+            <span id="searchResultCount">0</span> نتیجه برای جستجوی "<strong id="searchQueryText"></strong>"
+        </div>
+    </div>
+
+    <!-- DOCUMENTS -->
+    <div class="documents-section" id="documentsSection">
+        <div class="docs-header">
+            <div class="docs-title">
+                <i class="fa-solid fa-file-lines"></i>
+                اسناد من
+            </div>
+            <span class="docs-count">
+                <i class="fa-solid fa-file"></i>
+                <span id="docsCountNumber">—</span>
+            </span>
+        </div>
+
+        <div class="documents-placeholder" id="documentsPlaceholder">
+          <div class="placeholder-icon"><i class="fa-solid fa-folder-open"></i></div>
+            <h3>آماده برای نمایش اسناد</h3>
+            <p>برای دیدن اسناد، روی یکی از کارت‌های وضعیت بالا کلیک کنید<br>یا دکمه زیر را بزنید.</p>
+            <button type="button" class="btn-load-all" id="btnLoadAll">
+                <i class="fa-solid fa-list"></i> نمایش همه اسناد
+            </button>
+        </div>
+
+        <div class="document-grid" id="documentGrid" aria-live="polite"></div>
+
+        <div class="documents-pagination" id="documentsPagination" style="display:none;">
+            <button type="button" class="btn-load-more" id="btnLoadMore">
+                <i class="fa-solid fa-arrow-down"></i> نمایش بیشتر
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js" defer></script>
+
+<script>
+(() => {
+'use strict';
+
+// ============================================================
+// ★ STATE
+// ============================================================
+const state = {
+    chart: null,
+    resizeObserver: null,
+    searchTimeout: null,
+    loadController: null,
+    currentStatus: null,
+    currentStatusLabel: null,
+    currentPage: 1,
+    isLoading: false,
+    hasMore: false,
+    hasLoadedOnce: false,
+    currentDeadlineFilter: null,
+    currentDeadlineLabel: null,
+    selectedYear: "{{ selected_year }}",
+    userFullName: "{{ (current_user.full_name if current_user else 'کاربر')|e }}"
+};
+
+const FALLBACK_COLORS = ["#3d8bb5", "#2aa07a", "#e8b94a", "#dd7a3d", "#6b7a8f", "#3d8ad4", "#4fc3c0", "#9f7ae8"];
+const SCROLL_OFFSET = 80;
+const STATUS_DATA = {{ statuses | tojson }};
+const SEARCH_DEBOUNCE_MS = 350;
+
+const FILTER_LABELS = {
+    overdue: 'گذشته از مهلت',
+    near: 'نزدیک به مهلت',
+    normal: 'در حال پیگیری',
+    manager_approval: 'در انتظار تایید مدیریت'
+};
+
+// ============================================================
+// ★ UTILS
+// ============================================================
+const $  = (id) => document.getElementById(id);
+const $$ = (sel, root = document) => root.querySelectorAll(sel);
+
+const ESC_MAP = {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+const esc = (v) => v == null ? '' : String(v).replace(/[&<>"']/g, m => ESC_MAP[m]);
+
+const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+function highlight(text, query) {
+    if (!query || !text) return esc(text);
+    const re = new RegExp(`(${escapeRegex(query)})`, 'gi');
+    return esc(text).replace(re, '<mark>$1</mark>');
+}
+
+function lightenColor(hex, amount = 0.28) {
+    if (!hex || !hex.startsWith('#')) return hex || '#3D8499';
+    let c = hex.slice(1);
+    if (c.length === 3) c = c.split('').map(x => x + x).join('');
+    const num = parseInt(c, 16);
+    const r = Math.min(255, Math.round(((num >> 16) & 255) + (255 - ((num >> 16) & 255)) * amount));
+    const g = Math.min(255, Math.round(((num >> 8) & 255) + (255 - ((num >> 8) & 255)) * amount));
+    const b = Math.min(255, Math.round((num & 255) + (255 - (num & 255)) * amount));
+    return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function scrollToDocuments() {
+    const el = $('documentsSection');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    if (rect.top >= SCROLL_OFFSET && rect.top <= window.innerHeight * 0.5) return;
+    window.scrollTo({ top: rect.top + window.pageYOffset - SCROLL_OFFSET, behavior: 'smooth' });
+    el.style.backgroundColor = 'rgba(27, 105, 139, 0.06)';
+    setTimeout(() => { el.style.backgroundColor = 'transparent'; }, 900);
+}
+
+function showToast(message, type = 'success') {
+    const colors = {
+        success: ['#16a34a', '#15803d'],
+        error:   ['#dc2626', '#991b1b'],
+        info:    ['#1b698b', '#167a5c']
+    };
+    const [c1, c2] = colors[type] || colors.success;
+    const toast = document.createElement('div');
+    toast.setAttribute('role', 'status');
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+        background: linear-gradient(135deg, ${c1}, ${c2}); color: #fff;
+        padding: 12px 22px; border-radius: 12px; font-weight: 800;
+        font-size: .85rem; z-index: 99999; box-shadow: 0 12px 32px ${c1}66;
+        font-family: Vazirmatn, Tahoma, sans-serif;
+        opacity: 0; transition: opacity .3s, transform .3s;
+    `;
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
+        setTimeout(() => toast.remove(), 300);
+    }, 2800);
+}
+
+// ============================================================
+// ★ CHIP فیلتر فعال
+// ============================================================
+function renderActiveFilterChip() {
+    const holder = $('activeFilterChipHolder');
+    if (!holder) return;
+
+    let label = null, type = null;
+    if (state.currentStatus) {
+        label = state.currentStatusLabel;
+        type = 'status';
+    } else if (state.currentDeadlineFilter) {
+        label = FILTER_LABELS[state.currentDeadlineFilter] || state.currentDeadlineLabel;
+        type = 'deadline';
+    }
+
+    if (!label) {
+        holder.innerHTML = '';
+        $('clearStatusFilter').style.display = 'none';
+        return;
+    }
+
+    holder.innerHTML = `
+        <span class="active-filter-chip">
+            <span class="chip-label"><i class="fa-solid fa-filter"></i> ${esc(label)}</span>
+            <button type="button" class="chip-close" aria-label="حذف فیلتر" onclick="clearAllFilters()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </span>`;
+    $('clearStatusFilter').style.display = 'inline-flex';
+}
+
+// ============================================================
+// ★ FETCH
+// ============================================================
+async function fetchJSON(url, { signal } = {}) {
+    const res = await fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        signal
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+}
+
+// ============================================================
+// ★ SKELETON
+// ============================================================
+function renderSkeletons(n = 3) {
+    return Array.from({ length: n }, () => `
+        <div class="skeleton-card">
+            <div class="skeleton-line w-80 h-20"></div>
+            <div class="skeleton-line w-60"></div>
+            <div class="skeleton-line w-40"></div>
+            <div style="display:flex;gap:12px;margin-top:20px;">
+                <div class="skeleton-line" style="flex:1;"></div>
+                <div class="skeleton-line" style="flex:1;"></div>
+                <div class="skeleton-line" style="flex:1;"></div>
+            </div>
+        </div>
+    `).join('');
+}
+
+// ============================================================
+// ★ RENDER CARD
+// ============================================================
+function renderDocumentCard(record, searchQuery = '') {
+    const statusColor = record.status_color || '#3D8499';
+    const statusCode = record.status_code || '';
+    const subject = record.subject || 'بدون موضوع';
+    const docId = record.id || '';
+    const canAddNote = record.can_add_note !== false;
+    const hl = (v) => highlight(v, searchQuery);
+
+    let deadlineBadge = '';
+    if (statusCode === 'in_progress' && record.days_left != null && record.days_left !== '') {
+        const dl = Number(record.days_left);
+        if (dl < 0) {
+            deadlineBadge = `<span class="doc-deadline-badge badge-overdue"><i class="fa-solid fa-triangle-exclamation"></i> ${Math.abs(dl)} روز گذشته</span>`;
+        } else if (dl <= 2) {
+            const text = dl === 0 ? 'امروز' : (dl === 1 ? 'فردا' : `${dl} روز مانده`);
+            deadlineBadge = `<span class="doc-deadline-badge badge-near"><i class="fa-solid fa-hourglass-half"></i> ${text}</span>`;
+        } else {
+            deadlineBadge = `<span class="doc-deadline-badge badge-normal"><i class="fa-solid fa-clock"></i> ${dl} روز مانده</span>`;
+        }
+    }
+
+    const responseStatus = (record.doc_response_status || '').toString().trim();
+    const approvalBadge = ['در انتظار امضاي مديريت', 'در انتظار امضای مدیریت', 'در انتظار تایید مدیریت'].includes(responseStatus)
+        ? `<span class="doc-approval-badge"><i class="fa-solid fa-user-shield"></i> در انتظار تایید مدیریت</span>`
+        : '';
+
+    const buildField = ([key, icon, label, ltr = false, extraStyle = '']) => {
+        let val;
+        if (Array.isArray(key)) val = key.map(k => record[k]).find(Boolean);
+        else val = record[key];
+        if (!val) return '';
+        const styleAttr = extraStyle ? ` style="${extraStyle}"` : '';
+        return `<div class="doc-field">
+            <span class="field-label"${styleAttr}><i class="fa-solid ${icon}"></i> ${label}</span>
+            <span class="field-value${ltr ? ' ltr' : ''}"${styleAttr}>${hl(val)}</span>
+        </div>`;
+    };
+
+    const mainFields = [
+        ['date_letter_jalali', 'fa-calendar-day', 'تاریخ نامه', true],
+        ['automation_number', 'fa-barcode', 'شماره اتوماسیون', true],
+        ['contractor_letter_number', 'fa-envelope', 'شماره نامه پیمانکار', true],
+        ['contract_number', 'fa-file-contract', 'شماره قرارداد', true],
+        ['deadline_jalali', 'fa-hourglass-half', 'مهلت پاسخ', true, 'color:rgb(220,38,38);']
+    ];
+
+    const expandFields1 = [
+        ['contractor', 'fa-building', 'پیمانکار'],
+        [['area_title', 'area'], 'fa-location-dot', 'ناحیه'],
+        ['date_received_jalali', 'fa-calendar-plus', 'تاریخ دریافت', true],
+        ['date_referral_jalali', 'fa-share-from-square', 'تاریخ ارجاع', true],
+        ['unit', 'fa-building-columns', 'واحد']
+    ];
+    const expandFields2 = [
+        ['department_title', 'fa-sitemap', 'دپارتمان'],
+        ['document_group', 'fa-folder', 'گروه مدرک'],
+        ['sub_group', 'fa-layer-group', 'زیرگروه']
+    ];
+    const expandFields3 = [
+        ['doc_response_status', 'fa-clipboard-check', 'وضعیت پاسخ مدرک', false, 'color:rgb(22,163,74);font-weight:700;'],
+        ['final_letter_number', 'fa-file-signature', 'شماره نامه نهایی', true],
+        ['final_delay', 'fa-hourglass-end', 'تاخیر نهایی', true],
+        ['created_at_jalali', 'fa-calendar-plus', 'تاریخ ایجاد', true]
+    ];
+
+    const projectName = record.project_name ? `
+        <div class="doc-project">
+            <div class="doc-project-content">
+                <span class="doc-project-label">پروژه</span>
+                <span class="doc-project-name" title="${esc(record.project_name)}">${hl(record.project_name)}</span>
+            </div>
+        </div>` : '';
+
+    const statusBadge = record.status_title
+        ? `<span class="doc-status-badge"><i class="fa-solid fa-circle"></i> ${esc(record.status_title)}</span>` : '';
+
+    const metaParts = [
+        record.code_dfc ? `<span style="color:#16a34a;border-color:rgba(22,163,74,.25);"><i class="fa-solid fa-hashtag" style="color:#16a34a;"></i> DFC:${hl(record.code_dfc)}</span>` : '',
+        record.contractor ? `<span><i class="fa-solid fa-building"></i> ${hl(record.contractor)}</span>` : '',
+        `<span><i class="fa-solid fa-user-tie"></i> ${esc(state.userFullName)}</span>`,
+        record.sub_group ? `<span><i class="fa-solid fa-layer-group"></i> ${hl(record.sub_group)}</span>` : ''
+    ].filter(Boolean).join('');
+
+    const noteBtnHtml = canAddNote ? `
+        <button type="button" class="doc-card-action-btn note-btn"
+                onclick="openNoteModalForDoc('${esc(docId)}')"
+                title="ثبت یادداشت جدید">
+            <i class="fa-solid fa-note-sticky"></i><span>ثبت یادداشت</span>
+        </button>` : '';
+
+    return `
+    <article class="document-card" data-status="${esc(statusCode)}" data-doc-id="${esc(docId)}" style="--status-color:${esc(statusColor)};">
+        <div class="doc-header">
+            <div class="doc-title-group">
+                <div class="doc-subject">
+                    <i class="fa-solid fa-file-pen"></i>
+                    <span>${hl(subject)}</span>
+                </div>
+                ${projectName}
+                <div class="doc-meta">${metaParts}</div>
+            </div>
+            <div class="doc-badges-row">
+                ${statusBadge}
+                ${approvalBadge}
+                ${deadlineBadge}
+            </div>
+        </div>
+
+        <div class="doc-body">
+            <div class="doc-body-row">${mainFields.map(buildField).join('')}</div>
+            <div class="doc-expand-content">
+                <div class="doc-expand-content-inner">
+                    <div class="doc-body-row">${expandFields1.map(buildField).join('')}</div>
+                    <div class="doc-body-row">${expandFields2.map(buildField).join('')}</div>
+                    <div class="doc-body-row">${expandFields3.map(buildField).join('')}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="doc-bottom-row">
+            <button class="doc-expand-btn" onclick="toggleExpand(this)" aria-expanded="false">
+                <i class="fa-solid fa-plus"></i>
+                <span class="btn-text">نمایش جزئیات بیشتر</span>
+            </button>
+            <div class="doc-card-actions" onclick="event.stopPropagation();">
+                <a href="/documents/view/${esc(docId)}" class="doc-card-action-btn view-btn" title="تاریخچه یادداشت‌ها">
+                    <i class="fa-solid fa-eye"></i><span>تاریخچه</span>
+                </a>
+                ${noteBtnHtml}
+            </div>
+        </div>
+    </article>`;
+}
+
+// ============================================================
+// ★ LOAD DOCUMENTS
+// ============================================================
+async function loadDocuments(statusCode, page = 1, append = false) {
+    if (state.isLoading && !append) return;
+    state.isLoading = true;
+    state.hasLoadedOnce = true;
+
+    state.loadController?.abort();
+    state.loadController = new AbortController();
+
+    const placeholder = $('documentsPlaceholder');
+    const grid = $('documentGrid');
+    const pagination = $('documentsPagination');
+    const btnLoadMore = $('btnLoadMore');
+
+    if (page === 1) {
+        placeholder && (placeholder.style.display = 'none');
+        grid.innerHTML = renderSkeletons(3);
+        pagination.style.display = 'none';
+    } else {
+        btnLoadMore.disabled = true;
+        btnLoadMore.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال بارگذاری...';
+    }
+
+    try {
+        const params = new URLSearchParams({ year: state.selectedYear, page });
+        if (statusCode) params.set('status', statusCode);
+        if (state.currentDeadlineFilter) params.set('deadline_filter', state.currentDeadlineFilter);
+        const searchVal = $('searchInput')?.value.trim();
+        if (searchVal) params.set('search', searchVal);
+
+        const data = await fetchJSON(`/dashboard/documents.json?${params}`, { signal: state.loadController.signal });
+
+        const searchInfo = $('searchResultsInfo');
+        if (searchVal) {
+            searchInfo.classList.add('visible');
+            $('searchResultCount').textContent = data.total.toLocaleString('fa-IR');
+            $('searchQueryText').textContent = searchVal;
+        } else {
+            searchInfo.classList.remove('visible');
+        }
+
+        if (!data.records?.length) {
+            if (page === 1) {
+                grid.innerHTML = `<div class="empty-state">
+                    <i class="fa-solid fa-file-circle-xmark"></i>
+                    <p>${searchVal ? 'نتیجه‌ای یافت نشد' : 'سندی یافت نشد'}</p>
+                </div>`;
+                $('docsCountNumber').textContent = '0';
+            }
+            pagination.style.display = 'none';
+            return;
+        }
+
+        const query = searchVal || '';
+        const html = data.records.map(r => renderDocumentCard(r, query)).join('');
+        if (append) grid.insertAdjacentHTML('beforeend', html);
+        else grid.innerHTML = html;
+
+        $('docsCountNumber').textContent = data.total.toLocaleString('fa-IR');
+
+        state.hasMore = data.has_more;
+        state.currentPage = data.page;
+        pagination.style.display = state.hasMore ? 'block' : 'none';
+
+        if (page === 1) scrollToDocuments();
+
+    } catch (err) {
+        if (err.name === 'AbortError') return;
+        console.error(err);
+        if (page === 1) {
+            grid.innerHTML = `<div class="empty-state">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <p>خطا در بارگذاری اسناد. لطفاً دوباره تلاش کنید.</p>
+            </div>`;
+        }
+    } finally {
+        state.isLoading = false;
+        if (btnLoadMore) {
+            btnLoadMore.disabled = false;
+            btnLoadMore.innerHTML = '<i class="fa-solid fa-arrow-down"></i> نمایش بیشتر';
+        }
+    }
+}
+
+// ============================================================
+// ★ FILTERS
+// ============================================================
+function syncDeadlineUI(activeType) {
+    // آپدیت تایل‌های داخل کارت (شامل تایل جدید بنفش)
+    $$('.deadline-inline-tile').forEach(tile => {
+        tile.classList.toggle('tile-active', tile.dataset.tileDeadline === activeType);
+    });
+    // آپدیت دکمه‌های فیلتر سریع پایین
+    $$('.deadline-filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.deadlineFilter === activeType);
+    });
+}
+
+function filterByStatus(statusCode) {
+    if (state.currentStatus === statusCode) return clearAllFilters();
+
+    $$('.stats-grid-side .stat-card').forEach(c => c.classList.remove('active'));
+    const clickedCard = document.querySelector(`.stats-grid-side .stat-card[data-status="${statusCode}"]`);
+    clickedCard?.classList.add('active');
+
+    state.currentStatus = statusCode;
+    state.currentStatusLabel = clickedCard?.querySelector('.stat-label')?.textContent?.trim() || statusCode;
+    state.currentDeadlineFilter = null;
+    state.currentDeadlineLabel = null;
+
+    syncDeadlineUI(null);
+    renderActiveFilterChip();
+    loadDocuments(statusCode, 1, false);
+}
+
+function filterByDeadline(deadlineType) {
+    if (state.currentDeadlineFilter === deadlineType) return clearAllFilters();
+
+    state.currentDeadlineFilter = deadlineType;
+    state.currentDeadlineLabel = FILTER_LABELS[deadlineType] || deadlineType;
+    state.currentStatus = null;
+    state.currentStatusLabel = null;
+
+    syncDeadlineUI(deadlineType);
+    $$('.stats-grid-side .stat-card').forEach(c => c.classList.remove('active'));
+    renderActiveFilterChip();
+    loadDocuments(null, 1, false);
+}
+
+function clearAllFilters() {
+    $$('.stats-grid-side .stat-card').forEach(c => c.classList.remove('active'));
+    state.currentStatus = null;
+    state.currentStatusLabel = null;
+    state.currentDeadlineFilter = null;
+    state.currentDeadlineLabel = null;
+    state.hasLoadedOnce = false;
+
+    syncDeadlineUI(null);
+    renderActiveFilterChip();
+
+    $('documentsPlaceholder').style.display = 'block';
+    $('documentGrid').innerHTML = '';
+    $('documentsPagination').style.display = 'none';
+    $('docsCountNumber').textContent = '—';
+
+    const searchInput = $('searchInput');
+    if (searchInput) searchInput.value = '';
+    $('searchClear')?.classList.remove('visible');
+    $('searchResultsInfo').classList.remove('visible');
+
+    scrollToDocuments();
+}
+
+// ============================================================
+// ★ TOGGLE EXPAND
+// ============================================================
+function toggleExpand(btn) {
+    const content = btn.closest('.document-card').querySelector('.doc-expand-content');
+    const text = btn.querySelector('.btn-text');
+    const isOpen = content.classList.toggle('open');
+    btn.classList.toggle('expanded', isOpen);
+    btn.setAttribute('aria-expanded', String(isOpen));
+    text.textContent = isOpen ? 'بستن جزئیات' : 'نمایش جزئیات بیشتر';
+}
+
+// ============================================================
+// ★ CHART
+// ============================================================
+function getDatalabelThreshold() {
+    const w = window.innerWidth;
+    if (w <= 380) return 12;
+    if (w <= 576) return 9;
+    if (w <= 768) return 7;
+    return 5;
+}
+
+function createGradient(ctx, chartArea, c1, c2) {
+    if (!chartArea) return c1;
+    const g = ctx.createLinearGradient(chartArea.left, chartArea.top, chartArea.right, chartArea.bottom);
+    g.addColorStop(0, c1);
+    g.addColorStop(1, c2);
+    return g;
+}
+
+function initializeChart() {
+    const canvas = $('statusChart');
+    if (!canvas || !STATUS_DATA?.length || typeof Chart === 'undefined') return;
+
+    const total = STATUS_DATA.reduce((s, i) => s + Number(i.count || 0), 0);
+    const labels = STATUS_DATA.map(i => i.title || 'بدون عنوان');
+    const data = STATUS_DATA.map(i => Number(i.count || 0));
+    const baseColors = STATUS_DATA.map((i, idx) => i.color || FALLBACK_COLORS[idx % FALLBACK_COLORS.length]);
+    const lightColors = baseColors.map(c => lightenColor(c, 0.28));
+    const percentages = STATUS_DATA.map(i => total > 0 ? Math.round(Number(i.count || 0) / total * 100) : 0);
+
+    $('totalCount').textContent = total.toLocaleString('fa-IR');
+
+    if (typeof ChartDataLabels !== 'undefined') Chart.register(ChartDataLabels);
+
+    state.chart = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: ctx => createGradient(ctx.chart.ctx, ctx.chart.chartArea,
+                    baseColors[ctx.dataIndex], lightColors[ctx.dataIndex]),
+                borderColor: '#ffffff',
+                borderWidth: 3,
+                borderRadius: 8,
+                hoverOffset: 12,
+                hoverBorderWidth: 4,
+                hoverBorderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '68%',
+            layout: { padding: 8 },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    rtl: true,
+                    labels: {
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: 10, boxHeight: 10,
+                        padding: 14,
+                        color: '#0f172a',
+                        font: { family: 'Vazirmatn', size: 12, weight: '700' },
+                        generateLabels: (chart) => chart.data.labels.map((label, i) => ({
+                            text: `${label}  •  ${chart.data.datasets[0].data[i]} (${percentages[i]}%)`,
+                            fillStyle: baseColors[i],
+                            strokeStyle: baseColors[i],
+                            lineWidth: 0,
+                            pointStyle: 'circle',
+                            index: i
+                        }))
+                    }
+                },
+                tooltip: {
+                    rtl: true,
+                    backgroundColor: 'rgba(15,23,42,.95)',
+                    titleColor: '#fff', bodyColor: '#fff',
+                    titleFont: { family: 'Vazirmatn', size: 13, weight: '800' },
+                    bodyFont: { family: 'Vazirmatn', size: 12 },
+                    padding: 12, cornerRadius: 10,
+                    callbacks: {
+                        label: (ctx) => {
+                            const value = Number(ctx.raw || 0);
+                            const pct = total > 0 ? Math.round(value / total * 100) : 0;
+                            return `  ${value} سند  (${pct}%)`;
+                        }
+                    }
+                },
+                datalabels: {
+                    color: '#ffffff',
+                    font: { weight: '800', size: 13, family: 'Vazirmatn' },
+                    textStrokeColor: 'rgba(0,0,0,.35)',
+                    textStrokeWidth: 3,
+                    formatter: (_, ctx) => percentages[ctx.dataIndex] >= getDatalabelThreshold() ? `${percentages[ctx.dataIndex]}%` : '',
+                    display: (ctx) => percentages[ctx.dataIndex] >= getDatalabelThreshold()
+                }
+            },
+            animation: { animateRotate: true, animateScale: true, duration: 1200, easing: 'easeOutQuart' }
+        },
+        plugins: typeof ChartDataLabels !== 'undefined' ? [ChartDataLabels] : []
+    });
+
+    setupChartResizeObserver();
+}
+
+function setupChartResizeObserver() {
+    const container = document.querySelector('.page-dashboard .dashboard-chart-wrapper-side');
+    if (!container || !state.chart) return;
+    state.resizeObserver?.disconnect();
+    let lastW = container.clientWidth;
+    state.resizeObserver = new ResizeObserver(() => {
+        const w = container.clientWidth;
+        if (Math.abs(w - lastW) > 20) {
+            lastW = w;
+            state.chart.options.plugins.datalabels.font.size = w < 400 ? 11 : 13;
+            state.chart.update('none');
+        }
+    });
+    state.resizeObserver.observe(container);
+}
+
+// ============================================================
+// ★ LAYOUT TOGGLE
+// ============================================================
+const LAYOUT_STORAGE_KEY = 'dashboard_compact_layout';
+const MOBILE_BREAKPOINT = 768;
+const isDesktop = () => window.innerWidth > MOBILE_BREAKPOINT;
+
+function applyCompactLayout(enabled) {
+    const grid = $('statsGrid');
+    if (!grid) return;
+    grid.classList.toggle('layout-compact', enabled && isDesktop());
+}
+
+function setupCompactLayoutToggle() {
+    const toggle = $('compactLayoutToggle');
+    if (!toggle) return;
+    const saved = localStorage.getItem(LAYOUT_STORAGE_KEY) === '1';
+    if (isDesktop()) toggle.checked = saved;
+    applyCompactLayout(saved);
+
+    toggle.addEventListener('change', function () {
+        applyCompactLayout(this.checked);
+        try { localStorage.setItem(LAYOUT_STORAGE_KEY, this.checked ? '1' : '0'); } catch (e) {}
+    });
+
+    let last = isDesktop();
+    window.addEventListener('resize', () => {
+        const now = isDesktop();
+        if (now === last) return;
+        last = now;
+        if (now) {
+            const s = localStorage.getItem(LAYOUT_STORAGE_KEY) === '1';
+            toggle.checked = s;
+            applyCompactLayout(s);
+        } else {
+            applyCompactLayout(false);
+        }
+    }, { passive: true });
+}
+
+// ============================================================
+// ★ NOTE MODAL
+// ============================================================
+let dashboardNoteModalInstance = null;
+
+function openNoteModalForDoc(docId) {
+    if (!docId) { console.error('docId missing'); return; }
+    let modalEl = $('dashboardNoteModal');
+    if (!modalEl) {
+        modalEl = document.createElement('div');
+        modalEl.id = 'dashboardNoteModal';
+        modalEl.className = 'modal fade';
+        modalEl.tabIndex = -1;
+        modalEl.setAttribute('aria-hidden', 'true');
+        modalEl.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius:20px;overflow:hidden;font-family:Vazirmatn,Tahoma,sans-serif;direction:rtl;border:none;box-shadow:0 24px 64px rgba(15,23,42,.3);">
+                    <div class="modal-header" style="background:linear-gradient(135deg,#1b698b,#167a5c);color:#fff;border-bottom:none;padding:18px 22px;">
+                        <h5 class="modal-title" style="font-weight:800;font-size:1rem;display:flex;align-items:center;gap:8px;">
+                            <i class="fa-solid fa-note-sticky"></i> ثبت یادداشت جدید
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+                    </div>
+                    <div class="modal-body" style="padding:22px;">
+                        <input type="hidden" id="dashboardNoteDocId">
+                        <label for="dashboardNoteContent" style="display:block;font-size:.82rem;font-weight:800;color:#334155;margin-bottom:8px;">
+                            متن یادداشت <span style="color:#dc2626;">*</span>
+                        </label>
+                        <textarea id="dashboardNoteContent" class="form-control" rows="10"
+                                  placeholder="متن یادداشت خود را اینجا بنویسید..."
+                                  style="border-radius:12px;border:1.5px solid #e2e8f0;font-family:inherit;font-size:.88rem;resize:vertical;padding:12px 14px;min-height:220px;"></textarea>
+                        <div id="dashboardNoteError" style="background:#fef2f2;border:1px solid #fecaca;color:#b91c1c;padding:10px 14px;border-radius:10px;margin-top:14px;font-size:.82rem;font-weight:700;display:none;align-items:center;gap:8px;">
+                            <i class="fa-solid fa-circle-exclamation"></i>
+                            <span id="dashboardNoteErrorText"></span>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid #eef1f5;padding:14px 22px;gap:8px;background:#fafbfc;">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                                style="font-family:inherit;font-weight:800;font-size:.82rem;padding:9px 18px;border-radius:10px;background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;">انصراف</button>
+                        <button type="button" class="btn btn-primary" id="dashboardNoteSubmitBtn" onclick="submitDashboardNote()"
+                                style="font-family:inherit;font-weight:800;font-size:.82rem;padding:9px 20px;border-radius:10px;background:linear-gradient(135deg,#1b698b,#167a5c);color:#fff;border:none;box-shadow:0 4px 12px rgba(27,105,139,.3);">
+                            <i class="fa-solid fa-paper-plane"></i> ثبت یادداشت
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(modalEl);
+    }
+
+    $('dashboardNoteDocId').value = docId;
+    $('dashboardNoteError').style.display = 'none';
+    $('dashboardNoteContent').value = '';
+
+    if (!dashboardNoteModalInstance) dashboardNoteModalInstance = new bootstrap.Modal(modalEl);
+    dashboardNoteModalInstance.show();
+    setTimeout(() => $('dashboardNoteContent')?.focus(), 350);
+}
+
+async function submitDashboardNote() {
+    const docId = $('dashboardNoteDocId').value;
+    const content = $('dashboardNoteContent').value.trim();
+    const errBox = $('dashboardNoteError');
+    const errText = $('dashboardNoteErrorText');
+    const btn = $('dashboardNoteSubmitBtn');
+
+    const showErr = (msg) => { errText.textContent = msg; errBox.style.display = 'flex'; };
+    if (!content) return showErr('متن یادداشت الزامی است.');
+
+    btn.disabled = true;
+    const originalHtml = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال ثبت...';
+
+    try {
+        const res = await fetch('/workflow/note', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify({ document_id: docId, content, status: 'pending' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            dashboardNoteModalInstance.hide();
+            $('dashboardNoteContent').value = '';
+            showToast('✓ یادداشت با موفقیت ثبت شد', 'success');
+        } else {
+            showErr(data.message || 'خطا در ثبت یادداشت');
+        }
+    } catch (err) {
+        console.error(err);
+        showErr('خطای شبکه در ثبت یادداشت');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    }
+}
+
+// ============================================================
+// ★ INIT
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Chart !== 'undefined') initializeChart();
+    else window.addEventListener('load', initializeChart, { once: true });
+
+    setupCompactLayoutToggle();
+
+    $('yearFilter')?.addEventListener('change', function () {
+        const url = new URL(window.location.href);
+        if (this.value === 'all') url.searchParams.delete('year');
+        else url.searchParams.set('year', this.value);
+        window.location.href = url.toString();
+    });
+
+    $('clearStatusFilter')?.addEventListener('click', clearAllFilters);
+
+    $('btnLoadAll')?.addEventListener('click', () => {
+        state.currentStatus = null;
+        state.currentStatusLabel = null;
+        state.currentDeadlineFilter = null;
+        syncDeadlineUI(null);
+        renderActiveFilterChip();
+        loadDocuments(null, 1, false);
+    });
+
+    $('btnLoadMore')?.addEventListener('click', () => {
+        if (state.hasMore && !state.isLoading) loadDocuments(state.currentStatus, state.currentPage + 1, true);
+    });
+
+    const searchInput = $('searchInput');
+    const searchClear = $('searchClear');
+
+    searchInput?.addEventListener('input', function () {
+        clearTimeout(state.searchTimeout);
+        const value = this.value.trim();
+        searchClear?.classList.toggle('visible', !!value);
+        state.searchTimeout = setTimeout(() => {
+            if (state.hasLoadedOnce || value) loadDocuments(state.currentStatus, 1, false);
+        }, SEARCH_DEBOUNCE_MS);
+    });
+
+    searchClear?.addEventListener('click', () => {
+        searchInput.value = '';
+        searchClear.classList.remove('visible');
+        $('searchResultsInfo').classList.remove('visible');
+        if (state.hasLoadedOnce) loadDocuments(state.currentStatus, 1, false);
+        searchInput.focus();
+    });
+
+    searchClear?.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); searchClear.click(); }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+            e.preventDefault();
+            searchInput?.focus();
+            searchInput?.select();
+        }
+        if (e.key === 'Escape' && document.activeElement === searchInput) searchInput.blur();
+    });
+
+    // Expose globals
+    window.filterByStatus = filterByStatus;
+    window.filterByDeadline = filterByDeadline;
+    window.toggleExpand = toggleExpand;
+    window.openNoteModalForDoc = openNoteModalForDoc;
+    window.submitDashboardNote = submitDashboardNote;
+    window.clearAllFilters = clearAllFilters;
+});
+})();
+</script>
+{% endblock %}

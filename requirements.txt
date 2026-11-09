@@ -1,0 +1,29 @@
+# ---- Web ----
+Flask
+Flask-WTF
+WTForms
+Werkzeug
+Jinja2
+
+# ---- Data / export ----
+openpyxl
+pandas
+xlrd
+python-dateutil
+python-pptx
+Pillow
+
+# ---- Optional: face-aware avatar cropping ----
+# برنامه بدون این هم کار می‌کند (برش مرکزی با Pillow انجام می‌شود)،
+# ولی برای تشخیص چهره لازم است.
+opencv-python==4.10.0.84
+
+# ---- Jalali dates ----
+jdatetime
+
+# ---- Config / AI ----
+python-dotenv
+openai
+
+# ---- Production server ----
+gunicorn

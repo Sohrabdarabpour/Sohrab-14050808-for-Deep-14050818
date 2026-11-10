@@ -1,16 +1,6 @@
 """مقداردهی اولیه دیتابیس — فقط هماهنگ‌کننده.
 
-این فایل قبلاً ~۲۴۵۰ خط بود و همه‌چیز را در خود داشت. الان فقط ترتیب اجرا را
-مشخص می‌کند و هر بخش در فایل خودش قرار دارد:
-
-    database/tables/<table>.py        ← ساختار جدول + ایندکس‌ها (DDL)
-    database/seeds/<entity>.py        ← داده‌های پیش‌فرض
-    database/repositories/<entity>.py ← توابع CRUD
-
-برای اصلاح یک جدول، فقط فایل همان جدول را باز کنید.
-
-توابع CRUD برای سازگاری با کدهای موجود، از همین ماژول هم قابل import هستند:
-    from database.init_db import get_note, get_user, ...
+اجرای مکرر آن بی‌خطر است (همه دستورها IF NOT EXISTS هستند).
 """
 
 import os
@@ -27,14 +17,16 @@ from .tables.calendar_holidays import migrate as _migrate_calendar_holidays
 from .tables.document_groups import migrate as _migrate_document_groups
 from .tables.documents import migrate as _migrate_documents
 
+# ★★★ جدید — Migration ستون‌های پکیج سند
+from .migrations.add_document_package_columns import (
+    add_document_package_columns as _migrate_package_columns,
+)
+
 __all__ = ["init_db"] + list(_REPOSITORY_EXPORTS)
 
 
 def init_db():
-    """ساخت جداول در صورت نبود و درج داده‌های پیش‌فرض.
-
-    اجرای مکرر آن بی‌خطر است (همه دستورها IF NOT EXISTS هستند).
-    """
+    """ساخت جداول در صورت نبود و درج داده‌های پیش‌فرض."""
     os.makedirs(os.path.dirname(Config.DATABASE_PATH), exist_ok=True)
 
     connection = get_connection()
@@ -48,6 +40,9 @@ def init_db():
         connection.commit()
     finally:
         connection.close()
+
+    # ★★★ جدید — Migration ستون‌های پکیج سند
+    _migrate_package_columns()
 
     _run_seeds()
 

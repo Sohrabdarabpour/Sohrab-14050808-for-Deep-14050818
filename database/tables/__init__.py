@@ -1,8 +1,4 @@
-"""بسته جداول — ساختار دیتابیس
-
-هر جدول در فایل خودش قرار دارد و فقط DDL است (ساختار + ایندکس).
-منطق خواندن/نوشتن در database/repositories/ است.
-"""
+"""بسته جداول — ساختار دیتابیس"""
 
 from . import users
 from . import document_statuses
@@ -27,6 +23,17 @@ from . import assistant_feedback
 from . import calendar_holidays
 from . import calendar_holiday_events
 
+# ★★★ جدید — پکیج سند
+from . import document_counters
+from . import document_assignments
+from . import document_events
+from . import document_references
+from . import document_completion_requests
+from . import document_attachments
+from . import document_alarms
+from . import document_watchers
+
+
 TABLES = [
     users,
     document_statuses,
@@ -50,19 +57,27 @@ TABLES = [
     assistant_feedback,
     calendar_holidays,
     calendar_holiday_events,
+
+    # ★★★ جدید — پکیج سند (بعد از documents و users)
+    document_counters,
+    document_assignments,
+    document_events,
+    document_references,
+    document_completion_requests,
+    document_attachments,
+    document_alarms,
+    document_watchers,
 ]
 
 __all__ = ["TABLES", "create_all", "create_indexes"]
 
 
 def create_all(cursor):
-    """ساخت همه جداول به ترتیب وابستگی."""
     for module in TABLES:
         module.create(cursor)
 
 
 def create_indexes(cursor):
-    """ساخت ایندکس‌های هر جدول (در همان فایل جدول تعریف شده‌اند)."""
     for module in TABLES:
         for statement in module.INDEX_SQL:
             cursor.execute(statement)

@@ -423,3 +423,350 @@ with transaction():                    # BEGIN IMMEDIATE
 | صفحهٔ `/calendar` (تقویم، تعطیلات، ماشین‌حساب) | ✅ انجام شد |
 | ۳۳ تست تقویم/SLA | ✅ همه سبز (مجموع ۱۶۹ تست) |
 | جدول‌ها و فرم ثبت سند (ارجاع، نامه‌ها، تکمیل مدارک) | ⏳ فاز ۱ به بعد |
+
+
+# لاگ پیاده‌سازی «پکیج سند»
+
+این فایل هر قدم پیاده‌سازی را ثبت می‌کند تا در آینده بدانید چه کارهایی انجام شده و چرا.
+
+---
+
+## فاز ۱ — زیرساخت دیتابیس و آپلود
+
+### قدم ۱ — فایل‌های جدول (✅ انجام شد)
+
+| فایل | جدول |
+|---|---|
+| `database/tables/document_counters.py` | `document_counters` |
+| `database/tables/document_assignments.py` | `document_assignments` |
+| `database/tables/document_events.py` | `document_events` |
+| `database/tables/document_references.py` | `document_references` |
+| `database/tables/document_completion_requests.py` | `document_completion_requests` + `items` |
+| `database/tables/document_attachments.py` | `document_attachments` |
+| `database/tables/document_alarms.py` | `document_alarms` |
+| `database/tables/document_watchers.py` | `document_watchers` |
+
+### قدم ۲ — Migration ستون‌ها (✅ انجام شد)
+
+فایل: `database/migrations/add_document_package_columns.py`
+۲۳ ستون جدید به `documents` اضافه شد.
+
+### قدم ۳ — ثبت جداول (✅ انجام شد)
+
+فایل: `database/tables/__init__.py` ویرایش شد.
+
+### قدم ۴ — هماهنگی init_db (✅ انجام شد)
+
+فایل: `database/init_db.py` ویرایش شد — migration جدید اضافه شد.
+
+**تست:** `python check_package_setup.py` → همه چیز OK (۲۳ ستون، ۹ جدول، ۲۳ ایندکس).
+
+### قدم ۵ — تنظیمات آپلود (✅ انجام شد)
+
+فایل: `config.py`:
+- `MAX_CONTENT_LENGTH = None` (حذف محدودیت Flask)
+- `DOCUMENT_UPLOAD_ROOT = instance/uploads`
+- `ALLOWED_UPLOAD_EXTENSIONS` — لیست پسوندهای مجاز
+- `PREVIEWABLE_EXTENSIONS` — پسوندهای قابل پیش‌نمایش
+- `MAX_UPLOAD_SIZE_BYTES = None`
+
+### قدم ۶ — سرویس رویدادها (✅ انجام شد)
+
+فایل: `services/documents/event_service.py`
+- `log_event()` — ثبت رویداد در تایم‌لاین
+- `list_events()` — خواندن تایم‌لاین سند
+- `EventType` — لیست ثابت انواع رویداد
+
+### قدم ۷ — سرویس ذخیره‌سازی (✅ انجام شد)
+
+فایل: `services/documents/storage_service.py`
+- آپلود استریمی تکه‌تکه (chunk 1MB)
+- محاسبه‌ی SHA-256
+- نام‌گذاری UUID
+- ذخیره در `instance/uploads/<document_id>/`
+- تشخیص previewable
+- حذف امن
+
+### قدم ۸ — تست سرویس‌ها (✅ انجام شد)
+
+فایل موقت: `test_services.py` — همه تست‌ها سبز.
+
+---
+
+## تصمیمات معماری
+
+1. **جدول `document_assignments` مستقل از `document_notes` است.** گردش تأیید محتوا (notes) دست‌نخورده می‌ماند؛ گردش سند (assignments) موازی کار می‌کند.
+2. **`document_events` فقط append-only است.** هر عملیات باید یک ردیف اینجا بنویسد.
+3. **آپلود استریمی.** فایل تکه‌تکه خوانده می‌شود، در RAM بارگذاری نمی‌شود.
+4. **شماره‌گذاری اتمیک** با `BEGIN IMMEDIATE` روی `document_counters` (در قدم‌های بعد).
+5. **فایل‌ها با UUID ذخیره می‌شوند** — نام اصلی در DB می‌ماند، نام فیزیکی UUID است.
+6. **دسترسی سه‌لایه:** ثبت‌کننده، ادمین/مدیر، مسئول ارجاع فعال.
+
+---
+
+## قدم‌های بعدی
+
+- [ ] روت‌های آپلود/preview/download
+- [ ] سرویس ثبت سند + شماره‌گذاری اتمیک
+- [ ] سرویس ارجاع
+- [ ] سرویس SLA
+- [ ] کارتابل (`/inbox`)
+- [ ] هشدارها (alarm scanner)
+- [ ] آرشیو و بازگشایی
+
+### قدم ۹ — روت‌های آپلود/preview/download (✅ انجام شد)
+
+فایل: `routes/documents/attachment_routes.py` (جدید)
+فایل: `routes/documents/__init__.py` (ویرایش شد — import attachment_routes)
+
+روت‌ها:
+- `POST /documents/<id>/attachments/upload` — آپلود استریمی
+- `GET /documents/<id>/attachments.json` — لیست JSON
+- `GET /documents/attachments/<id>/preview` — inline + Range (206)
+- `GET /documents/attachments/<id>/download` — attachment + Range
+- `POST /documents/attachments/<id>/delete` — حذف + رویداد
+- `GET /documents/attachments/test-page/<id>` — صفحه‌ی تست (فقط DEBUG)
+
+نکات فنی:
+- صفحه‌ی تست از CSRF token استفاده می‌کند (`X-CSRFToken` header) — بدون آن 400 می‌دهد.
+- `conditional=True` در `send_file` → پشتیبانی از Range/ETag/Last-Modified.
+- دسترسی: `admin/manager/supervisor/doc_controller` + ثبت‌کننده + مسئول ارجاع فعال.
+
+تست موفق:
+- آپلود PDF/TXT از مرورگر → 200
+- پیش‌نمایش inline → 200 + 206 (Range)
+- دانلود با نام اصلی
+- حذف فایل از دیسک
+
+### قدم ۱۰ — سرویس پکیج سند (✅ انجام شد)
+
+فایل: `services/documents/package_service.py` (جدید)
+فایل: `services/documents/__init__.py` (ادغام DocumentService + جدید)
+
+توابع:
+- `allocate_package_code()` — شماره‌گذاری اتمیک DFC-YYYY-NNNN (BEGIN + commit)
+- `register_document()` — ثبت سند + شماره + SLA + رویداد
+- `change_stage()` — انتقال مرحله با قواعد مجاز (STAGE_TRANSITIONS)
+- `get_package()` — خواندن کامل پکیج با JOINها
+- `Stage` — کلاس ثابت‌ها
+- `STAGE_TRANSITIONS` — گراف مجاز انتقال
+
+تست موفق:
+- ثبت سند اول → DFC-1405-0001 (id=8783)
+- ثبت سند دوم → DFC-1405-0002 (اتمیک)
+- routed → archived رد شد
+- تایم‌لاین ۲ رویداد ثبت کرد
+
+### قدم ۱۱ — سرویس ارجاع (✅ انجام شد)
+
+فایل: `services/documents/assignment_service.py` (جدید)
+
+توابع:
+- `route_document()` — ارجاع به یک یا چند نفر
+- `mark_read()` / `accept()` / `start()` / `complete()` / `return_to_sender()` / `cancel()`
+- `get_inbox()` — کوئری کارتابل با تب‌ها
+- `get_document_assignments()` — درخت ارجاع‌ها
+- `AssignmentStatus` / `AssignmentAction` — ثابت‌ها
+
+تست موفق:
+- ثبت سند DFC-1405-0003
+- ارجاع به کارشناس با مهلت ۳ روز کاری
+- کارتابل: ۱ مورد active
+- چرخه‌ی کامل: read → accept → start → complete
+- تایم‌لاین ۷ رویداد
+- کارتابل بعد از انجام: active=0، done=1
+
+### قدم ۱۲ — روت‌های ارجاع و کارتابل (✅ انجام شد)
+
+فایل: `routes/documents/assignment_routes.py` (جدید)
+فایل: `routes/inbox/__init__.py` (جدید)
+فایل: `routes/inbox/inbox_routes.py` (جدید)
+فایل: `templates/inbox/inbox.html` (جدید)
+فایل: `routes/documents/__init__.py` (ویرایش — import assignment_routes)
+فایل: `routes/__init__.py` (ویرایش — inbox_bp)
+فایل: `app.py` (ویرایش — register_blueprint inbox_bp)
+
+روت‌ها:
+- `POST /documents/<id>/route` — ارجاع
+- `POST /documents/assignments/<id>/{read,accept,start,complete,return,cancel}`
+- `GET /documents/<id>/assignments.json`
+- `GET /inbox/` — کارتابل
+- `GET /inbox/api/counts` — شمارنده‌ها
+- `GET /inbox/api/<tab>` — لیست JSON
+
+تست: کارتابل ۵ تب، شمارنده‌ها، اقدامات inline.
+
+### قدم ۱۳ — صفحه‌ی تست ارجاع (✅ انجام شد)
+
+فایل: `routes/documents/assignment_test_routes.py` (جدید)
+فایل: `routes/documents/__init__.py` (ویرایش)
+
+آدرس: `GET /documents/assignment-test-page/<id>` (فقط DEBUG)
+امکانات: انتخاب چند گیرنده، دستور، مهلت، اولویت، نمایش درخت ارجاع‌ها.
+
+تست: ارجاع از صفحه‌ی تست + مشاهده در کارتابل + چرخه‌ی accept/start/complete.
+
+### قدم ۱۴ — سرویس SLA (✅ انجام شد)
+
+فایل: `services/documents/sla_service.py` (جدید)
+- `recalculate_sla()` — اولویت زیرگروه → گروه → پیش‌فرض
+- `refresh_overdue_flags()` — پرچم دیرکرد همه‌ی اسناد
+- `is_document_overdue()`
+- `_add_working_days()` / `_working_days_between()` — با fallback
+
+تست: سند 8785 → ۷ روز، سررسید 2026/11/21، دیرکرد ۰.
+
+### قدم ۱۵ — سرویس هشدار (✅ انجام شد)
+
+فایل: `services/documents/alarm_service.py` (جدید)
+- `scan_assignments()` — نزدیک مهلت / دیرکرد ۱-۳-۷ / بدون اقدام ۴۸h
+- `scan_documents()` — دیرکرد مهلت کل ۱-۳-۷-۱۴
+- `scan_all()` — اجرای همه
+- `list_user_alarms()` / `ack_alarm()`
+- dedupe_key یکتا → جلوگیری از اسپم
+- اتصال به `notifications` موجود
+
+تست: `flask alarms-scan` → ۲ هشدار ارجاع، notification ساخته شد.
+
+### قدم ۱۶ — CLI (✅ انجام شد)
+
+فایل: `routes/cli.py` (جدید) + ثبت در `app.py`
+- `flask alarms-scan`
+- `flask refresh-overdue`
+- `flask recalc-sla <id>`
+
+### قدم ۱۷ — صفحه‌ی کامل پکیج (✅ انجام شد)
+
+فایل: `routes/documents/package_routes.py` (جدید)
+فایل: `templates/documents/package.html` (جدید)
+فایل: `routes/documents/__init__.py` (ویرایش)
+
+آدرس: `GET /documents/package/<id>`
+تب‌ها: خلاصه | ارجاع‌ها | تایم‌لاین | پیوست‌ها
+API: `POST /documents/package/<id>/change-stage`
+
+تست: صفحه لود شد، ارجاع از این صفحه، تایم‌لاین، آپلود و حذف پیوست.
+
+
+### اصلاح — پیش‌نمایش پیوست (✅ تکمیل شد — با یک یادداشت)
+
+- **آپلود:** کاملاً عملیاتی و بدون محدودیت حجم.
+- **پیش‌نمایش عکس/ویدیو/صدا:** داخل مودال به‌درستی کار می‌کند.
+- **پیش‌نمایش PDF:** به دلیل محدودیت‌های امنیتی مرورگرها (Chrome/Edge)، فایل PDF داخل `iframe` یا `object` سفید نمایش داده می‌شود. راه‌حل فعلی: نمایش یک کارت زیبا با دکمه‌ی «باز کردن در تب جدید».
+- **یادداشت برای آینده (TODO):** برای رندر PDF درون مودال، باید کتابخانه‌ی `PDF.js` (مولّد موزیلا) را به پروژه اضافه کنیم و فایل را با آن رندر کنیم.
+
+
+# طراحی «پکیج سند ورودی» — ثبت، مسیر، کارتابل و هشدار
+
+> **سند فنی زنده (Living Document)**
+> این سند معماری و وضعیت پیاده‌سازی «پکیج سند» را در پروژه SSPE ثبت می‌کند.
+> بخش‌های علامت‌گذاری‌شده با ✅ در کدبیس پیاده‌سازی شده‌اند.
+
+---
+
+## ۱. تصمیم اصلی: «سند» همان «پکیج» است
+
+**جدول `documents` به‌عنوان هدر پکیج باقی می‌ماند** و چند ستون + چند جدول ماهواره‌ای (satellite) به آن اضافه شده است.
+
+دلیل انتخاب این معماری:
+- جستجوی پیشرفته، ابزارهای AI، گزارش‌ها و اکسل همه به `documents` وابسته‌اند.
+- با ایجاد جدول جدید، دو منبع حقیقت ایجاد می‌شد و دوباره‌کاری رخ می‌داد.
+- ۸٬۷۸۲ رکورد فعلی بدون مهاجرت سنگین حفظ می‌شوند.
+
+یعنی هر «موضوع» یک ردیف در `documents` است، و نامه‌ها، ارجاع‌ها، درخواست تکمیل مدارک، پیوست‌ها و رویدادها به آن آویزان می‌شوند. این دقیقاً همان «پکیج پیرامون موضوع» است.
+
+---
+
+## ۲. ستون‌های جدید `documents` (✅ انجام شد)
+
+```sql
+-- شماره‌گذاری و طبقه‌بندی
+ALTER TABLE documents ADD COLUMN package_code TEXT;          -- DFC-1405-0001 (یکتا)
+ALTER TABLE documents ADD COLUMN package_year INTEGER;
+ALTER TABLE documents ADD COLUMN direction TEXT DEFAULT 'incoming';
+ALTER TABLE documents ADD COLUMN source_type TEXT;
+ALTER TABLE documents ADD COLUMN source_department_id INTEGER;
+ALTER TABLE documents ADD COLUMN priority TEXT DEFAULT 'normal';
+ALTER TABLE documents ADD COLUMN confidentiality TEXT DEFAULT 'internal';
+
+-- فرستنده
+ALTER TABLE documents ADD COLUMN sender_name TEXT;
+ALTER TABLE documents ADD COLUMN sender_ref_no TEXT;
+ALTER TABLE documents ADD COLUMN sender_ref_date TEXT;
+
+-- مرحله چرخه عمر
+ALTER TABLE documents ADD COLUMN stage TEXT DEFAULT 'draft';
+
+-- SLA کامل
+ALTER TABLE documents ADD COLUMN sla_start_date TEXT;
+ALTER TABLE documents ADD COLUMN sla_effective_days INTEGER;
+ALTER TABLE documents ADD COLUMN is_overdue INTEGER DEFAULT 0;
+ALTER TABLE documents ADD COLUMN overdue_days INTEGER DEFAULT 0;
+
+-- آرشیو
+ALTER TABLE documents ADD COLUMN registered_by INTEGER;
+ALTER TABLE documents ADD COLUMN registered_at TEXT;
+ALTER TABLE documents ADD COLUMN closed_by INTEGER;
+ALTER TABLE documents ADD COLUMN closed_at TEXT;
+ALTER TABLE documents ADD COLUMN archived_by INTEGER;
+ALTER TABLE documents ADD COLUMN archived_at TEXT;
+ALTER TABLE documents ADD COLUMN archive_reason TEXT;
+ALTER TABLE documents ADD COLUMN reopen_count INTEGER DEFAULT 0;
+
+# طراحی «پکیج سند ورودی» — ثبت، مسیر، کارتابل و هشدار
+
+> **سند فنی زنده (Living Document)**
+> این سند معماری و وضعیت پیاده‌سازی «پکیج سند» را در پروژه SSPE ثبت می‌کند.
+> بخش‌های علامت‌گذاری‌شده با ✅ در کدبیس پیاده‌سازی شده‌اند.
+
+---
+
+## ۱. تصمیم اصلی: «سند» همان «پکیج» است
+
+**جدول `documents` به‌عنوان هدر پکیج باقی می‌ماند** و چند ستون + چند جدول ماهواره‌ای (satellite) به آن اضافه شده است.
+
+دلیل انتخاب این معماری:
+- جستجوی پیشرفته، ابزارهای AI، گزارش‌ها و اکسل همه به `documents` وابسته‌اند.
+- با ایجاد جدول جدید، دو منبع حقیقت ایجاد می‌شد و دوباره‌کاری رخ می‌داد.
+- ۸٬۷۸۲ رکورد فعلی بدون مهاجرت سنگین حفظ می‌شوند.
+
+یعنی هر «موضوع» یک ردیف در `documents` است، و نامه‌ها، ارجاع‌ها، درخواست تکمیل مدارک، پیوست‌ها و رویدادها به آن آویزان می‌شوند. این دقیقاً همان «پکیج پیرامون موضوع» است.
+
+---
+
+## ۲. ستون‌های جدید `documents` (✅ انجام شد)
+
+```sql
+-- شماره‌گذاری و طبقه‌بندی
+ALTER TABLE documents ADD COLUMN package_code TEXT;          -- DFC-1405-0001 (یکتا)
+ALTER TABLE documents ADD COLUMN package_year INTEGER;
+ALTER TABLE documents ADD COLUMN direction TEXT DEFAULT 'incoming';
+ALTER TABLE documents ADD COLUMN source_type TEXT;
+ALTER TABLE documents ADD COLUMN source_department_id INTEGER;
+ALTER TABLE documents ADD COLUMN priority TEXT DEFAULT 'normal';
+ALTER TABLE documents ADD COLUMN confidentiality TEXT DEFAULT 'internal';
+
+-- فرستنده و قرارداد
+ALTER TABLE documents ADD COLUMN sender_name TEXT;
+ALTER TABLE documents ADD COLUMN sender_ref_no TEXT;
+ALTER TABLE documents ADD COLUMN sender_ref_date TEXT;
+ALTER TABLE documents ADD COLUMN contract_number TEXT;       -- ★ جدید
+
+-- مرحله چرخه عمر
+ALTER TABLE documents ADD COLUMN stage TEXT DEFAULT 'draft';
+
+-- SLA کامل
+ALTER TABLE documents ADD COLUMN sla_start_date TEXT;
+ALTER TABLE documents ADD COLUMN sla_effective_days INTEGER;
+ALTER TABLE documents ADD COLUMN is_overdue INTEGER DEFAULT 0;
+ALTER TABLE documents ADD COLUMN overdue_days INTEGER DEFAULT 0;
+
+-- آرشیو
+ALTER TABLE documents ADD COLUMN registered_by INTEGER;
+ALTER TABLE documents ADD COLUMN registered_at TEXT;
+ALTER TABLE documents ADD COLUMN closed_by INTEGER;
+ALTER TABLE documents ADD COLUMN closed_at TEXT;
+ALTER TABLE documents ADD COLUMN archived_by INTEGER;
+ALTER TABLE documents ADD COLUMN archived_at TEXT;
+ALTER TABLE documents ADD COLUMN archive_reason TEXT;
+ALTER TABLE documents ADD COLUMN reopen_count INTEGER DEFAULT 0;

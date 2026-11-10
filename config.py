@@ -2,8 +2,6 @@ import os
 from datetime import timedelta
 
 # بارگذاری متغیرهای محیطی از فایل .env
-# اگر python-dotenv نصب نباشد، بی‌صدا نادیده گرفته می‌شود و فقط
-# متغیرهای محیطی سیستم خوانده می‌شوند.
 try:
     from dotenv import load_dotenv
 
@@ -54,49 +52,71 @@ class Config:
         BASE_DIR, "instance", "database.db"
     )
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
-    MAX_CONTENT_LENGTH = 16 * 1024 * 1024
+
+    # ★★★ حذف محدودیت Flask — ما خودمان استریمی بررسی می‌کنیم
+    MAX_CONTENT_LENGTH = None
+
+    # ★★★ جدید — تنظیمات آپلود پکیج سند
+    DOCUMENT_UPLOAD_ROOT = os.path.join(BASE_DIR, "instance", "uploads")
+    MAX_UPLOAD_SIZE_BYTES = None  # None = بدون محدودیت
+    ALLOWED_UPLOAD_EXTENSIONS = {
+        # اسناد اداری
+        "pdf", "doc", "docx", "docm", "xls", "xlsx", "xlsm",
+        "ppt", "pptx", "pptm", "txt", "csv", "rtf", "odt", "ods",
+        # تصاویر
+        "jpg", "jpeg", "jfif", "png", "gif", "bmp", "webp", "svg",
+        "heic", "heif", "tiff", "tif",
+        # ویدیو و صدا
+        "mp4", "mov", "avi", "mkv", "webm", "mpg", "mpeg",
+        "mp3", "wav", "ogg", "m4a", "aac",
+        # آرشیو
+        "zip", "rar", "7z", "tar", "gz",
+        # CAD
+        "dwg", "dxf", "step", "stp", "iges", "igs", "rvt", "ifc",
+        # مدیریت پروژه
+        "mpp", "vsd", "vsdx",
+        # ایمیل
+        "msg", "eml",
+        # اسکن
+        "djvu",
+    }
+    PREVIEWABLE_EXTENSIONS = {
+        "pdf", "txt", "csv", "json", "xml",
+        "jpg", "jpeg", "jfif", "png", "gif", "bmp", "webp", "svg",
+        "tiff", "tif",
+        "mp4", "webm", "mov", "m4a",
+        "mp3", "wav", "ogg",
+    }
+
     DATE_FORMAT = "%Y/%m/%d"
 
     # ============================================================
     # ★ امنیت نشست
     # ============================================================
-    # HttpOnly: جاوااسکریپت به کوکی نشست دسترسی ندارد
     SESSION_COOKIE_HTTPONLY = True
-    # SameSite=Lax: کوکی در درخواست‌های cross-site ارسال نمی‌شود
     SESSION_COOKIE_SAMESITE = "Lax"
-    # Secure را فقط وقتی HTTPS دارید روشن کنید:
-    #   SESSION_COOKIE_SECURE=1
     SESSION_COOKIE_SECURE = _env_bool("SESSION_COOKIE_SECURE", False)
-    # خروج خودکار پس از ۱۲ ساعت بی‌کاری/عمر نشست
     PERMANENT_SESSION_LIFETIME = timedelta(hours=12)
 
     # ============================================================
-    # ★ DEBUG — به‌صورت پیش‌فرض خاموش
+    # ★ DEBUG
     # ============================================================
     DEBUG = _env_bool("FLASK_DEBUG", False)
 
     # ============================================================
     # ★ تقویم کاری و مهلت پاسخ
     # ============================================================
-    # روزهای تعطیل هفتگی (ISO: دوشنبه=۱ … یکشنبه=۷).
-    # در این سازمان پنجشنبه (۴) و جمعه (۵) تعطیل است.
-    # برای تغییر: SSPE_WEEKEND_DAYS=5
     WEEKEND_DAYS = _env_iso_days("SSPE_WEEKEND_DAYS", (4, 5))
-
-    # مهلت پاسخ پیش‌فرض (روز کاری) وقتی گروه/زیرگروه مقداری نداشته باشد
     DEFAULT_SLA_DAYS = _env_int("SSPE_DEFAULT_SLA_DAYS", 7)
 
     # ============================================================
     # ★ CSRF
     # ============================================================
-    # توکن تا پایان نشست معتبر است (بدون انقضای یک‌ساعته) تا فرم‌هایی
-    # که مدت‌ها باز می‌مانند با خطای 400 غافلگیر نشوند.
     WTF_CSRF_TIME_LIMIT = None
     WTF_CSRF_HEADERS = ["X-CSRFToken", "X-CSRF-Token"]
 
     @classmethod
     def is_default_secret(cls):
-        """آیا SECRET_KEY روی مقدار ناامن پیش‌فرض مانده است؟"""
         return cls.SECRET_KEY == DEV_SECRET_KEY
 
     DATE_FIELDS = [
@@ -111,23 +131,17 @@ class Config:
     ]
 
     EXCEL_COLUMN_MAPPING = {
-        # ============================================================
-        # ★★★ شناسه‌ها ★★★
-        # ============================================================
+        # شناسه‌ها
         "شناسه سند": "id",
         "شناسه": "id",
         "ID": "id",
         "id": "id",
-
         "شناسه پیمانکار": "contractor_id",
         "شناسه پیمانکار ": "contractor_id",
-
         "شناسه پروژه": "project_id",
         "شناسه پروژه ": "project_id",
 
-        # ============================================================
         # اطلاعات اصلی سند
-        # ============================================================
         "کد DFC": "code_dfc",
         "تاریخ نامه": "date_letter",
         "تاریخ نامه پیمانکار": "date_letter",
@@ -164,12 +178,9 @@ class Config:
         "تاریخ تکمیل مدارک توسط پیمانکار": "complete_docs_by_contractor",
         "وضعیت پاسخ مدرک": "doc_response_status",
         "تاریخ اعلام پاسخ": "response_announce_date",
-        
         "تاریخ ارسال نهایی": "final_send_date",
         "تاریخ ارسال نهایی ": "final_send_date",
         "تاریخ ارسال": "final_send_date",
-
-        "شماره نامه نهایی": "final_letter_number",
         "شماره نامه نهایی": "final_letter_number",
         "شماره نامه نهایی ": "final_letter_number",
         "تاخیر نهایی": "final_delay",
@@ -180,22 +191,16 @@ class Config:
         "مسئول رسیدگی": "Responsible_Party",
         "مسئول رسیدگی ": "Responsible_Party",
 
-        # ============================================================
         # شناسه‌های ارجاعی
-        # ============================================================
         "شناسه وضعیت": "status_id",
         "شناسه ناحیه": "area_id",
         "شناسه دپارتمان": "department_id",
-
-        # ★ جدید — شناسه گروه و زیرگروه
         "شناسه گروه": "group_id",
         "شناسه گروه سند": "group_id",
         "شناسه زیرگروه": "subgroup_id",
         "شناسه زیرگروه سند": "subgroup_id",
 
-        # ============================================================
-        # انگلیسی (پشتیبانی اضافی)
-        # ============================================================
+        # انگلیسی
         "Responsible_Party": "Responsible_Party",
         "responsible_party": "Responsible_Party",
         "Responsible party": "Responsible_Party",

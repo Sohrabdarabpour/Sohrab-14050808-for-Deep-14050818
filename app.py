@@ -23,6 +23,7 @@ from routes.contract_types import contract_types_bp
 from routes.project_roles import project_roles_bp
 from routes.projects import projects_bp
 from routes.workflow import workflow_bp, notification_bp
+from routes.inbox import inbox_bp
 
 # ============================================================
 # ★ جستجوی پیشرفته
@@ -267,6 +268,10 @@ def create_app():
     # ============================================================
     init_db()
 
+     # ★ ثبت CLI commands
+    from routes.cli import register_cli
+    register_cli(app)
+
     # ============================================================
     # ★ ثبت Blueprintها
     # ============================================================
@@ -289,6 +294,7 @@ def create_app():
     # ---- ★ Workflow & Notifications ----
     app.register_blueprint(workflow_bp)
     app.register_blueprint(notification_bp)
+    app.register_blueprint(inbox_bp)
 
     # ============================================================
     # ★ جستجوی پیشرفته

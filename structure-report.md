@@ -1062,3 +1062,16 @@ class LLMTools(ExtraToolsMixin):
 - نمایش «روزهای کاری باقی‌مانده» در کارتابل/کارت سند پس از ساخت ارجاع‌ها.
 - ستون `days_review` گروه هنوز فرم ویرایش ندارد؛ مقدارش فعلاً از seed/دیتابیس تنظیم می‌شود.
 
+### قدم ۱۱ — سرویس ارجاع (✅ انجام شد)
+
+فایل: `services/documents/assignment_service.py` (جدید)
+
+توابع:
+- `route_document()` — ارجاع به یک یا چند نفر (due_date محاسبه‌شده)
+- `mark_read()` — رسید خواندن
+- `accept()` / `start()` / `complete()` / `return_to_sender()` / `cancel()`
+- `get_inbox()` — کوئری کارتابل با تب‌ها (active / unread / overdue / waiting / done)
+- `get_document_assignments()` — درخت ارجاع‌ها
+- `AssignmentStatus` / `AssignmentAction` — ثابت‌ها
+
+تست موفق: ثبت سند → ارجاع → کارتابل → خواندن → پذیرش → انجام → تایم‌لاین.

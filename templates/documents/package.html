@@ -1,0 +1,1105 @@
+{% extends "base.html" %}
+
+{% block title %}پکیج {{ doc.package_code or ('#' ~ doc.id) }}{% endblock %}
+
+{% block styles %}
+<style>
+    /* ============================================================
+       استایل‌های اختصاصی صفحه‌ی پکیج سند
+       ============================================================ */
+    .package-header {
+        background: #fff;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    
+    .package-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1b698b;
+        margin-bottom: 8px;
+    }
+    
+    .package-meta {
+        font-size: 0.85rem;
+        color: #718096;
+    }
+    
+    .nav-tabs-package {
+        border-bottom: 2px solid #e2e8f0;
+        margin-bottom: 24px;
+        gap: 4px;
+    }
+    
+    .nav-tabs-package .nav-link {
+        border: none;
+        color: #4a5568;
+        font-weight: 500;
+        padding: 10px 16px;
+        border-radius: 8px 8px 0 0;
+        transition: all 0.2s;
+    }
+    
+    .nav-tabs-package .nav-link:hover {
+        background: #f7fafc;
+        color: #1b698b;
+    }
+    
+    .nav-tabs-package .nav-link.active {
+        background: #fff;
+        color: #1b698b;
+        border-bottom: 3px solid #1b698b;
+        font-weight: 700;
+    }
+    
+    .nav-tabs-package .nav-link .badge {
+        font-size: 0.7rem;
+        margin-right: 4px;
+    }
+
+    /* کارت‌های اطلاعات */
+    .info-card {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+        margin-bottom: 20px;
+        overflow: hidden;
+    }
+    
+    .info-card-header {
+        background: #f8fafc;
+        padding: 12px 16px;
+        font-weight: 600;
+        color: #2d3748;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .info-card-body {
+        padding: 16px;
+    }
+    
+    .info-table {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+    
+    .info-table th {
+        font-weight: 500;
+        color: #718096;
+        width: 35%;
+        padding: 6px 0;
+        vertical-align: top;
+    }
+    
+    .info-table td {
+        font-weight: 500;
+        color: #2d3748;
+        padding: 6px 0;
+    }
+
+    /* تایم‌لاین */
+    .timeline-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        position: relative;
+    }
+    
+    .timeline-list::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: 15px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    
+    .timeline-item {
+        position: relative;
+        padding-right: 40px;
+        margin-bottom: 20px;
+    }
+    
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #1b698b;
+        border: 3px solid #fff;
+        box-shadow: 0 0 0 2px #1b698b;
+    }
+    
+    .timeline-content {
+        background: #f8fafc;
+        border-radius: 8px;
+        padding: 12px;
+        border: 1px solid #edf2f7;
+    }
+    
+    .timeline-type {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #1b698b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .timeline-summary {
+        font-size: 0.9rem;
+        color: #2d3748;
+        margin-top: 4px;
+    }
+    
+    .timeline-meta {
+        font-size: 0.75rem;
+        color: #a0aec0;
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    /* جدول‌ها */
+    .table-custom {
+        font-size: 0.85rem;
+        background: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .table-custom th {
+        background: #f8fafc;
+        color: #4a5568;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .table-custom td {
+        vertical-align: middle;
+    }
+
+    /* فرم‌ها */
+    .form-section {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+    }
+    
+    .form-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 4px;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 6px;
+        border: 1px solid #cbd5e0;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #1b698b;
+        box-shadow: 0 0 0 3px rgba(27, 105, 139, 0.15);
+    }
+    
+    .btn-custom {
+        background: #1b698b;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .btn-custom:hover {
+        background: #145272;
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    /* استایل درصد پیشرفت */
+    .progress-custom {
+        height: 12px;
+        border-radius: 6px;
+        background: #edf2f7;
+        overflow: hidden;
+    }
+    
+    .progress-custom .progress-bar {
+        border-radius: 6px;
+        transition: width 0.4s ease;
+    }
+
+    /* بج‌ها */
+    .badge-soft-success { background: #c6f6d5; color: #22543d; }
+    .badge-soft-warning { background: #fefcbf; color: #744210; }
+    .badge-soft-danger { background: #fed7d7; color: #742a2a; }
+    .badge-soft-info { background: #bee3f8; color: #2a4365; }
+    .badge-soft-secondary { background: #e2e8f0; color: #4a5568; }
+
+    @media (max-width: 768px) {
+        .package-header { padding: 16px; }
+        .info-table th { width: 45%; }
+        .timeline-item { padding-right: 30px; }
+        .timeline-list::before { right: 10px; }
+        .timeline-item::before { right: 5px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+  {# ════════ هدر ════════ #}
+  <div class="package-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <div>
+      <div class="package-title">
+        {% if doc.package_code %}
+          <code class="fs-5">{{ doc.package_code }}</code>
+        {% else %}
+          <code class="fs-5">#{{ doc.id }}</code>
+        {% endif %}
+        — {{ doc.subject or 'بدون موضوع' }}
+      </div>
+      <div class="package-meta">
+        <i class="fa-solid fa-user"></i> ثبت‌کننده: {{ doc.registered_by_name or '—' }}
+        {% if doc.registered_at %} — <i class="fa-regular fa-clock"></i> {{ doc.registered_at }}{% endif %}
+        <span class="badge badge-soft-info ms-2">{{ current_stage }}</span>
+      </div>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="/inbox/" class="btn btn-outline-secondary btn-sm">
+        <i class="fa-solid fa-inbox"></i> کارتابل
+      </a>
+      <a href="/documents/view/{{ doc.id }}" class="btn btn-outline-secondary btn-sm">
+        نمای قدیمی
+      </a>
+    </div>
+  </div>
+
+  {# ════════ تب‌ها ════════ #}
+  <ul class="nav nav-tabs nav-tabs-package" role="tablist">
+    <li class="nav-item">
+      <button class="nav-link active" data-bs-toggle="tab"
+              data-bs-target="#tab-summary" type="button">
+        <i class="fa-solid fa-circle-info"></i> خلاصه
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab"
+              data-bs-target="#tab-assignments" type="button">
+        <i class="fa-solid fa-route"></i> ارجاع‌ها
+        <span class="badge bg-primary">{{ assignments|length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab"
+              data-bs-target="#tab-references" type="button">
+        <i class="fa-solid fa-envelope"></i> نامه‌ها
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab"
+              data-bs-target="#tab-completion" type="button">
+        <i class="fa-solid fa-clipboard-check"></i> تکمیل مدارک
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab"
+              data-bs-target="#tab-attachments" type="button">
+        <i class="fa-solid fa-paperclip"></i> پیوست‌ها
+        <span class="badge bg-secondary">{{ attachments|length }}</span>
+      </button>
+    </li>
+    <li class="nav-item">
+      <button class="nav-link" data-bs-toggle="tab"
+              data-bs-target="#tab-timeline" type="button">
+        <i class="fa-solid fa-clock-rotate-left"></i> تایم‌لاین
+        <span class="badge bg-secondary">{{ events|length }}</span>
+      </button>
+    </li>
+  </ul>
+
+  <div class="tab-content">
+
+    {# ════════ تب ۱: خلاصه ════════ #}
+    <div class="tab-pane fade show active" id="tab-summary">
+      <div class="row">
+        <div class="col-md-6">
+          <div class="info-card">
+            <div class="info-card-header">
+              <i class="fa-solid fa-file-lines"></i> اطلاعات اصلی
+            </div>
+            <div class="info-card-body">
+              <table class="info-table">
+                <tr><th>موضوع</th><td>{{ doc.subject or '—' }}</td></tr>
+                <tr><th>کد پکیج</th><td><code>{{ doc.package_code or '—' }}</code></td></tr>
+                <tr><th>منبع</th><td>{{ doc.source_type or '—' }}</td></tr>
+                <tr><th>فرستنده</th><td>{{ doc.sender_name or '—' }}</td></tr>
+                <tr><th>شماره نامه فرستنده</th><td>{{ doc.sender_ref_no or '—' }}</td></tr>
+                <tr><th>اولویت</th><td>
+                  {% if doc.priority == 'urgent' %}<span class="badge badge-soft-danger">فوری</span>
+                  {% elif doc.priority == 'high' %}<span class="badge badge-soft-warning">بالا</span>
+                  {% elif doc.priority == 'normal' %}<span class="badge badge-soft-info">معمولی</span>
+                  {% else %}<span class="badge badge-soft-secondary">کم</span>{% endif %}
+                </td></tr>
+                <tr><th>گروه</th><td>{{ doc.group_title or '—' }}</td></tr>
+                <tr><th>زیرگروه</th><td>{{ doc.subgroup_title or '—' }}</td></tr>
+                <tr><th>تاریخ دریافت</th><td>{{ doc.date_received or '—' }}</td></tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <div class="info-card">
+            <div class="info-card-header">
+              <i class="fa-solid fa-hourglass-half"></i> مهلت پاسخ (SLA)
+            </div>
+            <div class="info-card-body">
+              <table class="info-table">
+                <tr><th>مهلت</th>
+                    <td>{{ doc.sla_effective_days or doc.sla_days or '—' }} روز کاری
+                        <small class="text-muted">({{ doc.sla_source or '—' }})</small>
+                    </td></tr>
+                <tr><th>شروع</th><td>{{ doc.sla_start_date or '—' }}</td></tr>
+                <tr><th>سررسید</th><td>{{ doc.response_due_date or '—' }}</td></tr>
+                <tr><th>دیرکرد</th><td>
+                  {% if doc.is_overdue %}
+                    <span class="badge badge-soft-danger">{{ doc.overdue_days }} روز کاری دیرکرد</span>
+                  {% else %}
+                    <span class="badge badge-soft-success">به‌موقع</span>
+                  {% endif %}
+                </td></tr>
+              </table>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-header">
+              <i class="fa-solid fa-forward-step"></i> اقدامات مرحله
+            </div>
+            <div class="info-card-body">
+              <p class="text-muted small mb-3">مرحله فعلی:
+                <span class="badge badge-soft-info">{{ current_stage }}</span>
+              </p>
+              {% if allowed_stages %}
+                <div class="d-flex gap-2 flex-wrap">
+                  {% for stage in allowed_stages %}
+                    <button class="btn btn-outline-primary btn-sm"
+                            onclick="changeStage('{{ stage }}')">
+                      <i class="fa-solid fa-arrow-left"></i> انتقال به {{ stage }}
+                    </button>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="text-muted small mb-0">این مرحله پایانی است.</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {# ════════ تب ۲: ارجاع‌ها ════════ #}
+    <div class="tab-pane fade" id="tab-assignments">
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fa-solid fa-plus-circle text-primary"></i> ارجاع جدید
+        </div>
+        <form id="route-form">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label class="form-label">گیرندگان</label>
+              <select class="form-select" name="to_user_ids" multiple size="5">
+                {% for u in users %}
+                  <option value="{{ u.id }}">{{ u.full_name }} — {{ u.role }}</option>
+                {% endfor %}
+              </select>
+              <small class="text-muted">Ctrl+Click برای چند انتخاب</small>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">دستور</label>
+              <textarea class="form-control" name="instruction" rows="2"
+                        placeholder="اختیاری..."></textarea>
+              <label class="form-label mt-2">مهلت (روز کاری)</label>
+              <input type="number" class="form-control" name="due_days"
+                     value="3" min="0" max="365">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">اولویت</label>
+              <select class="form-select" name="priority">
+                <option value="low">کم</option>
+                <option value="normal" selected>معمولی</option>
+                <option value="high">بالا</option>
+                <option value="urgent">فوری</option>
+              </select>
+              <button type="submit" class="btn btn-custom mt-3 w-100">
+                <i class="fa-solid fa-paper-plane"></i> ارجاع
+              </button>
+            </div>
+          </div>
+          <div id="route-result" class="mt-2"></div>
+        </form>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-header">
+          <i class="fa-solid fa-route"></i> ارجاع‌های موجود ({{ assignments|length }})
+        </div>
+        <div class="info-card-body">
+          {% if not assignments %}
+            <p class="text-muted text-center my-4">هنوز ارجاعی ثبت نشده است.</p>
+          {% else %}
+            <div class="table-responsive">
+              <table class="table table-custom table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th><th>از</th><th>به</th><th>دستور</th>
+                    <th>مهلت</th><th>وضعیت</th><th>عملیات</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for a in assignments %}
+                  <tr data-id="{{ a.id }}">
+                    <td>{{ a.id }}</td>
+                    <td>{{ a.from_user_name or '—' }}</td>
+                    <td>{{ a.to_user_name or '—' }}</td>
+                    <td><small>{{ a.instruction or '—' }}</small></td>
+                    <td><small>{{ a.due_date or '—' }}</small></td>
+                    <td>
+                      {% if a.status == 'pending' %}
+                        <span class="badge badge-soft-secondary">در انتظار</span>
+                      {% elif a.status == 'accepted' %}
+                        <span class="badge badge-soft-info">پذیرفته</span>
+                      {% elif a.status == 'in_progress' %}
+                        <span class="badge badge-soft-warning">در حال انجام</span>
+                      {% elif a.status == 'done' %}
+                        <span class="badge badge-soft-success">انجام‌شده</span>
+                      {% else %}
+                        <span class="badge badge-soft-secondary">{{ a.status }}</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if a.status in ('pending','accepted','in_progress') %}
+                        <div class="d-flex gap-1">
+                          {% if a.status == 'pending' %}
+                            <button class="btn btn-xs btn-outline-primary"
+                                    onclick="doAction({{ a.id }}, 'accept')">پذیرش</button>
+                          {% endif %}
+                          {% if a.status in ('pending','accepted') %}
+                            <button class="btn btn-xs btn-outline-info"
+                                    onclick="doAction({{ a.id }}, 'start')">شروع</button>
+                          {% endif %}
+                          {% if a.status in ('accepted','in_progress') %}
+                            <button class="btn btn-xs btn-outline-success"
+                                    onclick="doAction({{ a.id }}, 'complete')">اتمام</button>
+                          {% endif %}
+                        </div>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ════════ تب ۳: نامه‌ها ════════ #}
+    <div class="tab-pane fade" id="tab-references">
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fa-solid fa-envelope-open-text text-primary"></i> ثبت نامه / ارتباط جدید
+        </div>
+        <form id="reference-form">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">نوع</label>
+              <select class="form-select" name="ref_type" required>
+                <option value="incoming_letter">نامه وارده</option>
+                <option value="outgoing_letter">نامه صادره</option>
+                <option value="phone_call">تماس تلفنی</option>
+                <option value="meeting">جلسه</option>
+                <option value="email">ایمیل</option>
+                <option value="verbal_request">درخواست شفاهی</option>
+                <option value="other">سایر</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">شماره نامه</label>
+              <input type="text" class="form-control" name="ref_no" placeholder="اختیاری">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">تاریخ</label>
+              <input type="text" class="form-control" name="ref_date" placeholder="1405/01/01">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+              <button type="submit" class="btn btn-custom w-100">
+                <i class="fa-solid fa-check"></i> ثبت
+              </button>
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-6">
+              <label class="form-label">موضوع</label>
+              <input type="text" class="form-control" name="subject" placeholder="موضوع نامه...">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">خلاصه / توضیحات</label>
+              <input type="text" class="form-control" name="summary" placeholder="اختیاری...">
+            </div>
+          </div>
+          <div class="mt-2" id="reference-result"></div>
+        </form>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-header">
+          <i class="fa-solid fa-list"></i> نامه‌ها و ارتباطات ثبت‌شده
+        </div>
+        <div class="info-card-body" id="references-list">
+          <div class="text-muted text-center my-4">در حال بارگذاری...</div>
+        </div>
+      </div>
+    </div>
+
+    {# ════════ تب ۴: تکمیل مدارک ════════ #}
+    <div class="tab-pane fade" id="tab-completion">
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fa-solid fa-file-circle-plus text-primary"></i> درخواست تکمیل مدارک جدید
+        </div>
+        <form id="completion-form">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">نوع درخواست</label>
+              <select class="form-select" name="mode">
+                <option value="written">کتبی (نامه)</option>
+                <option value="verbal">شفاهی</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">مهلت تحویل</label>
+              <input type="text" class="form-control" name="due_date" placeholder="1405/01/01">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">مدارک مورد نیاز (با کاما جدا کنید)</label>
+              <input type="text" class="form-control" name="items" placeholder="نقشه تأییدشده، گزارش تست، ...">
+            </div>
+          </div>
+          <div class="row g-3 mt-1">
+            <div class="col-md-12">
+              <label class="form-label">توضیحات (اختیاری)</label>
+              <input type="text" class="form-control" name="note">
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-custom">
+              <i class="fa-solid fa-plus"></i> ثبت درخواست
+            </button>
+          </div>
+          <div id="completion-result" class="mt-2"></div>
+        </form>
+      </div>
+      
+      <div class="info-card">
+        <div class="info-card-header">
+          <i class="fa-solid fa-list-check"></i> درخواست‌های تکمیل مدارک
+        </div>
+        <div class="info-card-body" id="completion-list">
+          <div class="text-muted text-center my-4">در حال بارگذاری...</div>
+        </div>
+      </div>
+    </div>
+
+    {# ════════ تب ۵: پیوست‌ها ════════ #}
+    <div class="tab-pane fade" id="tab-attachments">
+      <div class="form-section">
+        <div class="form-section-title">
+          <i class="fa-solid fa-cloud-arrow-up text-primary"></i> آپلود فایل جدید
+        </div>
+        <form id="upload-form">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-6">
+              <label class="form-label">انتخاب فایل</label>
+              <input type="file" class="form-control" id="file-input" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">نوع فایل</label>
+              <select class="form-select" id="kind-input">
+                <option value="letter">نامه</option>
+                <option value="scan">اسکن</option>
+                <option value="evidence">مدرک</option>
+                <option value="other" selected>سایر</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <button type="submit" class="btn btn-custom w-100">
+                <i class="fa-solid fa-upload"></i> آپلود
+              </button>
+            </div>
+          </div>
+          <progress id="progress" value="0" max="100"
+                    class="w-100 mt-3" style="display:none; height: 10px;"></progress>
+          <div id="upload-result" class="mt-2"></div>
+        </form>
+      </div>
+
+      <div class="info-card">
+        <div class="info-card-header">
+          <i class="fa-solid fa-paperclip"></i> پیوست‌ها ({{ attachments|length }})
+        </div>
+        <div class="info-card-body">
+          {% if not attachments %}
+            <p class="text-muted text-center my-4">هنوز فایلی پیوست نشده است.</p>
+          {% else %}
+            <div class="table-responsive">
+              <table class="table table-custom table-hover">
+                <thead>
+                  <tr><th>نام فایل</th><th>حجم</th><th>نوع</th><th>عملیات</th></tr>
+                </thead>
+                <tbody>
+                  {% for a in attachments %}
+                  <tr>
+                    <td>{{ a.original_name }}</td>
+                    <td>{{ a.size_human }}</td>
+                    <td><small class="text-muted">{{ a.mime }}</small></td>
+                    <td>
+                      <div class="d-flex gap-1">
+                        {% if a.previewable %}
+                          <button class="btn btn-sm btn-outline-primary"
+                                  onclick="openPreview({{ a.id }}, '{{ a.mime }}', '{{ a.original_name }}')">
+                            <i class="fa-solid fa-eye"></i> پیش‌نمایش
+                          </button>
+                        {% endif %}
+                        <a href="/documents/attachments/{{ a.id }}/download"
+                           class="btn btn-sm btn-outline-secondary">
+                          <i class="fa-solid fa-download"></i> دانلود
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger"
+                                onclick="delAttachment({{ a.id }})">
+                          <i class="fa-solid fa-trash"></i> حذف
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# ════════ تب ۶: تایم‌لاین ════════ #}
+    <div class="tab-pane fade" id="tab-timeline">
+      <div class="info-card">
+        <div class="info-card-header">
+          <i class="fa-solid fa-clock-rotate-left"></i> تاریخچه رویدادها
+        </div>
+        <div class="info-card-body">
+          {% if not events %}
+            <p class="text-muted text-center my-4">هنوز رویدادی ثبت نشده است.</p>
+          {% else %}
+            <ul class="timeline-list">
+              {% for e in events %}
+                <li class="timeline-item">
+                  <div class="timeline-content">
+                    <div class="timeline-type">{{ e.event_type }}</div>
+                    {% if e.summary %}
+                      <div class="timeline-summary">{{ e.summary }}</div>
+                    {% endif %}
+                    <div class="timeline-meta">
+                      <span>
+                        {% if e.actor_name %}
+                          <i class="fa-solid fa-user"></i> {{ e.actor_name }}
+                        {% endif %}
+                      </span>
+                      <span>{{ e.created_at or '' }}</span>
+                    </div>
+                  </div>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ★ مودال پیش‌نمایش فایل -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewModalTitle">پیش‌نمایش فایل</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center" id="previewModalBody" style="min-height: 500px;">
+        <!-- محتوا با JS پر می‌شود -->
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+const DOC_ID = {{ doc.id }};
+
+// CSRF خودکار توسط base.html ست می‌شود
+function postJSON(url, body) {
+  return fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(body || {}),
+  }).then(r => r.json());
+}
+
+async function doAction(assignmentId, action) {
+  try {
+    const data = await postJSON(`/documents/assignments/${assignmentId}/${action}`, {});
+    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+    location.reload();
+  } catch (e) { alert('خطا: ' + e.message); }
+}
+
+async function changeStage(stage) {
+  const reason = stage === 'archived' ? prompt('دلیل آرشیو:') : null;
+  if (stage === 'archived' && reason === null) return;
+  try {
+    const data = await postJSON(`/documents/package/${DOC_ID}/change-stage`, {stage, reason});
+    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+    location.reload();
+  } catch (e) { alert('خطا: ' + e.message); }
+}
+
+async function delAttachment(id) {
+  if (!confirm('فایل حذف شود؟')) return;
+  try {
+    const data = await postJSON(`/documents/attachments/${id}/delete`, {});
+    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+    location.reload();
+  } catch (e) { alert('خطا: ' + e.message); }
+}
+
+// ★★★ پیش‌نمایش داخل مودال ★★★
+function openPreview(id, mime, name) {
+  const modalEl = document.getElementById('previewModal');
+  const modalTitle = document.getElementById('previewModalTitle');
+  const modalBody = document.getElementById('previewModalBody');
+
+  modalTitle.textContent = 'پیش‌نمایش: ' + name;
+  const url = `/documents/attachments/${id}/preview`;
+  let content = '';
+
+  if (mime.startsWith('image/')) {
+    content = `<img src="${url}" style="max-width: 100%; max-height: 75vh; border-radius: 8px;" alt="preview">`;
+  } else if (mime === 'application/pdf') {
+    content = `
+      <div class="text-center py-5">
+        <i class="fa-solid fa-file-pdf text-danger" style="font-size: 5rem; margin-bottom: 20px;"></i>
+        <h4>فایل PDF آماده مشاهده است</h4>
+        <p class="text-muted">به دلیل محدودیت‌های امنیتی مرورگرها، فایل‌های PDF باید در یک تب جدید باز شوند.</p>
+        <a href="${url}" target="_blank" class="btn btn-primary btn-lg mt-3">
+          <i class="fa-solid fa-up-right-from-square"></i> باز کردن در تب جدید
+        </a>
+      </div>
+    `;
+  } else if (mime.startsWith('video/')) {
+    content = `<video controls src="${url}" style="max-width: 100%; max-height: 75vh; border-radius: 8px;"></video>`;
+  } else if (mime.startsWith('audio/')) {
+    content = `<audio controls src="${url}" style="width: 100%;"></audio>`;
+  } else if (mime.startsWith('text/') || mime === 'application/json' || mime === 'text/csv') {
+    content = `<iframe src="${url}" style="width: 100%; height: 75vh; border: none; border-radius: 8px;"></iframe>`;
+  } else {
+    content = `
+      <div class="text-center py-5">
+        <i class="fa-solid fa-file text-secondary" style="font-size: 5rem; margin-bottom: 20px;"></i>
+        <h4>پیش‌نمایش درون‌مرورگری برای این فایل امکان‌پذیر نیست</h4>
+        <p class="text-muted">نوع فایل: <code>${mime}</code></p>
+        <a href="/documents/attachments/${id}/download" class="btn btn-success btn-lg mt-3">
+          <i class="fa-solid fa-download"></i> دانلود فایل
+        </a>
+      </div>
+    `;
+  }
+
+  modalBody.innerHTML = content;
+  const modal = new bootstrap.Modal(modalEl);
+  modal.show();
+}
+
+// ★★★ لود نامه‌ها و ارتباطات ★★★
+async function loadReferences() {
+  const area = document.getElementById('references-list');
+  if (!area) return;
+  area.innerHTML = '<div class="text-muted text-center my-4">در حال بارگذاری...</div>';
+  try {
+    const res = await fetch(`/documents/${DOC_ID}/references.json`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'خطا');
+    if (!data.references || data.references.length === 0) {
+      area.innerHTML = '<div class="text-muted text-center my-4">هنوز نامه یا ارتباطی ثبت نشده است.</div>';
+      return;
+    }
+    const typeLabels = {
+      'incoming_letter': 'نامه وارده', 'outgoing_letter': 'نامه صادره',
+      'phone_call': 'تماس تلفنی', 'meeting': 'جلسه', 'email': 'ایمیل',
+      'verbal_request': 'درخواست شفاهی', 'other': 'سایر'
+    };
+    let html = '<div class="table-responsive"><table class="table table-custom table-hover"><thead><tr>'
+      + '<th>نوع</th><th>شماره</th><th>موضوع</th><th>تاریخ</th><th>ثبت‌کننده</th>'
+      + '</tr></thead><tbody>';
+    for (const r of data.references) {
+      html += `<tr>
+        <td><span class="badge badge-soft-secondary">${typeLabels[r.ref_type] || r.ref_type}</span></td>
+        <td>${r.ref_no || '—'}</td>
+        <td>${r.subject || '—'}</td>
+        <td>${r.ref_date || '—'}</td>
+        <td>${r.created_by_name || '—'}</td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
+    area.innerHTML = html;
+  } catch (e) {
+    area.innerHTML = `<div class="alert alert-danger">خطا: ${e.message}</div>`;
+  }
+}
+
+// فرم ثبت نامه
+const refForm = document.getElementById('reference-form');
+if (refForm) {
+  refForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    const resultDiv = document.getElementById('reference-result');
+    const body = {
+      ref_type: form.querySelector('[name="ref_type"]').value,
+      ref_no: form.querySelector('[name="ref_no"]').value || null,
+      ref_date: form.querySelector('[name="ref_date"]').value || null,
+      subject: form.querySelector('[name="subject"]').value || null,
+      summary: form.querySelector('[name="summary"]').value || null,
+    };
+    try {
+      const data = await postJSON(`/documents/${DOC_ID}/references`, body);
+      if (!data.ok) throw new Error(data.error || 'خطا');
+      form.reset();
+      resultDiv.innerHTML = '<div class="alert alert-success py-1 px-2 mb-0">با موفقیت ثبت شد.</div>';
+      setTimeout(() => resultDiv.innerHTML = '', 3000);
+      loadReferences();
+    } catch (e) {
+      resultDiv.innerHTML = `<div class="alert alert-danger py-1 px-2 mb-0">خطا: ${e.message}</div>`;
+    }
+  });
+}
+
+// ★★★ لود تکمیل مدارک ★★★
+async function loadCompletionRequests() {
+  const area = document.getElementById('completion-list');
+  if (!area) return;
+  area.innerHTML = '<div class="text-muted text-center my-4">در حال بارگذاری...</div>';
+  try {
+    const res = await fetch(`/documents/${DOC_ID}/completion.json`);
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || 'خطا');
+    if (!data.requests || data.requests.length === 0) {
+      area.innerHTML = '<div class="text-muted text-center my-4">هنوز درخواستی ثبت نشده است.</div>';
+      return;
+    }
+    let html = '';
+    for (const req of data.requests) {
+      const modeLabel = req.mode === 'verbal' ? 'شفاهی' : 'کتبی';
+      let statusBadge = '';
+      if (req.status === 'fulfilled') statusBadge = '<span class="badge badge-soft-success">تکمیل شده</span>';
+      else if (req.status === 'partial') statusBadge = '<span class="badge badge-soft-warning">ناقص</span>';
+      else statusBadge = '<span class="badge badge-soft-secondary">باز</span>';
+      
+      html += `<div class="card mb-3 border shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <strong class="text-primary">درخواست #${req.id}</strong> (${modeLabel})
+              ${statusBadge}
+            </div>
+            <div class="text-muted small">
+              پیشرفت: <strong>${req.received_items}</strong> از ${req.total_items} 
+              (${req.progress}%)
+            </div>
+          </div>
+          <div class="progress progress-custom mb-3">
+            <div class="progress-bar ${req.progress === 100 ? 'bg-success' : 'bg-primary'}" 
+                 role="progressbar" style="width: ${req.progress}%"></div>
+          </div>
+          
+          <table class="table table-sm table-bordered">
+            <thead class="table-light"><tr><th width="5%">#</th><th>عنوان مدرک</th><th width="20%">وضعیت</th></tr></thead>
+            <tbody>`;
+      
+      for (let i = 0; i < req.items.length; i++) {
+        const item = req.items[i];
+        const isReceived = item.is_received;
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${item.title}</td>
+          <td>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" 
+                     ${isReceived ? 'checked' : ''}
+                     onchange="toggleCompletionItem(${item.id}, this.checked)">
+              <label class="form-check-label ${isReceived ? 'text-success' : 'text-muted'}">
+                ${isReceived ? 'دریافت شد' : 'دریافت نشد'}
+              </label>
+            </div>
+          </td>
+        </tr>`;
+      }
+      
+      html += `</tbody></table>
+          ${req.note ? `<div class="text-muted small mt-2"><i class="fa-solid fa-note-sticky"></i> توضیحات: ${req.note}</div>` : ''}
+        </div>
+      </div>`;
+    }
+    area.innerHTML = html;
+  } catch (e) {
+    area.innerHTML = `<div class="alert alert-danger">خطا: ${e.message}</div>`;
+  }
+}
+
+async function toggleCompletionItem(itemId, received) {
+  try {
+    const data = await postJSON(`/documents/completion/items/${itemId}/toggle`, {received});
+    if (!data.ok) throw new Error(data.error || 'خطا');
+    loadCompletionRequests();
+  } catch (e) {
+    alert('خطا: ' + e.message);
+    loadCompletionRequests();
+  }
+}
+
+const completionForm = document.getElementById('completion-form');
+if (completionForm) {
+  completionForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    const resultDiv = document.getElementById('completion-result');
+    const body = {
+      mode: form.querySelector('[name="mode"]').value,
+      due_date: form.querySelector('[name="due_date"]').value || null,
+      note: form.querySelector('[name="note"]').value || null,
+      items: form.querySelector('[name="items"]').value || '',
+    };
+    try {
+      const data = await postJSON(`/documents/${DOC_ID}/completion`, body);
+      if (!data.ok) throw new Error(data.error || 'خطا');
+      form.reset();
+      resultDiv.innerHTML = '<div class="alert alert-success py-1 px-2 mb-0">درخواست با موفقیت ثبت شد.</div>';
+      setTimeout(() => resultDiv.innerHTML = '', 3000);
+      loadCompletionRequests();
+    } catch (e) {
+      resultDiv.innerHTML = `<div class="alert alert-danger py-1 px-2 mb-0">خطا: ${e.message}</div>`;
+    }
+  });
+}
+
+// فرم ارجاع
+document.getElementById('route-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const form = ev.target;
+  const toIds = Array.from(form.querySelector('select[name="to_user_ids"]').selectedOptions)
+                      .map(o => parseInt(o.value));
+  if (!toIds.length) {
+    document.getElementById('route-result').innerHTML =
+      '<div class="alert alert-danger">حداقل یک گیرنده انتخاب کنید</div>';
+    return;
+  }
+  const body = {
+    to_user_ids: toIds,
+    instruction: form.querySelector('textarea[name="instruction"]').value || null,
+    due_days: parseInt(form.querySelector('input[name="due_days"]').value || '3'),
+    priority: form.querySelector('select[name="priority"]').value,
+  };
+  try {
+    const data = await postJSON(`/documents/${DOC_ID}/route`, body);
+    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+    location.reload();
+  } catch (e) {
+    document.getElementById('route-result').innerHTML =
+      `<div class="alert alert-danger">${e.message}</div>`;
+  }
+});
+
+// آپلود
+document.getElementById('upload-form').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const fileInput = document.getElementById('file-input');
+  if (!fileInput.files[0]) return;
+
+  const fd = new FormData();
+  fd.append('file', fileInput.files[0]);
+  fd.append('kind', document.getElementById('kind-input').value);
+
+  const progress = document.getElementById('progress');
+  progress.style.display = 'block';
+  progress.value = 0;
+
+  try {
+    const res = await fetch(`/documents/${DOC_ID}/attachments/upload`, {
+      method: 'POST',
+      body: fd,
+    });
+
+    progress.style.display = 'none';
+
+    const data = await res.json();
+    if (!res.ok || !data.ok) {
+      document.getElementById('upload-result').innerHTML =
+        `<div class="alert alert-danger">${data.message || data.error || 'خطا'}</div>`;
+      return;
+    }
+    location.reload();
+  } catch (e) {
+    progress.style.display = 'none';
+    document.getElementById('upload-result').innerHTML =
+      `<div class="alert alert-danger">${e.message}</div>`;
+  }
+});
+
+// اجرای اولیه
+loadReferences();
+loadCompletionRequests();
+</script>
+{% endblock %}

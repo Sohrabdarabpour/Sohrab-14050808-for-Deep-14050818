@@ -34,6 +34,7 @@ from .projects import projects_bp
 # ★ Workflow
 # ============================================================
 from .workflow import workflow_bp, notification_bp
+from .inbox import inbox_bp
 
 # ============================================================
 # ★ جستجوی پیشرفته
@@ -71,6 +72,7 @@ __all__ = [
     # ---- Workflow ----
     "workflow_bp",
     "notification_bp",
+    "inbox_bp",
 
     # ---- جستجو ----
     "search_bp",

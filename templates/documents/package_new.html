@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}ثبت پکیج سند جدید{% endblock %}
+
+{% block styles %}
+<style>
+    .form-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 30px; max-width: 900px; margin: 0 auto; border: 1px solid #e2e8f0; }
+    .form-title { color: #1b698b; font-weight: 700; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 2px solid #f0f4f8; display: flex; align-items: center; gap: 10px; }
+    .section-title { font-size: 1rem; font-weight: 600; color: #4a5568; margin-top: 24px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .section-title::before { content: ''; display: block; width: 4px; height: 16px; background: #1b698b; border-radius: 2px; }
+    .form-label { font-size: 0.85rem; font-weight: 600; color: #718096; }
+    .form-control, .form-select { border-radius: 8px; border: 1px solid #cbd5e0; padding: 10px 14px; }
+    .form-control:focus, .form-select:focus { border-color: #1b698b; box-shadow: 0 0 0 3px rgba(27,105,139,0.1); }
+    .btn-submit { background: #1b698b; color: #fff; padding: 12px 30px; border-radius: 8px; font-weight: 600; width: 100%; border: none; transition: all 0.2s; }
+    .btn-submit:hover { background: #145272; transform: translateY(-2px); }
+    .suggestion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; transition: all 0.2s; }
+    .suggestion-item:hover { border-color: #1b698b; box-shadow: 0 2px 8px rgba(27,105,139,0.1); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="form-card">
+        <h3 class="form-title"><i class="fa-solid fa-file-circle-plus"></i> ثبت پکیج سند جدید</h3>
+
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <!-- بخش ۱: اطلاعات اصلی -->
+            <div class="section-title">اطلاعات اصلی</div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    {{ form.subject.label(class="form-label") }}
+                    {{ form.subject(class="form-control", placeholder="موضوع سند را وارد کنید...") }}
+                    {% for error in form.subject.errors %}<small class="text-danger">{{ error }}</small>{% endfor %}
+                </div>
+                <div class="col-md-4">
+                    {{ form.source_type.label(class="form-label") }}
+                    {{ form.source_type(class="form-select") }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.priority.label(class="form-label") }}
+                    {{ form.priority(class="form-select") }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.date_received.label(class="form-label") }}
+                    {{ form.date_received(class="form-control", placeholder="1405/01/01") }}
+                </div>
+            </div>
+
+            <!-- ★ بخش ۲: رفرنس‌ها (جستجوی خودکار) -->
+            <div class="section-title">رفرنس‌های پکیج</div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label">شماره رفرنس‌ها (با کاما جدا کنید)</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="ref_no_input"
+                               placeholder="مثلاً: 12345/الف، 67890/ب">
+                        <button type="button" class="btn btn-outline-primary" id="search_ref_btn">
+                            <i class="fa-solid fa-magnifying-glass"></i> جستجو
+                        </button>
+                    </div>
+                    <small class="text-muted">با وارد کردن رفرنس و کلیک روی جستجو، اطلاعات سند قبلی پر می‌شود.</small>
+                    <div id="ref_search_result" class="mt-2" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- پیشنهاد پکیج -->
+            <div id="suggestion-section" class="mt-3" style="display:none;">
+                <div class="alert alert-info">
+                    <strong><i class="fa-solid fa-lightbulb"></i> پیشنهاد سیستم:</strong>
+                    <div id="suggestion-list" class="mt-2"></div>
+                </div>
+            </div>
+
+            <!-- بخش ۳: فرستنده -->
+            <div class="section-title">اطلاعات فرستنده</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    {{ form.sender_name.label(class="form-label") }}
+                    {{ form.sender_name(class="form-control", placeholder="نام شخص یا سازمان...") }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.sender_ref_no.label(class="form-label") }}
+                    {{ form.sender_ref_no(class="form-control", placeholder="شماره نامه...") }}
+                    <div id="ref-match-result" class="mt-2" style="display:none;"></div>
+                </div>
+                <div class="col-md-6">
+                    {{ form.contract_number.label(class="form-label") }}
+                    {{ form.contract_number(class="form-control", placeholder="شماره قرارداد...", id="contract_number_input") }}
+                </div>
+            </div>
+
+            <!-- بخش ۴: طبقه‌بندی -->
+            <div class="section-title">طبقه‌بندی سند</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    {{ form.group_id.label(class="form-label") }}
+                    {{ form.group_id(class="form-select", id="group_select") }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.subgroup_id.label(class="form-label") }}
+                    {{ form.subgroup_id(class="form-select", id="subgroup_select") }}
+                </div>
+            </div>
+
+            <!-- بخش ۵: ارتباطات -->
+            <div class="section-title">ارتباطات</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    {{ form.contractor_id.label(class="form-label") }}
+                    {{ form.contractor_id(class="form-select", id="contractor_select") }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.project_id.label(class="form-label") }}
+                    {{ form.project_id(class="form-select", id="project_select") }}
+                </div>
+            </div>
+
+            <div class="mt-5">
+                {{ form.submit(class="btn-submit") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ============================================================
+// ★ ۱. بارگذاری زیرگروه‌ها بر اساس گروه
+// ============================================================
+document.getElementById('group_select').addEventListener('change', async function() {
+    const groupId = this.value;
+    const subSelect = document.getElementById('subgroup_select');
+    subSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
+    if (groupId == "0") {
+        subSelect.innerHTML = '<option value="0">— بدون زیرگروه —</option>';
+        return;
+    }
+    try {
+        const res = await fetch(`/documents/api/groups/${groupId}/subgroups`);
+        const data = await res.json();
+        subSelect.innerHTML = '<option value="0">— بدون زیرگروه —</option>';
+        if (data.ok && data.subgroups) {
+            data.subgroups.forEach(sg => {
+                subSelect.innerHTML += `<option value="${sg.id}">${sg.title}</option>`;
+            });
+        }
+    } catch (e) {
+        subSelect.innerHTML = '<option value="0">خطا در بارگذاری</option>';
+    }
+});
+
+// ============================================================
+// ★ ۲. فیلتر پروژه‌ها بر اساس پیمانکار
+// ============================================================
+const contractorSelect = document.getElementById('contractor_select');
+const projectSelect = document.getElementById('project_select');
+
+contractorSelect.addEventListener('change', async function() {
+    const contractorId = this.value;
+    projectSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
+    if (contractorId === "0") {
+        projectSelect.innerHTML = '<option value="0">— بدون پروژه —</option>';
+        return;
+    }
+    try {
+        const res = await fetch(`/documents/api/contractors/${contractorId}/projects`);
+        const data = await res.json();
+        projectSelect.innerHTML = '<option value="0">— بدون پروژه —</option>';
+        if (data.ok && data.projects.length > 0) {
+            data.projects.forEach(p => {
+                projectSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        } else {
+            projectSelect.innerHTML = '<option value="0">— پروژه‌ای برای این پیمانکار یافت نشد —</option>';
+        }
+    } catch (e) {
+        projectSelect.innerHTML = '<option value="0">خطا در بارگذاری</option>';
+    }
+});
+
+// ============================================================
+// ★ ۳. پیشنهاد خودکار پکیج
+// ============================================================
+let suggestionTimer = null;
+function refreshSuggestions() {
+    const subject = document.querySelector('[name="subject"]').value.trim();
+    const senderName = document.querySelector('[name="sender_name"]').value.trim();
+    const contractor = contractorSelect.value;
+    const project = projectSelect.value;
+    const groupId = document.getElementById('group_select').value;
+
+    if (!subject && !senderName && contractor === "0" && project === "0") {
+        document.getElementById('suggestion-section').style.display = 'none';
+        return;
+    }
+    clearTimeout(suggestionTimer);
+    suggestionTimer = setTimeout(async () => {
+        try {
+            const res = await fetch('/documents/package/suggest', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    subject: subject || null,
+                    sender_name: senderName || null,
+                    contractor_id: contractor !== "0" ? parseInt(contractor) : null,
+                    project_id: project !== "0" ? parseInt(project) : null,
+                    group_id: groupId !== "0" ? parseInt(groupId) : null,
+                }),
+            });
+            const data = await res.json();
+            renderSuggestions(data.suggestions || []);
+        } catch (e) { console.error(e); }
+    }, 500);
+}
+
+function renderSuggestions(items) {
+    const section = document.getElementById('suggestion-section');
+    const list = document.getElementById('suggestion-list');
+    if (!items.length) { section.style.display = 'none'; return; }
+    section.style.display = 'block';
+    let html = '<div class="d-flex flex-column gap-2">';
+    for (const item of items) {
+        html += `<div class="suggestion-item d-flex justify-content-between align-items-center">
+            <div>
+                <code class="text-primary fw-bold">${item.package_code || '#' + item.id}</code>
+                <span class="small me-2">${item.subject || '—'}</span>
+                <span class="badge bg-secondary">${item.stage || 'draft'}</span>
+            </div>
+            <div class="d-flex gap-1">
+                <a href="/documents/package/${item.id}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-eye"></i>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-primary"
+                        onclick="attachToPackage(${item.id})">
+                    <i class="fa-solid fa-link"></i> اتصال
+                </button>
+            </div>
+        </div>`;
+    }
+    html += '</div>';
+    list.innerHTML = html;
+}
+
+function attachToPackage(documentId) {
+    if (!confirm('نامه به این پکیج متصل شود؟')) return;
+    window.location.href = `/documents/package/${documentId}#tab-references`;
+}
+
+['subject', 'sender_name'].forEach(name => {
+    const el = document.querySelector(`[name="${name}"]`);
+    if (el) el.addEventListener('input', refreshSuggestions);
+});
+
+// ============================================================
+// ★ ۴. جستجوی رفرنس و پر کردن خودکار فرم
+// ============================================================
+const refInput = document.getElementById('ref_no_input');
+const searchRefBtn = document.getElementById('search_ref_btn');
+const refSearchResult = document.getElementById('ref_search_result');
+
+async function searchReference() {
+    const refNo = refInput.value.trim();
+    if (!refNo) {
+        refSearchResult.style.display = 'none';
+        return;
+    }
+    const firstRef = refNo.split(',')[0].trim();
+    searchRefBtn.disabled = true;
+    searchRefBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ...';
+
+    try {
+        const res = await fetch('/documents/package/search-reference', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ref_no: firstRef}),
+        });
+        const data = await res.json();
+
+        if (!data.ok || !data.found) {
+            refSearchResult.style.display = 'block';
+            refSearchResult.innerHTML = `
+                <div class="alert alert-warning py-2 px-3 mb-0 small">
+                    <i class="fa-solid fa-circle-info"></i> ${data.message || 'سندی یافت نشد.'}
+                </div>
+            `;
+            return;
+        }
+
+        const first = data.first;
+        refSearchResult.style.display = 'block';
+        refSearchResult.innerHTML = `
+            <div class="alert alert-success py-2 px-3 mb-0 small">
+                <strong><i class="fa-solid fa-check-circle"></i> یافت شد:</strong>
+                <div>کد پکیج: <code>${first.package_code || '#' + first.document_id}</code></div>
+                <div>موضوع: ${first.subject || '—'}</div>
+                <div>پیمانکار: ${first.contractor_name || '—'}</div>
+                <div>پروژه: ${first.project_name || '—'}</div>
+                <div>شماره قرارداد: ${first.contract_number || '—'}</div>
+                ${data.results.length > 1 ? `<div class="text-muted">و ${data.results.length - 1} سند دیگر مرتبط.</div>` : ''}
+                <button type="button" class="btn btn-sm btn-success mt-2" onclick="applyReference()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> پر کردن خودکار فرم
+                </button>
+            </div>
+        `;
+        window._lastReference = first;
+    } catch (e) {
+        refSearchResult.style.display = 'block';
+        refSearchResult.innerHTML = `<div class="alert alert-danger py-2 px-3 mb-0 small">خطا: ${e.message}</div>`;
+    } finally {
+        searchRefBtn.disabled = false;
+        searchRefBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> جستجو';
+    }
+}
+
+function applyReference() {
+    const ref = window._lastReference;
+    if (!ref) return;
+
+    if (ref.contractor_id) {
+        contractorSelect.value = ref.contractor_id.toString();
+        contractorSelect.dispatchEvent(new Event('change'));
+        setTimeout(() => {
+            if (ref.project_id) {
+                projectSelect.value = ref.project_id.toString();
+                projectSelect.dispatchEvent(new Event('change'));
+            }
+        }, 600);
+    }
+
+    if (ref.contract_number) {
+        const contractInput = document.getElementById('contract_number_input');
+        if (contractInput) contractInput.value = ref.contract_number;
+    }
+
+    refSearchResult.innerHTML = `
+        <div class="alert alert-success py-2 px-3 mb-0 small">
+            <i class="fa-solid fa-check-double"></i> فرم با موفقیت پر شد.
+        </div>
+    `;
+    setTimeout(() => refSearchResult.style.display = 'none', 3000);
+}
+
+if (searchRefBtn) searchRefBtn.addEventListener('click', searchReference);
+if (refInput) {
+    refInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); searchReference(); }
+    });
+}
+
+// ============================================================
+// ★ ۵. تشخیص شماره نامه تکراری
+// ============================================================
+const refNoInput = document.querySelector('[name="sender_ref_no"]');
+const refMatchResult = document.getElementById('ref-match-result');
+
+if (refNoInput) {
+    refNoInput.addEventListener('blur', async () => {
+        const refNo = refNoInput.value.trim();
+        if (!refNo) { refMatchResult.style.display = 'none'; return; }
+        try {
+            const res = await fetch('/documents/package/find-by-ref', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({sender_ref_no: refNo}),
+            });
+            const data = await res.json();
+            if (data.matches && data.matches.length) {
+                const first = data.matches[0];
+                refMatchResult.style.display = 'block';
+                refMatchResult.innerHTML = `
+                    <div class="alert alert-warning py-2 px-3 mb-0 small">
+                        <strong><i class="fa-solid fa-triangle-exclamation"></i> توجه:</strong>
+                        این شماره نامه قبلاً ثبت شده است.
+                        <div>کد پکیج: <code>${first.package_code || '#' + first.id}</code></div>
+                        <div>موضوع: ${first.subject}</div>
+                        <a href="/documents/package/${first.id}" target="_blank" class="btn btn-sm btn-warning mt-2 w-100">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i> مشاهده پکیج قبلی
+                        </a>
+                    </div>
+                `;
+            } else {
+                refMatchResult.style.display = 'none';
+            }
+        } catch (e) { console.error(e); }
+    });
+}
+</script>
+{% endblock %}

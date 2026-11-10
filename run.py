@@ -27,6 +27,6 @@ if __name__ == "__main__":
 
     app.run(
         debug=Config.DEBUG,
-        host=os.environ.get("SSPE_HOST", "0.0.0.0"),
+        host=os.environ.get("SSPE_HOST", "127.0.0.1"),
         port=int(os.environ.get("SSPE_PORT", "5000")),
     )

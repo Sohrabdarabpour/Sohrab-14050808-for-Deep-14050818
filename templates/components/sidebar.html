@@ -84,11 +84,11 @@
                 <ul class="sidebar-submenu">
 
                     <!-- ============================================ -->
-                    <!-- ★★★ کارتابل من ★★★ -->
+                    <!-- ★★★ کارتابل من (پکیج‌های ارجاع‌شده) ★★★ -->
                     <!-- ============================================ -->
                     <li class="sidebar-item">
-                        <a href="{{ url_for('workflow.inbox') }}"
-                           class="sidebar-link {% if request.endpoint and request.endpoint.startswith('workflow.') and request.endpoint != 'workflow.view_note' %}active{% endif %}"
+                        <a href="/inbox/"
+                           class="sidebar-link {% if request.path.startswith('/inbox') %}active{% endif %}"
                            data-tooltip="کارتابل من">
                             <i class="fa-solid fa-inbox"></i>
                             <span>کارتابل من</span>
@@ -98,14 +98,52 @@
                         </a>
                     </li>
 
-                    <!-- جستجوی پیشرفته -->
-                    <li class="sidebar-item">
-                        <a href="{{ url_for('search.index') }}"
-                        class="sidebar-link {% if request.endpoint and request.endpoint.startswith('search.') %}active{% endif %}"
-                        data-tooltip="جستجوی پیشرفته">
-                            <i class="fa-solid fa-magnifying-glass-chart"></i>
-                            <span>جستجوی پیشرفته</span>
-                        </a>
+                    <!-- ============================================ -->
+                    <!-- ★★★ اسناد و پکیج‌ها (گروه جدید) ★★★ -->
+                    <!-- ============================================ -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and (request.endpoint.startswith('documents.') or request.path.startswith('/documents')) %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="اسناد و پکیج‌ها">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>اسناد و پکیج‌ها</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item">
+                                <a href="/documents/package/new"
+                                   class="sidebar-link {% if request.path == '/documents/package/new' %}active{% endif %}"
+                                   data-tooltip="ثبت سند جدید">
+                                    <i class="fa-solid fa-plus-circle"></i>
+                                    <span>ثبت سند جدید</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/documents/"
+                                   class="sidebar-link {% if request.path == '/documents/' %}active{% endif %}"
+                                   data-tooltip="لیست اسناد">
+                                    <i class="fa-solid fa-list"></i>
+                                    <span>لیست اسناد</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('search.index') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('search.') %}active{% endif %}"
+                                   data-tooltip="جستجوی پیشرفته">
+                                    <i class="fa-solid fa-magnifying-glass-chart"></i>
+                                    <span>جستجوی پیشرفته</span>
+                                </a>
+                            </li>
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('document_group.group_list') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('document_group.') %}active{% endif %}"
+                                   data-tooltip="گروه‌های سند">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                    <span>گروه‌های سند</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
                     </li>
 
                     <!-- دستیار هوشمند -->
@@ -153,38 +191,13 @@
                                 </a>
                             </li>
 
-                            <!-- فرایند اصلی (بدون صفحه - به زودی) -->
+                            <!-- فرایند اصلی -->
                             <li class="sidebar-item">
                                 <a href="#" class="sidebar-link disabled" data-tooltip="گزارش عملکرد">
                                     <i class="fa-solid fa-diagram-project"></i>
                                     <span>گزارش عملکرد</span>
                                 </a>
                             </li>
-
-                            <!-- گروه سند (بدون صفحه - به زودی) -->
-                            <!-- <li class="sidebar-item">
-                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس گروه سند">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                    <span>تفکیک کارها بر اساس گروه سند</span>
-                                </a>
-                            </li> -->
-
-                            <!-- پروژه -->
-                            <!-- <li class="sidebar-item">
-                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس پروژه">
-                                    <i class="fa-solid fa-folder-tree"></i>
-                                    <span>تفکیک کارها بر اساس پروژه</span>
-                                </a>
-                            </li> -->
-
-                            <!-- پیمانکار -->
-                            <!-- <li class="sidebar-item">
-                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس پیمانکار">
-                                    <i class="fa-solid fa-helmet-safety"></i>
-                                    <span>تفکیک کارها بر اساس پیمانکار</span>
-                                </a>
-                            </li> -->
-
                         </ul>
                     </li>
 
@@ -204,10 +217,12 @@
                     </li>
                     {% endif %}
 
-                    <!-- گزارش‌ها -->
+                    <!-- ============================================
+                         ★★★ گزارش‌ها (به‌روزرسانی با گزارش‌های جدید پکیج) ★★★
+                         ============================================ -->
                     {% if session.get('role') in ['admin','manager','supervisor'] %}
                     <li class="sidebar-item sidebar-dropdown
-                        {% if request.endpoint and request.endpoint.startswith('reports.') %}open{% endif %}">
+                        {% if request.endpoint and (request.endpoint.startswith('reports.') or request.path.startswith('/reports')) %}open{% endif %}">
                         <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="گزارش‌ها">
                             <i class="fa-solid fa-chart-line"></i>
                             <span>گزارش‌ها</span>
@@ -215,6 +230,31 @@
                         </button>
 
                         <ul class="sidebar-submenu">
+
+                            <!-- ★ جدید: گزارش‌های تخصصی پکیج -->
+                            <li class="sidebar-item">
+                                <a href="/reports/package/overdue"
+                                   class="sidebar-link {% if request.path.startswith('/reports/package/overdue') %}active{% endif %}">
+                                    <i class="fa-solid fa-triangle-exclamation text-danger"></i>
+                                    <span>اسناد دیرکرد</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/reports/package/workload"
+                                   class="sidebar-link {% if request.path.startswith('/reports/package/workload') %}active{% endif %}">
+                                    <i class="fa-solid fa-user-clock text-warning"></i>
+                                    <span>بار کاری کارشناسان</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="/reports/package/cycle-time"
+                                   class="sidebar-link {% if request.path.startswith('/reports/package/cycle-time') %}active{% endif %}">
+                                    <i class="fa-solid fa-stopwatch text-primary"></i>
+                                    <span>زمان چرخه</span>
+                                </a>
+                            </li>
+
+                            <!-- گزارش‌های قدیمی -->
                             <li class="sidebar-item">
                                 <a href="{{ url_for('reports.status_report') }}"
                                    class="sidebar-link {% if request.endpoint == 'reports.status_report' %}active{% endif %}">
@@ -320,16 +360,6 @@
                             </li>
                             {% endif %}
 
-                            {% if session.get('role') in ['admin', 'manager'] %}
-                            <li class="sidebar-item">
-                                <a href="{{ url_for('document_group.group_list') }}"
-                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('document_group.') %}active{% endif %}">
-                                    <i class="fa-solid fa-layer-group"></i>
-                                    <span>گروه‌های سند</span>
-                                </a>
-                            </li>
-                            {% endif %}
-
                             {% if session.get('role') == 'admin' %}
                             <li class="sidebar-item">
                                 <a href="{{ url_for('excel.index') }}"
@@ -405,7 +435,7 @@
                     <!-- چارت سازمانی -->
                     <li class="sidebar-item">
                         <a href=""
-                           class="sidebar-link disabled" 
+                           class="sidebar-link disabled"
                            data-tooltip="چارت سازمانی">
                             <i class="fa-solid fa-diagram-project"></i>
                             <span>چارت سازمانی</span>

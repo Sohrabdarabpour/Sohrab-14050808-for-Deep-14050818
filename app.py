@@ -24,6 +24,7 @@ from routes.project_roles import project_roles_bp
 from routes.projects import projects_bp
 from routes.workflow import workflow_bp, notification_bp
 from routes.inbox import inbox_bp
+from routes.work_package import work_package_bp
 
 # ============================================================
 # ★ جستجوی پیشرفته
@@ -295,6 +296,7 @@ def create_app():
     app.register_blueprint(workflow_bp)
     app.register_blueprint(notification_bp)
     app.register_blueprint(inbox_bp)
+    app.register_blueprint(work_package_bp)
 
     # ============================================================
     # ★ جستجوی پیشرفته

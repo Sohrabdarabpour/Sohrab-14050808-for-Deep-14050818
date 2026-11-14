@@ -1,0 +1,1225 @@
+{% extends "base.html" %}
+{% block title %}{{ package.dfc_code }} — {{ package.subject }}{% endblock %}
+
+{% block styles %}
+<style>
+    .pkg-header {
+        background: #fff; border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        border: 1px solid #e2e8f0;
+        padding: 20px; margin-bottom: 20px;
+    }
+    .pkg-title { font-size: 1.2rem; font-weight: 700; color: #1b698b; margin-bottom: 8px; }
+    .pkg-title code { background: #ebf8ff; padding: 2px 8px; border-radius: 4px; color: #2c5282; font-size: 0.95rem; }
+    .pkg-meta { font-size: 0.85rem; color: #718096; }
+
+    .steps-nav { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px; border: 1px solid #e2e8f0; }
+    .step-circle {
+        width: 48px; height: 48px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 700; font-size: 1rem; margin: 0 auto;
+        background: #fff; border: 3px solid #e2e8f0;
+        transition: all .3s;
+    }
+    .step-done { background: #38a169; border-color: #38a169; color: #fff; }
+    .step-active { background: #1b698b; border-color: #1b698b; color: #fff; box-shadow: 0 0 0 4px rgba(27,105,139,0.15); }
+    .step-pending { background: #f7fafc; color: #a0aec0; }
+    .step-label { font-size: 0.78rem; color: #4a5568; text-align: center; margin-top: 6px; }
+
+    .pkg-tabs { border-bottom: 2px solid #e2e8f0; margin-bottom: 20px; gap: 4px; }
+    .pkg-tabs .nav-link { border: none; color: #4a5568; font-weight: 500; padding: 10px 16px; border-radius: 8px 8px 0 0; }
+    .pkg-tabs .nav-link:hover { background: #f7fafc; color: #1b698b; }
+    .pkg-tabs .nav-link.active { background: #fff; color: #1b698b; border-bottom: 3px solid #1b698b; font-weight: 700; }
+    .pkg-tabs .nav-link .badge { font-size: .7rem; margin-right: 4px; }
+
+    .info-card { background: #fff; border-radius: 10px; border: 1px solid #e2e8f0; margin-bottom: 20px; overflow: hidden; }
+    .info-card-header { background: #f8fafc; padding: 12px 16px; font-weight: 600; color: #2d3748; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 8px; }
+    .info-card-body { padding: 16px; }
+    .info-table { width: 100%; font-size: .9rem; }
+    .info-table th { font-weight: 500; color: #718096; width: 35%; padding: 6px 0; vertical-align: top; }
+    .info-table td { font-weight: 500; color: #2d3748; padding: 6px 0; }
+
+    .timeline-list { list-style: none; padding: 0; margin: 0; position: relative; }
+    .timeline-list::before { content: ''; position: absolute; top: 0; bottom: 0; right: 15px; width: 2px; background: #e2e8f0; }
+    .timeline-item { position: relative; padding-right: 40px; margin-bottom: 20px; }
+    .timeline-item::before { content: ''; position: absolute; right: 10px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: #1b698b; border: 3px solid #fff; box-shadow: 0 0 0 2px #1b698b; }
+    .timeline-content { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #edf2f7; }
+    .timeline-type { font-size: .75rem; font-weight: 700; color: #1b698b; text-transform: uppercase; }
+    .timeline-summary { font-size: .9rem; color: #2d3748; margin-top: 4px; }
+    .timeline-meta { font-size: .75rem; color: #a0aec0; margin-top: 6px; display: flex; justify-content: space-between; }
+
+    .table-custom { font-size: .85rem; }
+    .table-custom th { background: #f8fafc; color: #4a5568; font-weight: 600; border-bottom: 2px solid #e2e8f0; }
+
+    .form-section { background: #f8fafc; border-radius: 10px; padding: 16px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    .form-section-title { font-size: .95rem; font-weight: 600; color: #2d3748; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .form-label { font-size: .8rem; font-weight: 600; color: #4a5568; }
+    .form-control, .form-select { border-radius: 6px; border: 1px solid #cbd5e0; font-size: .9rem; padding: 8px 12px; }
+    .btn-custom { background: #1b698b; color: #fff; border: none; border-radius: 6px; padding: 8px 20px; font-weight: 500; }
+    .btn-custom:hover { background: #145272; color: #fff; }
+
+    .badge-soft-success { background: #c6f6d5; color: #22543d; }
+    .badge-soft-warning { background: #fefcbf; color: #744210; }
+    .badge-soft-danger { background: #fed7d7; color: #742a2a; }
+    .badge-soft-info { background: #bee3f8; color: #2a4365; }
+    .badge-soft-secondary { background: #e2e8f0; color: #4a5568; }
+
+    /* ★ انتخاب‌گر کاربران */
+    .user-picker-results {
+        position: absolute;
+        width: 100%;
+        background: #fff;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-height: 220px;
+        overflow-y: auto;
+        z-index: 1050;
+    }
+    .user-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #1b698b;
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 16px;
+        font-size: 0.82rem;
+        margin: 2px;
+    }
+    .user-chip .chip-remove {
+        cursor: pointer;
+        opacity: 0.7;
+    }
+    .user-chip .chip-remove:hover { opacity: 1; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+
+    {# ═══ هدر ═══ #}
+    <div class="pkg-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <div class="pkg-title">
+                    <code>{{ package.dfc_code }}</code>
+                    <span class="badge bg-secondary ms-2">WP: {{ package.work_package_code }}</span>
+                    — {{ package.subject }}
+                </div>
+                <div class="pkg-meta">
+                    <i class="fa-solid fa-user"></i> {{ package.registered_by_name or '-' }}
+                    {% if package.registered_at %}
+                    — <i class="fa-regular fa-clock"></i> {{ package.registered_at }}
+                    {% endif %}
+                    <span class="badge badge-soft-info ms-2">{{ current_stage }}</span>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="/work-package/{{ package.id }}/print-label" target="_blank"
+                   class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-print"></i> چاپ کد DFC
+                </a>
+                <a href="/work-package/" class="btn btn-outline-secondary btn-sm">
+                    <i class="fa-solid fa-list"></i> لیست
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ نوار مراحل ═══ #}
+    {% set current_idx = 1 %}
+    {% if current_stage == 'registered' %}{% set current_idx = 1 %}
+    {% elif current_stage == 'sent_to_management' %}{% set current_idx = 3 %}
+    {% elif current_stage == 'returned_from_management' %}{% set current_idx = 4 %}
+    {% elif current_stage in ['routed', 'in_progress', 'under_review', 'approved'] %}{% set current_idx = 5 %}
+    {% elif current_stage in ['closed', 'archived'] %}{% set current_idx = 6 %}
+    {% endif %}
+
+    <div class="steps-nav">
+        <div class="d-flex justify-content-between align-items-start position-relative">
+            <div style="position:absolute; top:24px; right:10%; left:10%; height:2px; background:#e2e8f0; z-index:1;"></div>
+
+            {% set steps = [
+                ('1', 'ثبت اولیه'),
+                ('2', 'آپلود اسکن'),
+                ('3', 'ارسال به مدیریت'),
+                ('4', 'بازگشت از مدیریت'),
+                ('5', 'ارجاع'),
+            ] %}
+
+            {% for step in steps %}
+                {% set num = loop.index %}
+                {% set is_done = num < current_idx %}
+                {% set is_active = num == current_idx %}
+
+                <div style="flex:1; position:relative; z-index:2; text-align:center;">
+                    <div class="step-circle 
+                        {% if is_done %}step-done
+                        {% elif is_active %}step-active
+                        {% else %}step-pending{% endif %}">
+                        {% if is_done %}
+                            <i class="fa-solid fa-check"></i>
+                        {% else %}
+                            {{ num }}
+                        {% endif %}
+                    </div>
+                    <div class="step-label">{{ step[1] }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {# ═══ اقدامات مرحله‌ی فعلی ═══ #}
+    {% if current_stage == 'registered' %}
+    <div class="alert alert-info d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fa-solid fa-info-circle"></i>
+            <strong>مرحله ۲:</strong> فایل‌های اسکن‌شده را در تب «پیوست‌ها» آپلود کنید.
+            سپس کد DFC را چاپ و روی فیزیکی بچسبانید و به دفتر مدیریت ارسال کنید.
+        </div>
+        <div class="d-flex gap-2">
+            <a href="/work-package/{{ package.id }}/print-label" target="_blank"
+               class="btn btn-sm btn-outline-secondary">
+                <i class="fa-solid fa-print"></i> چاپ کد DFC
+            </a>
+            <button class="btn btn-sm btn-primary" onclick="sendToManagement()">
+                <i class="fa-solid fa-paper-plane"></i> ارسال به مدیریت
+            </button>
+        </div>
+    </div>
+
+    {% elif current_stage == 'sent_to_management' %}
+    <div class="alert alert-warning d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fa-solid fa-hourglass-half"></i>
+            <strong>مرحله ۴:</strong> سند در دفتر مدیریت است. پس از بازگشت، بازگشت آن را ثبت کنید.
+            {% if package.date_sent_to_management %}
+            <br><small><strong>تاریخ ارسال:</strong> {{ package.date_sent_to_management }}</small>
+            {% endif %}
+        </div>
+        <button class="btn btn-sm btn-success" onclick="openReturnFromManagement()">
+            <i class="fa-solid fa-arrow-rotate-left"></i> ثبت بازگشت
+        </button>
+    </div>
+
+    {% elif current_stage == 'returned_from_management' %}
+    <div class="alert alert-primary d-flex justify-content-between align-items-center">
+        <div>
+            <i class="fa-solid fa-forward-step"></i>
+            <strong>مرحله ۵:</strong> سند از مدیریت بازگشت. اکنون به سرپرست(ان) ارجاع دهید.
+            {% if package.management_instruction %}
+            <br><small><strong>دستور:</strong> {{ package.management_instruction }}</small>
+            {% endif %}
+        </div>
+        <button class="btn btn-sm btn-warning" onclick="openRouteForm()">
+            <i class="fa-solid fa-paper-plane"></i> ارجاع به سرپرست
+        </button>
+    </div>
+
+    {% elif current_stage == 'routed' %}
+    <div class="alert alert-success">
+        <i class="fa-solid fa-check-circle"></i>
+        <strong>سند ارجاع شد.</strong> در انتظار بررسی سرپرست. تایم‌لاین را برای پیگیری ببینید.
+    </div>
+
+    {% elif current_stage in ['in_progress', 'under_review', 'approved'] %}
+    <div class="alert alert-info">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        سند در حال بررسی است — مرحله: <strong>{{ current_stage }}</strong>
+    </div>
+
+    {% elif current_stage == 'closed' %}
+    <div class="alert alert-success">
+        <i class="fa-solid fa-flag-checkered"></i>
+        این سند بسته شده است.
+    </div>
+
+    {% elif current_stage == 'archived' %}
+    <div class="alert alert-secondary">
+        <i class="fa-solid fa-box-archive"></i>
+        این سند آرشیو شده است.
+    </div>
+    {% endif %}
+
+    {# ═══ تب‌ها ═══ #}
+    <ul class="nav nav-tabs pkg-tabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-summary" type="button">
+                <i class="fa-solid fa-circle-info"></i> خلاصه
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-assignments" type="button">
+                <i class="fa-solid fa-route"></i> ارجاع‌ها
+                <span class="badge bg-primary">{{ assignments|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-deficiencies" type="button">
+                <i class="fa-solid fa-clipboard-check"></i> نواقص
+                <span class="badge bg-secondary">{{ deficiencies|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-attachments" type="button">
+                <i class="fa-solid fa-paperclip"></i> پیوست‌ها
+                <span class="badge bg-secondary">{{ attachments|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-siblings" type="button">
+                <i class="fa-solid fa-layer-group"></i> اسناد مرتبط
+                <span class="badge bg-secondary">{{ siblings|length }}</span>
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-timeline" type="button">
+                <i class="fa-solid fa-clock-rotate-left"></i> تایم‌لاین
+                <span class="badge bg-secondary">{{ events|length }}</span>
+            </button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+
+        {# ═══ تب ۱: خلاصه ═══ #}
+        <div class="tab-pane fade show active" id="tab-summary">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header"><i class="fa-solid fa-file-lines"></i> اطلاعات اصلی</div>
+                        <div class="info-card-body">
+                            <table class="info-table">
+                                <tr><th>موضوع</th><td>{{ package.subject }}</td></tr>
+                                <tr><th>کد DFC</th><td><code>{{ package.dfc_code }}</code></td></tr>
+                                <tr><th>کد WP</th><td><code>{{ package.work_package_code }}</code></td></tr>
+                                <tr><th>تاریخ نامه</th><td>{{ package.date_letter or '-' }}</td></tr>
+                                <tr><th>تاریخ دریافت</th><td>{{ package.date_received or '-' }}</td></tr>
+                                <tr><th>شماره نامه فرستنده</th><td>{{ package.sender_ref_no or '-' }}</td></tr>
+                                <tr><th>شماره قرارداد</th><td>{{ package.contract_number or '-' }}</td></tr>
+                                <tr><th>شماره اتوماسیون</th><td>{{ package.automation_number or '-' }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header"><i class="fa-solid fa-user-tie"></i> فرستنده و ارتباطات</div>
+                        <div class="info-card-body">
+                            <table class="info-table">
+                                <tr><th>نام فرستنده</th><td>{{ package.sender_name or '-' }}</td></tr>
+                                <tr><th>نوع فرستنده</th><td>{{ package.sender_type or '-' }}</td></tr>
+                                <tr><th>پیمانکار</th><td>{{ package.contractor_name or '-' }}</td></tr>
+                                <tr><th>پروژه</th><td>{{ package.project_name_full or '-' }}</td></tr>
+                                <tr><th>گروه</th><td>{{ package.group_title or '-' }}</td></tr>
+                                <tr><th>زیرگروه</th><td>{{ package.subgroup_title or '-' }}</td></tr>
+                                <tr><th>اولویت</th><td>
+                                    {% if package.priority == 'urgent' %}<span class="badge badge-soft-danger">فوری</span>
+                                    {% elif package.priority == 'high' %}<span class="badge badge-soft-warning">بالا</span>
+                                    {% elif package.priority == 'normal' %}<span class="badge badge-soft-info">معمولی</span>
+                                    {% else %}<span class="badge badge-soft-secondary">کم</span>{% endif %}
+                                </td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header"><i class="fa-solid fa-building-columns"></i> اطلاعات مدیریت</div>
+                        <div class="info-card-body">
+                            <table class="info-table">
+                                <tr><th>ارسال به مدیریت</th><td>{{ package.date_sent_to_management or '-' }}</td></tr>
+                                <tr><th>بازگشت از دفتر</th><td>{{ package.date_returned_from_management or '-' }}</td></tr>
+                                <tr><th>تاریخ روی سند</th><td>{{ package.management_date_on_letter or '-' }}</td></tr>
+                                <tr><th>دستور مدیریت</th><td>{{ package.management_instruction or '-' }}</td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-card">
+                        <div class="info-card-header"><i class="fa-solid fa-hourglass-half"></i> مهلت پاسخ</div>
+                        <div class="info-card-body">
+                            <table class="info-table">
+                                <tr><th>مهلت</th><td>{{ package.sla_effective_days or package.sla_days or '-' }} روز کاری
+                                    <small class="text-muted">({{ package.sla_source or '-' }})</small></td></tr>
+                                <tr><th>شروع</th><td>{{ package.sla_start_date or '-' }}</td></tr>
+                                <tr><th>سررسید</th><td>{{ package.response_due_date or '-' }}</td></tr>
+                                <tr><th>دیرکرد</th><td>
+                                    {% if package.is_overdue %}
+                                    <span class="badge badge-soft-danger">{{ package.overdue_days }} روز دیرکرد</span>
+                                    {% else %}
+                                    <span class="badge badge-soft-success">به‌موقع</span>
+                                    {% endif %}
+                                </td></tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ═══ تب ۲: ارجاع‌ها ═══ #}
+        <div class="tab-pane fade" id="tab-assignments">
+            {% if current_stage in ['returned_from_management', 'routed', 'in_progress', 'under_review', 'approved'] %}
+            <div class="form-section">
+                <div class="form-section-title"><i class="fa-solid fa-plus-circle text-primary"></i> ارجاع جدید</div>
+                <form id="route-form">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">گیرندگان <small>(Ctrl+Click)</small></label>
+                            <select class="form-select" name="to_user_ids" multiple size="5">
+                                {% for u in users %}
+                                <option value="{{ u.id }}">{{ u.full_name }} — {{ u.role }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">نقش</label>
+                            <select class="form-select" name="role">
+                                <option value="supervisor">سرپرست</option>
+                                <option value="expert">کارشناس</option>
+                                <option value="collaborator">همکار</option>
+                            </select>
+                            <label class="form-label mt-2">مهلت (روز کاری)</label>
+                            <input type="number" class="form-control" name="due_days" value="3" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">دستور</label>
+                            <textarea class="form-control" name="instruction" rows="3"></textarea>
+                            <button type="submit" class="btn btn-custom mt-2 w-100">
+                                <i class="fa-solid fa-paper-plane"></i> ارجاع
+                            </button>
+                        </div>
+                    </div>
+                    <div id="route-result" class="mt-2"></div>
+                </form>
+            </div>
+            {% endif %}
+
+            <div class="info-card">
+                <div class="info-card-header"><i class="fa-solid fa-route"></i> ارجاع‌های موجود ({{ assignments|length }})</div>
+                <div class="info-card-body">
+                    {% if not assignments %}
+                    <p class="text-muted text-center my-3">هنوز ارجاعی ثبت نشده است.</p>
+                    {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-custom table-hover">
+                            <thead><tr>
+                                <th>#</th><th>از</th><th>به</th><th>نقش</th>
+                                <th>متولی</th><th>مهلت</th><th>وضعیت</th><th>عملیات</th>
+                            </tr></thead>
+                            <tbody>
+                                {% for a in assignments %}
+                                <tr>
+                                    <td>{{ a.id }}</td>
+                                    <td>{{ a.from_user_name or '-' }}</td>
+                                    <td>{{ a.to_user_name or '-' }}</td>
+                                    <td><span class="badge badge-soft-secondary">{{ a.assignee_role }}</span></td>
+                                    <td>{% if a.is_primary %}<i class="fa-solid fa-star text-warning"></i>{% endif %}</td>
+                                    <td><small>{{ a.due_date or '-' }}</small></td>
+                                    <td>
+                                        {% if a.status == 'pending' %}<span class="badge badge-soft-secondary">در انتظار</span>
+                                        {% elif a.status == 'accepted' %}<span class="badge badge-soft-info">پذیرفته</span>
+                                        {% elif a.status == 'in_progress' %}<span class="badge badge-soft-warning">در حال انجام</span>
+                                        {% elif a.status == 'done' %}<span class="badge badge-soft-success">انجام‌شده</span>
+                                        {% else %}<span class="badge badge-soft-secondary">{{ a.status }}</span>{% endif %}
+                                    </td>
+                                    <td>
+                                        {% if a.status in ('pending','accepted','in_progress') %}
+                                        <div class="d-flex gap-1 flex-wrap">
+                                            {% if a.status == 'pending' %}<button class="btn btn-sm btn-outline-primary" onclick="doAction({{ a.id }}, 'accept')">پذیرش</button>{% endif %}
+                                            {% if a.status in ('pending','accepted') %}<button class="btn btn-sm btn-outline-info" onclick="doAction({{ a.id }}, 'start')">شروع</button>{% endif %}
+                                            {% if a.status in ('accepted','in_progress') %}<button class="btn btn-sm btn-outline-success" onclick="doAction({{ a.id }}, 'complete')">اتمام</button>{% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# ═══ تب ۳: نواقص ═══ #}
+        <div class="tab-pane fade" id="tab-deficiencies">
+            <div class="form-section">
+                <div class="form-section-title"><i class="fa-solid fa-file-circle-exclamation text-warning"></i> درخواست رفع نقص</div>
+                <form id="deficiency-form">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label">نوع</label>
+                            <select class="form-select" name="mode">
+                                <option value="written">کتبی</option>
+                                <option value="verbal">شفاهی</option>
+                                <option value="email">ایمیل</option>
+                                <option value="phone">تلفنی</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">شماره نامه/ایمیل</label>
+                            <input type="text" class="form-control" name="reference_no">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">تاریخ درخواست</label>
+                            <input type="text" class="form-control" name="request_date" placeholder="1405/01/01">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">مهلت</label>
+                            <input type="text" class="form-control" name="due_date" placeholder="1405/01/01">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">مدارک (با کاما جدا کنید)</label>
+                            <input type="text" class="form-control" name="items" placeholder="نقشه تأییدشده، گزارش تست، ...">
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <button type="submit" class="btn btn-custom"><i class="fa-solid fa-plus"></i> ثبت</button>
+                    </div>
+                    <div id="deficiency-result" class="mt-2"></div>
+                </form>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header"><i class="fa-solid fa-list-check"></i> درخواست‌ها ({{ deficiencies|length }})</div>
+                <div class="info-card-body">
+                    {% if not deficiencies %}
+                    <p class="text-muted text-center my-3">هنوز درخواستی ثبت نشده است.</p>
+                    {% else %}
+                        {% for req in deficiencies %}
+                        <div class="card mb-3 border">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <div>
+                                        <strong class="text-primary">#{{ req.id }}</strong>
+                                        <span class="badge badge-soft-secondary">{{ req.mode }}</span>
+                                        {% if req.status == 'fulfilled' %}<span class="badge badge-soft-success">تکمیل</span>
+                                        {% elif req.status == 'partial' %}<span class="badge badge-soft-warning">ناقص</span>
+                                        {% else %}<span class="badge badge-soft-secondary">باز</span>{% endif %}
+                                    </div>
+                                    <small class="text-muted">{{ req.received_items }}/{{ req.total_items }} ({{ req.progress }}%)</small>
+                                </div>
+                                <div class="progress mb-2" style="height:8px;">
+                                    <div class="progress-bar {% if req.progress==100 %}bg-success{% else %}bg-primary{% endif %}" style="width:{{ req.progress }}%"></div>
+                                </div>
+                                {% if req.items %}
+                                <table class="table table-sm table-bordered mb-0">
+                                    <thead><tr><th width="5%">#</th><th>عنوان</th><th width="20%">وضعیت</th></tr></thead>
+                                    <tbody>
+                                        {% for item in req.items %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ item.title }}</td>
+                                            <td>
+                                                <div class="form-check form-switch">
+                                                    <input class="form-check-input" type="checkbox"
+                                                           {% if item.is_received %}checked{% endif %}
+                                                           onchange="toggleDeficiencyItem({{ item.id }}, this.checked)">
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# ═══ تب ۴: پیوست‌ها ═══ #}
+        <div class="tab-pane fade" id="tab-attachments">
+            <div class="form-section">
+                <div class="form-section-title"><i class="fa-solid fa-cloud-arrow-up text-primary"></i> آپلود فایل (پوشه: {{ package.dfc_code }})</div>
+                <form id="upload-form">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <input type="file" class="form-control" id="file-input" required>
+                        </div>
+                        <div class="col-md-3">
+                            <select class="form-select" id="kind-input">
+                                <option value="scan">اسکن</option>
+                                <option value="letter">نامه</option>
+                                <option value="evidence">مدرک</option>
+                                <option value="response">پاسخ</option>
+                                <option value="other" selected>سایر</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-custom w-100">
+                                <i class="fa-solid fa-upload"></i> آپلود
+                            </button>
+                        </div>
+                    </div>
+                    <progress id="progress" value="0" max="100" class="w-100 mt-3" style="display:none; height:10px;"></progress>
+                    <div id="upload-result" class="mt-2"></div>
+                </form>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-header"><i class="fa-solid fa-paperclip"></i> پیوست‌ها ({{ attachments|length }})</div>
+                <div class="info-card-body">
+                    {% if not attachments %}
+                    <p class="text-muted text-center my-3">هنوز فایلی پیوست نشده است.</p>
+                    {% else %}
+                    <table class="table table-custom table-hover">
+                        <thead><tr><th>نام</th><th>حجم</th><th>نوع</th><th>آپلودکننده</th><th>عملیات</th></tr></thead>
+                        <tbody>
+                            {% for a in attachments %}
+                            <tr>
+                                <td>{{ a.original_name }}</td>
+                                <td>{{ a.size_human }}</td>
+                                <td><small class="text-muted">{{ a.kind }}</small></td>
+                                <td><small>{{ a.uploaded_by_name or '-' }}</small></td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        {% if a.previewable %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="openPreview({{ a.id }}, '{{ a.mime }}', '{{ a.original_name }}')">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                        {% endif %}
+                                        <a href="/work-package/attachments/{{ a.id }}/download" class="btn btn-sm btn-outline-secondary">
+                                            <i class="fa-solid fa-download"></i>
+                                        </a>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="delAttachment({{ a.id }})">
+                                            <i class="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        {# ═══ تب ۵: اسناد مرتبط ═══ #}
+        <div class="tab-pane fade" id="tab-siblings">
+            <div class="info-card">
+                <div class="info-card-header"><i class="fa-solid fa-layer-group"></i> همه‌ی اسناد پکیج {{ package.work_package_code }}</div>
+                <div class="info-card-body">
+                    <table class="table table-custom table-hover">
+                        <thead><tr><th>#</th><th>کد DFC</th><th>موضوع</th><th>مرحله</th><th>تاریخ</th><th></th></tr></thead>
+                        <tbody>
+                            {% for s in siblings %}
+                            <tr {% if s.id == package.id %}class="table-active"{% endif %}>
+                                <td>{{ loop.index }}</td>
+                                <td><code>{{ s.dfc_code }}</code></td>
+                                <td>{{ s.subject }}</td>
+                                <td><span class="badge badge-soft-secondary">{{ s.stage }}</span></td>
+                                <td><small>{{ s.registered_at or '-' }}</small></td>
+                                <td>
+                                    {% if s.id != package.id %}
+                                    <a href="/work-package/{{ s.id }}" class="btn btn-sm btn-outline-primary">مشاهده</a>
+                                    {% else %}
+                                    <span class="badge badge-soft-info">فعلی</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {# ═══ تب ۶: تایم‌لاین ═══ #}
+        <div class="tab-pane fade" id="tab-timeline">
+            <div class="info-card">
+                <div class="info-card-header"><i class="fa-solid fa-clock-rotate-left"></i> تاریخچه رویدادها</div>
+                <div class="info-card-body">
+                    {% if not events %}
+                    <p class="text-muted text-center my-3">هنوز رویدادی ثبت نشده است.</p>
+                    {% else %}
+                    <ul class="timeline-list">
+                        {% for e in events %}
+                        <li class="timeline-item">
+                            <div class="timeline-content">
+                                <div class="timeline-type">{{ e.event_type }}</div>
+                                {% if e.summary %}<div class="timeline-summary">{{ e.summary }}</div>{% endif %}
+                                <div class="timeline-meta">
+                                    <span>{% if e.actor_name %}<i class="fa-solid fa-user"></i> {{ e.actor_name }}{% endif %}</span>
+                                    <span>{{ e.created_at or '' }}</span>
+                                </div>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# ═══ مودال بازگشت از مدیریت ═══ #}
+    <div class="modal fade" id="returnModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                        ثبت بازگشت از دفتر مدیریت
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+
+                    {# بخش ۱: تاریخ‌ها و دستور #}
+                    <div class="mb-3" style="font-size: 0.95rem; font-weight: 700; color: #2d3748; padding-right: 8px; border-right: 4px solid #1b698b;">
+                        اطلاعات بازگشت
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">تاریخ بازگشت از دفتر (شمسی) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="ret_date" placeholder="1405/01/15">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">تاریخ درج‌شده روی سند (شمسی)</label>
+                            <input type="text" class="form-control" id="ret_letter_date" placeholder="1405/01/14">
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">دستور مدیریت <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="ret_instruction" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    {# بخش ۲: نوع اقدام #}
+                    <div class="mt-4 mb-3" style="font-size: 0.95rem; font-weight: 700; color: #2d3748; padding-right: 8px; border-right: 4px solid #1b698b;">
+                        نوع اقدام مدیریت
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <input type="radio" class="btn-check" name="mgmt_action" id="mgmt_route" value="route_to_supervisor" checked>
+                        <label class="btn btn-outline-primary" for="mgmt_route">
+                            <i class="fa-solid fa-paper-plane"></i> ارجاع به سرپرست
+                        </label>
+
+                        <input type="radio" class="btn-check" name="mgmt_action" id="mgmt_archive" value="archive">
+                        <label class="btn btn-outline-secondary" for="mgmt_archive">
+                            <i class="fa-solid fa-box-archive"></i> بایگانی
+                        </label>
+
+                        <input type="radio" class="btn-check" name="mgmt_action" id="mgmt_info" value="informational">
+                        <label class="btn btn-outline-info" for="mgmt_info">
+                            <i class="fa-solid fa-circle-info"></i> جهت اطلاع
+                        </label>
+
+                        <input type="radio" class="btn-check" name="mgmt_action" id="mgmt_urgent" value="urgent_action">
+                        <label class="btn btn-outline-danger" for="mgmt_urgent">
+                            <i class="fa-solid fa-fire"></i> اقدام فوری
+                        </label>
+                    </div>
+
+                    {# بخش ۳: طبقه‌بندی و ارجاع #}
+                    <div class="mt-4 mb-3" style="font-size: 0.95rem; font-weight: 700; color: #2d3748; padding-right: 8px; border-right: 4px solid #1b698b;">
+                        طبقه‌بندی و ارجاع
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">گروه سند</label>
+                            <select class="form-select" id="ret_group_id" onchange="onGroupChange()">
+                                <option value="0">— بدون گروه —</option>
+                                {% for g in all_groups %}
+                                <option value="{{ g.id }}">{{ g.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">زیرگروه سند</label>
+                            <select class="form-select" id="ret_subgroup_id" onchange="onSubgroupChange()">
+                                <option value="0">— بدون زیرگروه —</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">اولویت</label>
+                            <select class="form-select" id="ret_priority">
+                                <option value="low">کم</option>
+                                <option value="normal" selected>معمولی</option>
+                                <option value="high">بالا</option>
+                                <option value="urgent">فوری</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">محرمانگی</label>
+                            <select class="form-select" id="ret_confidentiality">
+                                <option value="internal" selected>داخلی</option>
+                                <option value="confidential">محرمانه</option>
+                            </select>
+                        </div>
+
+                        {# ★ کامپوننت انتخاب چند کاربر با جستجو #}
+                        <div class="col-md-12">
+                            <label class="form-label small fw-bold">
+                                سرپرستان
+                                <small class="text-muted">(نام را تایپ کنید و روی نتیجه کلیک کنید)</small>
+                            </label>
+                            <div id="selected_supervisors" class="mb-2 d-flex flex-wrap gap-1">
+                                <span class="text-muted small">هنوز کسی انتخاب نشده.</span>
+                            </div>
+                            <div class="position-relative">
+                                <input type="text"
+                                       id="supervisor_search"
+                                       class="form-control"
+                                       placeholder="جستجوی نام..."
+                                       autocomplete="off">
+                                <div id="supervisor_results" class="user-picker-results" style="display:none;"></div>
+                            </div>
+                        </div>
+
+                        {# پیش‌نمایش SLA #}
+                        <div class="col-md-12">
+                            <div class="alert alert-info mb-0" style="font-size: 0.9rem;">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                                <strong>مهلت پاسخ (SLA):</strong>
+                                <span id="sla_text">در حال محاسبه...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">انصراف</button>
+                    <button class="btn btn-success" onclick="submitReturnFromManagement()">
+                        <i class="fa-solid fa-check"></i> ثبت بازگشت
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# ═══ مودال پیش‌نمایش فایل ═══ #}
+    <div class="modal fade" id="previewModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="previewModalTitle">پیش‌نمایش</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center" id="previewModalBody" style="min-height:500px;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const PACKAGE_ID = {{ package.id }};
+
+function postJSON(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body || {}),
+    }).then(r => r.json());
+}
+
+function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
+
+// ═══════════════════════════════════════════════════════
+// ★ انتخاب‌گر کاربران چندگانه با جستجو
+// ═══════════════════════════════════════════════════════
+const selectedSupervisors = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    const input = document.getElementById('supervisor_search');
+    const results = document.getElementById('supervisor_results');
+    if (!input || !results) return;
+
+    let timer = null;
+
+    input.addEventListener('input', function () {
+        const q = this.value.trim();
+        clearTimeout(timer);
+        if (q.length < 2) {
+            results.style.display = 'none';
+            return;
+        }
+        timer = setTimeout(async () => {
+            try {
+                const res = await fetch('/work-package/search-users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({q: q}),
+                });
+                const data = await res.json();
+                renderUsers(data.users || []);
+            } catch (e) { console.error(e); }
+        }, 250);
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#supervisor_search') &&
+            !e.target.closest('#supervisor_results')) {
+            results.style.display = 'none';
+        }
+    });
+});
+
+function renderUsers(users) {
+    const results = document.getElementById('supervisor_results');
+    if (!users.length) {
+        results.innerHTML = '<div class="p-2 text-muted small">نتیجه‌ای یافت نشد.</div>';
+        results.style.display = 'block';
+        return;
+    }
+
+    let html = '';
+    for (const u of users) {
+        if (selectedSupervisors.find(s => s.id === u.id)) continue;
+        const roleLabel = {
+            'admin': 'مدیر نرم‌افزار',
+            'manager': 'مدیر',
+            'supervisor': 'سرپرست',
+            'expert': 'کارشناس',
+            'doc_controller': 'کنترل مستندات'
+        }[u.role] || u.role;
+
+        html += `<button type="button"
+                   class="dropdown-item d-flex justify-content-between align-items-center p-2 border-bottom"
+                   style="background:transparent; border:none; width:100%; text-align:right;"
+                   onclick='addSupervisor(${JSON.stringify(u).replace(/'/g, "&apos;")})'>
+            <span>
+                <strong>${escapeHtml(u.full_name)}</strong>
+                <small class="text-muted ms-2">${escapeHtml(u.username || '')}</small>
+            </span>
+            <span class="badge bg-secondary">${roleLabel}</span>
+        </button>`;
+    }
+    if (!html) {
+        html = '<div class="p-2 text-muted small">همه انتخاب شده‌اند.</div>';
+    }
+    results.innerHTML = html;
+    results.style.display = 'block';
+}
+
+function addSupervisor(user) {
+    if (selectedSupervisors.find(s => s.id === user.id)) return;
+    selectedSupervisors.push(user);
+    document.getElementById('supervisor_search').value = '';
+    document.getElementById('supervisor_results').style.display = 'none';
+    renderSelectedSupervisors();
+}
+
+function removeSupervisor(userId) {
+    const idx = selectedSupervisors.findIndex(s => s.id === userId);
+    if (idx >= 0) {
+        selectedSupervisors.splice(idx, 1);
+        renderSelectedSupervisors();
+    }
+}
+
+function renderSelectedSupervisors() {
+    const container = document.getElementById('selected_supervisors');
+    if (!container) return;
+
+    if (selectedSupervisors.length === 0) {
+        container.innerHTML = '<span class="text-muted small">هنوز کسی انتخاب نشده.</span>';
+        return;
+    }
+
+    let html = '';
+    for (const s of selectedSupervisors) {
+        html += `<span class="user-chip">
+            ${escapeHtml(s.full_name)}
+            <i class="fa-solid fa-times chip-remove" onclick="removeSupervisor(${s.id})"></i>
+        </span>`;
+    }
+    container.innerHTML = html;
+}
+
+// ═══ ارسال به مدیریت ═══
+async function sendToManagement() {
+    if (!confirm('سند به دفتر مدیریت ارسال شود؟')) return;
+    const today = new Date();
+    const dateStr = today.getFullYear() + '/' +
+                    String(today.getMonth()+1).padStart(2,'0') + '/' +
+                    String(today.getDate()).padStart(2,'0');
+    try {
+        const data = await postJSON(`/work-package/${PACKAGE_ID}/change-stage`, {
+            stage: 'sent_to_management',
+            extra_fields: { date_sent_to_management: dateStr }
+        });
+        if (!data.ok) throw new Error(data.error || 'خطا');
+        location.reload();
+    } catch (e) { alert('خطا: ' + e.message); }
+}
+
+// ═══ بازگشت از مدیریت ═══
+function openReturnFromManagement() {
+    document.getElementById('ret_group_id').value = "{{ package.group_id or 0 }}";
+    document.getElementById('ret_priority').value = "{{ package.priority or 'normal' }}";
+    document.getElementById('ret_confidentiality').value = "{{ package.confidentiality or 'internal' }}";
+
+    if (document.getElementById('ret_group_id').value !== "0") {
+        onGroupChange();
+    }
+
+    new bootstrap.Modal(document.getElementById('returnModal')).show();
+}
+
+async function onGroupChange() {
+    const groupId = document.getElementById('ret_group_id').value;
+    const subSelect = document.getElementById('ret_subgroup_id');
+    subSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
+    if (groupId === "0") {
+        subSelect.innerHTML = '<option value="0">— بدون زیرگروه —</option>';
+        onSubgroupChange();
+        return;
+    }
+    try {
+        const res = await fetch(`/documents/api/groups/${groupId}/subgroups`);
+        const data = await res.json();
+        subSelect.innerHTML = '<option value="0">— بدون زیرگروه —</option>';
+        (data.subgroups || []).forEach(sg => {
+            subSelect.innerHTML += `<option value="${sg.id}">${sg.title}</option>`;
+        });
+        onSubgroupChange();
+    } catch (e) {
+        subSelect.innerHTML = '<option value="0">خطا</option>';
+    }
+}
+
+function onSubgroupChange() {
+    const groupId = document.getElementById('ret_group_id').value;
+    const subgroupId = document.getElementById('ret_subgroup_id').value;
+    const slaText = document.getElementById('sla_text');
+
+    slaText.textContent = 'در حال محاسبه...';
+
+    fetch('/work-package/preview-sla', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            group_id: groupId !== "0" ? parseInt(groupId) : null,
+            subgroup_id: subgroupId !== "0" ? parseInt(subgroupId) : null,
+        }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            const sourceLabel = {
+                'subgroup': 'زیرگروه',
+                'group': 'گروه',
+                'default': 'پیش‌فرض'
+            }[data.sla_source] || data.sla_source;
+            slaText.innerHTML = `
+                <strong>${data.sla_days}</strong> روز کاری
+                (منبع: ${sourceLabel})
+                — سررسید: <strong>${data.response_due_date_jalali}</strong>
+            `;
+        } else {
+            slaText.textContent = 'خطا در محاسبه';
+        }
+    })
+    .catch(() => {
+        slaText.textContent = 'خطا در محاسبه';
+    });
+}
+
+async function submitReturnFromManagement() {
+    const date = document.getElementById('ret_date').value.trim();
+    const instruction = document.getElementById('ret_instruction').value.trim();
+    const action = document.querySelector('input[name="mgmt_action"]:checked').value;
+
+    if (!date) { alert('تاریخ بازگشت الزامی است'); return; }
+    if (!instruction) { alert('دستور مدیریت الزامی است'); return; }
+
+    const letterDate = document.getElementById('ret_letter_date').value.trim();
+    const groupId = document.getElementById('ret_group_id').value;
+    const subgroupId = document.getElementById('ret_subgroup_id').value;
+    const priority = document.getElementById('ret_priority').value;
+    const confidentiality = document.getElementById('ret_confidentiality').value;
+
+    // ★ خواندن از آرایه‌ی selectedSupervisors
+    const supervisors = selectedSupervisors.map(s => s.id);
+
+    if (action === 'route_to_supervisor' && supervisors.length === 0) {
+        alert('برای ارجاع به سرپرست، حداقل یک سرپرست انتخاب کنید');
+        return;
+    }
+
+    try {
+        const data = await postJSON(
+            `/work-package/${PACKAGE_ID}/return-from-management`,
+            {
+                date_returned_from_management: date,
+                management_date_on_letter: letterDate || null,
+                management_instruction: instruction,
+                management_action: action,
+                group_id: groupId !== "0" ? parseInt(groupId) : null,
+                subgroup_id: subgroupId !== "0" ? parseInt(subgroupId) : null,
+                priority: priority,
+                confidentiality: confidentiality,
+                supervisor_ids: supervisors,
+            }
+        );
+        if (!data.ok) throw new Error(data.error || 'خطا');
+        location.reload();
+    } catch (e) {
+        alert('خطا: ' + e.message);
+    }
+}
+
+// ═══ ارجاع ═══
+function openRouteForm() {
+    const tab = document.querySelector('[data-bs-target="#tab-assignments"]');
+    if (tab) new bootstrap.Tab(tab).show();
+}
+
+document.getElementById('route-form')?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    const toIds = Array.from(form.querySelector('select[name="to_user_ids"]').selectedOptions)
+                      .map(o => parseInt(o.value));
+    if (!toIds.length) {
+        document.getElementById('route-result').innerHTML =
+            '<div class="alert alert-danger">حداقل یک گیرنده</div>';
+        return;
+    }
+    try {
+        const data = await postJSON(`/work-package/${PACKAGE_ID}/route`, {
+            to_user_ids: toIds,
+            role: form.querySelector('select[name="role"]').value,
+            instruction: form.querySelector('textarea[name="instruction"]').value || null,
+            due_days: parseInt(form.querySelector('input[name="due_days"]').value || '3'),
+        });
+        if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+        location.reload();
+    } catch (e) {
+        document.getElementById('route-result').innerHTML =
+            `<div class="alert alert-danger">${e.message}</div>`;
+    }
+});
+
+async function doAction(aid, action) {
+    try {
+        const data = await postJSON(`/work-package/assignments/${aid}/${action}`, {});
+        if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+        location.reload();
+    } catch (e) { alert('خطا: ' + e.message); }
+}
+
+// ═══ نواقص ═══
+document.getElementById('deficiency-form')?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const form = ev.target;
+    try {
+        const data = await postJSON(`/work-package/${PACKAGE_ID}/deficiencies`, {
+            mode: form.querySelector('[name="mode"]').value,
+            reference_no: form.querySelector('[name="reference_no"]').value || null,
+            request_date: form.querySelector('[name="request_date"]').value || null,
+            due_date: form.querySelector('[name="due_date"]').value || null,
+            items: form.querySelector('[name="items"]').value || '',
+        });
+        if (!data.ok) throw new Error(data.error || 'خطا');
+        location.reload();
+    } catch (e) {
+        document.getElementById('deficiency-result').innerHTML =
+            `<div class="alert alert-danger">${e.message}</div>`;
+    }
+});
+
+async function toggleDeficiencyItem(itemId, received) {
+    try {
+        const data = await postJSON(`/work-package/deficiency/items/${itemId}/toggle`, {received});
+        if (!data.ok) throw new Error(data.error || 'خطا');
+        location.reload();
+    } catch (e) { alert('خطا: ' + e.message); }
+}
+
+// ═══ آپلود ═══
+document.getElementById('upload-form')?.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    const fileInput = document.getElementById('file-input');
+    if (!fileInput.files[0]) return;
+    const fd = new FormData();
+    fd.append('file', fileInput.files[0]);
+    fd.append('kind', document.getElementById('kind-input').value);
+
+    const progress = document.getElementById('progress');
+    progress.style.display = 'block';
+    progress.value = 0;
+
+    try {
+        const res = await fetch(`/work-package/${PACKAGE_ID}/attachments/upload`, {
+            method: 'POST', body: fd,
+        });
+        progress.style.display = 'none';
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+            document.getElementById('upload-result').innerHTML =
+                `<div class="alert alert-danger">${data.message || data.error || 'خطا'}</div>`;
+            return;
+        }
+        location.reload();
+    } catch (e) {
+        progress.style.display = 'none';
+        document.getElementById('upload-result').innerHTML =
+            `<div class="alert alert-danger">${e.message}</div>`;
+    }
+});
+
+async function delAttachment(id) {
+    if (!confirm('حذف شود؟')) return;
+    try {
+        const data = await postJSON(`/work-package/attachments/${id}/delete`, {});
+        if (!data.ok) throw new Error(data.error || 'خطا');
+        location.reload();
+    } catch (e) { alert('خطا: ' + e.message); }
+}
+
+// ═══ پیش‌نمایش ═══
+function openPreview(id, mime, name) {
+    const modalEl = document.getElementById('previewModal');
+    document.getElementById('previewModalTitle').textContent = 'پیش‌نمایش: ' + name;
+    const body = document.getElementById('previewModalBody');
+    const url = `/work-package/attachments/${id}/preview`;
+    let content = '';
+    if (mime.startsWith('image/')) {
+        content = `<img src="${url}" style="max-width:100%;max-height:75vh;border-radius:8px;">`;
+    } else if (mime === 'application/pdf') {
+        content = `<div class="text-center py-5">
+            <i class="fa-solid fa-file-pdf text-danger" style="font-size:5rem;"></i>
+            <h4 class="mt-3">فایل PDF آماده مشاهده است</h4>
+            <a href="${url}" target="_blank" class="btn btn-primary btn-lg mt-3">
+                <i class="fa-solid fa-up-right-from-square"></i> باز کردن در تب جدید
+            </a></div>`;
+    } else if (mime.startsWith('video/')) {
+        content = `<video controls src="${url}" style="max-width:100%;max-height:75vh;"></video>`;
+    } else if (mime.startsWith('audio/')) {
+        content = `<audio controls src="${url}" style="width:100%;"></audio>`;
+    } else if (mime.startsWith('text/')) {
+        content = `<iframe src="${url}" style="width:100%;height:75vh;border:none;"></iframe>`;
+    } else {
+        content = `<div class="text-center py-5">
+            <i class="fa-solid fa-file text-secondary" style="font-size:5rem;"></i>
+            <h4 class="mt-3">پیش‌نمایش امکان‌پذیر نیست</h4>
+            <a href="/work-package/attachments/${id}/download" class="btn btn-success btn-lg mt-3">
+                <i class="fa-solid fa-download"></i> دانلود
+            </a></div>`;
+    }
+    body.innerHTML = content;
+    new bootstrap.Modal(modalEl).show();
+}
+</script>
+{% endblock %}

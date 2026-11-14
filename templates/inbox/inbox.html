@@ -2,192 +2,265 @@
 
 {% block title %}کارتابل من{% endblock %}
 
+{% block styles %}
+<style>
+    .inbox-header { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 20px;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0; }
+    .inbox-tabs .nav-link { border: none; color: #4a5568; font-weight: 500; padding: 10px 16px;
+                            border-radius: 8px; margin: 0 4px 4px 0; }
+    .inbox-tabs .nav-link:hover { background: #f7fafc; color: #1b698b; }
+    .inbox-tabs .nav-link.active { background: #1b698b; color: #fff; }
+    .inbox-tabs .nav-link .badge { font-size: 0.7rem; margin-right: 4px; }
+    .inbox-tabs .nav-link.active .badge { background: rgba(255,255,255,0.3) !important; }
+
+    .inbox-table { font-size: 0.88rem; }
+    .inbox-table th { background: #f8fafc; color: #4a5568; font-weight: 600;
+                      border-bottom: 2px solid #e2e8f0; font-size: 0.8rem; }
+    .inbox-table td { vertical-align: middle; }
+
+    .type-badge-package { background: #c6f6d5; color: #22543d; padding: 2px 8px;
+                          border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    .type-badge-legacy { background: #e2e8f0; color: #4a5568; padding: 2px 8px;
+                         border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
+    .overdue-row { background: #fff5f5 !important; }
+    .priority-urgent { color: #c53030; font-weight: 700; }
+    .priority-high { color: #c05621; font-weight: 600; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: #a0aec0; }
+    .empty-state i { font-size: 4rem; margin-bottom: 16px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2><i class="fa-solid fa-inbox"></i> کارتابل من</h2>
-  </div>
 
-  {% if login_required %}
-    <div class="alert alert-warning">لطفاً وارد شوید تا کارتابل خود را ببینید.</div>
-  {% else %}
-
-  <ul class="nav nav-tabs mb-4" role="tablist">
-    <li class="nav-item">
-      <a class="nav-link {% if current_tab=='active' %}active{% endif %}"
-         href="?tab=active">
-        اقدام من
-        <span class="badge bg-primary">{{ counts.get('active', 0) }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if current_tab=='unread' %}active{% endif %}"
-         href="?tab=unread">
-        خوانده‌نشده
-        <span class="badge bg-danger">{{ counts.get('unread', 0) }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if current_tab=='overdue' %}active{% endif %}"
-         href="?tab=overdue">
-        دیرکرد
-        <span class="badge bg-warning text-dark">{{ counts.get('overdue', 0) }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if current_tab=='waiting' %}active{% endif %}"
-         href="?tab=waiting">
-        در انتظار دیگران
-        <span class="badge bg-secondary">{{ counts.get('waiting', 0) }}</span>
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if current_tab=='done' %}active{% endif %}"
-         href="?tab=done">
-        انجام‌شده (۳۰ روز)
-        <span class="badge bg-success">{{ counts.get('done', 0) }}</span>
-      </a>
-    </li>
-  </ul>
-
-  {% if not items %}
-    <div class="alert alert-info">
-      <i class="fa-solid fa-circle-info"></i>
-      در این تب موردی وجود ندارد.
-    </div>
-  {% else %}
-
-  <div class="table-responsive">
-    <table class="table table-hover align-middle">
-      <thead class="table-light">
-        <tr>
-          <th>کد پکیج</th>
-          <th>موضوع</th>
-          <th>از</th>
-          <th>اولویت</th>
-          <th>مهلت</th>
-          <th>وضعیت</th>
-          <th>عملیات</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-        <tr data-assignment-id="{{ item.id }}">
-          <td>
-            <a href="{{ url_for('documents.view_document', doc_id=item.document_id) }}">
-              <code>{{ item.package_code or ('#' ~ item.document_id) }}</code>
-            </a>
-          </td>
-          <td>{{ item.subject or '—' }}</td>
-          <td>{{ item.from_user_name or '—' }}</td>
-          <td>
-            {% if item.priority == 'urgent' %}
-              <span class="badge bg-danger">فوری</span>
-            {% elif item.priority == 'high' %}
-              <span class="badge bg-warning text-dark">بالا</span>
-            {% elif item.priority == 'normal' %}
-              <span class="badge bg-info">معمولی</span>
-            {% else %}
-              <span class="badge bg-secondary">کم</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if item.due_date %}
-              {{ item.due_date }}
-              {% if item.is_overdue %}
-                <span class="badge bg-danger">دیرکرد</span>
-              {% endif %}
-            {% else %}—{% endif %}
-          </td>
-          <td>
-            {% if item.status == 'pending' %}
-              <span class="badge bg-secondary">در انتظار</span>
-            {% elif item.status == 'accepted' %}
-              <span class="badge bg-info">پذیرفته</span>
-            {% elif item.status == 'in_progress' %}
-              <span class="badge bg-primary">در حال انجام</span>
-            {% elif item.status == 'done' %}
-              <span class="badge bg-success">انجام‌شده</span>
-            {% elif item.status == 'returned' %}
-              <span class="badge bg-warning text-dark">بازگشته</span>
-            {% else %}
-              <span class="badge bg-secondary">{{ item.status }}</span>
-            {% endif %}
-          </td>
-          <td>
-            <div class="btn-group btn-group-sm" role="group">
-              {% if current_tab in ('active', 'unread', 'overdue') %}
-                {% if item.status == 'pending' %}
-                  <button class="btn btn-outline-primary"
-                          onclick="doAction({{ item.id }}, 'accept')">پذیرش</button>
-                {% endif %}
-                {% if item.status in ('pending', 'accepted') %}
-                  <button class="btn btn-outline-info"
-                          onclick="doAction({{ item.id }}, 'start')">شروع</button>
-                {% endif %}
-                {% if item.status in ('accepted', 'in_progress') %}
-                  <button class="btn btn-outline-success"
-                          onclick="doAction({{ item.id }}, 'complete')">اتمام</button>
-                {% endif %}
-                <button class="btn btn-outline-warning"
-                        onclick="doReturn({{ item.id }})">بازگشت</button>
-              {% endif %}
+    <!-- ═══ هدر ═══ -->
+    <div class="inbox-header">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h4 class="mb-1">
+                    <i class="fa-solid fa-inbox text-primary"></i> کارتابل من
+                </h4>
+                <p class="text-muted mb-0 small">
+                    مجموع: <strong>{{ total }}</strong> مورد
+                    {% if package_count is defined %}
+                    — پکیج جدید: <strong>{{ package_count }}</strong>
+                    {% endif %}
+                    {% if legacy_count is defined and legacy_count > 0 %}
+                    — قدیمی: <strong>{{ legacy_count }}</strong>
+                    {% endif %}
+                </p>
             </div>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
+            <a href="/work-package/" class="btn btn-outline-secondary btn-sm">
+                <i class="fa-solid fa-list"></i> همه‌ی پکیج‌ها
+            </a>
+        </div>
+    </div>
 
-  <p class="text-muted">مجموع: {{ total }} مورد</p>
-  {% endif %}
+    {% if login_required %}
+    <div class="alert alert-warning text-center">
+        لطفاً وارد شوید تا کارتابل خود را ببینید.
+    </div>
+    {% else %}
 
-  {% endif %}
+    <!-- ═══ تب‌ها ═══ -->
+    <ul class="nav nav-pills inbox-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab=='active' %}active{% endif %}"
+               href="?tab=active">
+                <i class="fa-solid fa-tasks"></i> اقدام من
+                <span class="badge bg-light text-dark">{{ counts.get('active', 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab=='unread' %}active{% endif %}"
+               href="?tab=unread">
+                <i class="fa-solid fa-envelope"></i> خوانده‌نشده
+                <span class="badge bg-light text-dark">{{ counts.get('unread', 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab=='overdue' %}active{% endif %}"
+               href="?tab=overdue">
+                <i class="fa-solid fa-triangle-exclamation"></i> دیرکرد
+                <span class="badge bg-light text-dark">{{ counts.get('overdue', 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab=='waiting' %}active{% endif %}"
+               href="?tab=waiting">
+                <i class="fa-solid fa-hourglass-half"></i> در انتظار دیگران
+                <span class="badge bg-light text-dark">{{ counts.get('waiting', 0) }}</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if current_tab=='done' %}active{% endif %}"
+               href="?tab=done">
+                <i class="fa-solid fa-check-double"></i> انجام‌شده
+                <span class="badge bg-light text-dark">{{ counts.get('done', 0) }}</span>
+            </a>
+        </li>
+    </ul>
+
+    {% if not items %}
+    <div class="empty-state">
+        <i class="fa-regular fa-folder-open"></i>
+        <p>در این تب موردی وجود ندارد.</p>
+    </div>
+    {% else %}
+
+    <!-- ═══ جدول ═══ -->
+    <div class="card">
+        <div class="table-responsive">
+            <table class="table inbox-table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th width="80">نوع</th>
+                        <th>کد</th>
+                        <th>موضوع</th>
+                        <th>از</th>
+                        <th width="100">اولویت</th>
+                        <th width="120">مهلت</th>
+                        <th width="110">وضعیت</th>
+                        <th width="150">عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    {% set is_overdue = item.is_overdue or item.pkg_overdue %}
+                    <tr class="{% if is_overdue %}overdue-row{% endif %}">
+                        <td>
+                            {% if item._type == 'package' %}
+                            <span class="type-badge-package">
+                                <i class="fa-solid fa-folder-tree"></i> پکیج
+                            </span>
+                            {% else %}
+                            <span class="type-badge-legacy">
+                                <i class="fa-solid fa-file"></i> قدیمی
+                            </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item._type == 'package' %}
+                            <a href="{{ item._link }}" class="text-decoration-none">
+                                <code class="text-primary fw-bold">{{ item.dfc_code }}</code>
+                            </a>
+                            {% else %}
+                            <a href="{{ item._link }}" class="text-decoration-none">
+                                <code class="text-muted">{{ item.package_code or ('#' ~ item.document_id) }}</code>
+                            </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small">{{ item.subject or '-' }}</div>
+                            {% if item.work_package_code %}
+                            <div class="text-muted" style="font-size: 0.72rem;">
+                                WP: {{ item.work_package_code }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ item.from_user_name or '-' }}</td>
+                        <td>
+                            {% set prio = item.priority or item.doc_priority or 'normal' %}
+                            {% if prio == 'urgent' %}
+                            <span class="priority-urgent"><i class="fa-solid fa-fire"></i> فوری</span>
+                            {% elif prio == 'high' %}
+                            <span class="priority-high"><i class="fa-solid fa-arrow-up"></i> بالا</span>
+                            {% elif prio == 'normal' %}
+                            <span class="text-info">معمولی</span>
+                            {% else %}
+                            <span class="text-muted">کم</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <small>{{ item.due_date or '-' }}</small>
+                            {% if is_overdue %}
+                            <br><span class="badge bg-danger" style="font-size: 0.65rem;">دیرکرد</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.status == 'pending' %}
+                            <span class="badge bg-secondary">در انتظار</span>
+                            {% elif item.status == 'accepted' %}
+                            <span class="badge bg-info text-dark">پذیرفته</span>
+                            {% elif item.status == 'in_progress' %}
+                            <span class="badge bg-primary">در حال انجام</span>
+                            {% elif item.status == 'done' %}
+                            <span class="badge bg-success">انجام‌شده</span>
+                            {% elif item.status == 'returned' %}
+                            <span class="badge bg-warning text-dark">بازگشته</span>
+                            {% else %}
+                            <span class="badge bg-secondary">{{ item.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1 flex-wrap">
+                                {% if item._type == 'package' %}
+                                    {% if item.status == 'pending' %}
+                                    <button class="btn btn-xs btn-sm btn-outline-primary"
+                                            onclick="doAction({{ item.id }}, 'accept', 'package')"
+                                            title="پذیرش">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% if item.status in ('pending', 'accepted') %}
+                                    <button class="btn btn-xs btn-sm btn-outline-info"
+                                            onclick="doAction({{ item.id }}, 'start', 'package')"
+                                            title="شروع">
+                                        <i class="fa-solid fa-play"></i>
+                                    </button>
+                                    {% endif %}
+                                    {% if item.status in ('accepted', 'in_progress') %}
+                                    <button class="btn btn-xs btn-sm btn-outline-success"
+                                            onclick="doAction({{ item.id }}, 'complete', 'package')"
+                                            title="اتمام">
+                                        <i class="fa-solid fa-check-double"></i>
+                                    </button>
+                                    {% endif %}
+                                    <a href="{{ item._link }}" class="btn btn-sm btn-outline-secondary" title="مشاهده">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                {% else %}
+                                    <a href="{{ item._link }}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa-solid fa-eye"></i> مشاهده
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% endif %}
+    {% endif %}
 </div>
 
 <script>
-function csrfToken() {
-  const meta = document.querySelector('meta[name="csrf-token"]');
-  return meta ? meta.content : '';
+function postJSON(url, body) {
+    return fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body || {}),
+    }).then(r => r.json());
 }
 
-async function doAction(assignmentId, action) {
-  try {
-    const res = await fetch(`/documents/assignments/${assignmentId}/${action}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken(),
-      },
-      body: JSON.stringify({}),
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
-    location.reload();
-  } catch (e) {
-    alert('خطا: ' + e.message);
-  }
-}
-
-async function doReturn(assignmentId) {
-  const reason = prompt('دلیل بازگشت:');
-  if (!reason) return;
-  try {
-    const res = await fetch(`/documents/assignments/${assignmentId}/return`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': csrfToken(),
-      },
-      body: JSON.stringify({reason}),
-    });
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.message || data.error || 'خطا');
-    location.reload();
-  } catch (e) {
-    alert('خطا: ' + e.message);
-  }
+async function doAction(assignmentId, action, type) {
+    let url;
+    if (type === 'package') {
+        url = `/work-package/assignments/${assignmentId}/${action}`;
+    } else {
+        url = `/documents/assignments/${assignmentId}/${action}`;
+    }
+    try {
+        const data = await postJSON(url, {});
+        if (!data.ok) throw new Error(data.message || data.error || 'خطا');
+        location.reload();
+    } catch (e) {
+        alert('خطا: ' + e.message);
+    }
 }
 </script>
 {% endblock %}

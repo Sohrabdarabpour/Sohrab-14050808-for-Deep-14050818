@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>چاپ کد {{ package.dfc_code }}</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; padding: 40px; text-align: center; background: #f5f7fa; }
+        .label {
+            border: 4px solid #1b698b;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 450px;
+            margin: 0 auto;
+            background: #fff;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        }
+        .label-title { font-size: 14px; color: #718096; margin-bottom: 16px; letter-spacing: 1px; }
+        .dfc-code {
+            font-size: 48px;
+            font-weight: 900;
+            color: #1b698b;
+            letter-spacing: 6px;
+            margin-bottom: 16px;
+            font-family: 'Courier New', monospace;
+        }
+        .wp-code { font-size: 16px; color: #4a5568; margin-bottom: 20px; font-family: monospace; }
+        .subject {
+            font-size: 14px;
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            min-height: 40px;
+        }
+        .meta { font-size: 12px; color: #718096; line-height: 1.8; }
+        .meta strong { color: #4a5568; }
+        .barcode-wrap { margin-top: 20px; padding-top: 20px; border-top: 1px dashed #cbd5e0; }
+        @media print {
+            body { padding: 0; background: #fff; }
+            .no-print { display: none !important; }
+            .label { box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="label">
+        <div class="label-title">سامانه مدیریت اسناد و نظارت عالیه</div>
+
+        <div class="dfc-code">{{ package.dfc_code }}</div>
+
+        <div class="wp-code">پکیج کاری: {{ package.work_package_code }}</div>
+
+        <div class="subject">{{ package.subject }}</div>
+
+        <div class="meta">
+            <div><strong>ثبت‌کننده:</strong> {{ package.registered_by_name or '-' }}</div>
+            <div><strong>تاریخ ثبت:</strong> {{ package.registered_at or '-' }}</div>
+            {% if package.sender_ref_no %}
+            <div><strong>شماره نامه:</strong> {{ package.sender_ref_no }}</div>
+            {% endif %}
+            {% if package.contract_number %}
+            <div><strong>شماره قرارداد:</strong> {{ package.contract_number }}</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="no-print" style="margin-top: 30px;">
+        <button onclick="window.print()" 
+                style="padding: 12px 40px; background: #1b698b; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600;">
+            <i class="fa-solid fa-print"></i> چاپ
+        </button>
+        <button onclick="window.close()"
+                style="padding: 12px 24px; background: #718096; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; margin-right: 8px;">
+            بستن
+        </button>
+    </div>
+</body>
+</html>

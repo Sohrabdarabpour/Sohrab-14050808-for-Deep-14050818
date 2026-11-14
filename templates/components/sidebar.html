@@ -12,7 +12,7 @@
 <aside class="app-sidebar">
 
     <!-- ============================================
-         ★ ناحیه قابل اسکرول (کارت کاربر + منو)
+         ★ ناحیه قابل اسکرول (کارت کاربر + جستجو + منو)
          ============================================ -->
     <div class="sidebar-scroll-area">
 
@@ -71,6 +71,21 @@
         </div>
 
         <!-- ============================================
+             ★★★ باکس جستجوی سریع ★★★
+             ============================================ -->
+        <div class="sidebar-search-box">
+            <div class="sidebar-search-wrap">
+                <input type="text"
+                       id="sidebarSearchInput"
+                       class="sidebar-search-input"
+                       placeholder="جستجو: DFC، نامه، موضوع..."
+                       autocomplete="off">
+                <i class="fa-solid fa-magnifying-glass sidebar-search-icon"></i>
+            </div>
+            <div id="sidebarSearchResults" class="sidebar-search-results" style="display:none;"></div>
+        </div>
+
+        <!-- ============================================
              ★ منوی اصلی — آکاردئون
              ============================================ -->
         <ul class="sidebar-menu">
@@ -84,7 +99,7 @@
                 <ul class="sidebar-submenu">
 
                     <!-- ============================================ -->
-                    <!-- ★★★ کارتابل من (پکیج‌های ارجاع‌شده) ★★★ -->
+                    <!-- ★★★ کارتابل من ★★★ -->
                     <!-- ============================================ -->
                     <li class="sidebar-item">
                         <a href="/inbox/"
@@ -99,28 +114,50 @@
                     </li>
 
                     <!-- ============================================ -->
-                    <!-- ★★★ اسناد و پکیج‌ها (گروه جدید) ★★★ -->
+                    <!-- ★★★ پکیج‌های سند (Work Package) ★★★ -->
                     <!-- ============================================ -->
                     <li class="sidebar-item sidebar-dropdown
-                        {% if request.endpoint and (request.endpoint.startswith('documents.') or request.path.startswith('/documents')) %}open{% endif %}">
-                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="اسناد و پکیج‌ها">
-                            <i class="fa-solid fa-folder-open"></i>
-                            <span>اسناد و پکیج‌ها</span>
+                        {% if request.path.startswith('/work-package') %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="پکیج‌های سند">
+                            <i class="fa-solid fa-folder-tree"></i>
+                            <span>پکیج‌های سند</span>
                             <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
                         </button>
                         <ul class="sidebar-submenu">
                             <li class="sidebar-item">
-                                <a href="/documents/package/new"
-                                   class="sidebar-link {% if request.path == '/documents/package/new' %}active{% endif %}"
-                                   data-tooltip="ثبت سند جدید">
-                                    <i class="fa-solid fa-plus-circle"></i>
-                                    <span>ثبت سند جدید</span>
+                                <a href="/work-package/new"
+                                   class="sidebar-link {% if request.path == '/work-package/new' %}active{% endif %}"
+                                   data-tooltip="ثبت پکیج جدید">
+                                    <i class="fa-solid fa-plus-circle text-success"></i>
+                                    <span>ثبت پکیج جدید</span>
                                 </a>
                             </li>
                             <li class="sidebar-item">
+                                <a href="/work-package/"
+                                   class="sidebar-link {% if request.path == '/work-package/' %}active{% endif %}"
+                                   data-tooltip="لیست پکیج‌ها">
+                                    <i class="fa-solid fa-list"></i>
+                                    <span>لیست پکیج‌ها</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- ============================================ -->
+                    <!-- ★★★ اسناد قدیمی (documents) ★★★ -->
+                    <!-- ============================================ -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and request.endpoint.startswith('documents.') and not request.path.startswith('/documents/package') %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="اسناد قدیمی">
+                            <i class="fa-solid fa-folder-open"></i>
+                            <span>اسناد قدیمی</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item">
                                 <a href="/documents/"
                                    class="sidebar-link {% if request.path == '/documents/' %}active{% endif %}"
-                                   data-tooltip="لیست اسناد">
+                                   data-tooltip="لیست اسناد قدیمی">
                                     <i class="fa-solid fa-list"></i>
                                     <span>لیست اسناد</span>
                                 </a>
@@ -168,9 +205,7 @@
                     </li>
                     {% endif %}
 
-                    <!-- ============================================
-                         داشبورد من (دراپ‌داون)
-                         ============================================ -->
+                    <!-- داشبورد من -->
                     <li class="sidebar-item sidebar-dropdown
                         {% if request.endpoint and (request.endpoint == 'main.index' or request.endpoint == 'dashboard.dashboard' or request.endpoint.startswith('dashboard.')) %}open{% endif %}">
                         <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="داشبورد من">
@@ -180,8 +215,6 @@
                         </button>
 
                         <ul class="sidebar-submenu">
-
-                            <!-- خود داشبورد -->
                             <li class="sidebar-item">
                                 <a href="{{ url_for('main.index') }}"
                                    class="sidebar-link {% if request.endpoint == 'main.index' or request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
@@ -190,8 +223,6 @@
                                     <span>داشبورد من</span>
                                 </a>
                             </li>
-
-                            <!-- فرایند اصلی -->
                             <li class="sidebar-item">
                                 <a href="#" class="sidebar-link disabled" data-tooltip="گزارش عملکرد">
                                     <i class="fa-solid fa-diagram-project"></i>
@@ -201,7 +232,7 @@
                         </ul>
                     </li>
 
-                    <!-- دپارتمان من / دپارتمان‌ها -->
+                    <!-- دپارتمان من -->
                     {% if session.get('role') in ['admin', 'manager', 'supervisor'] %}
                     <li class="sidebar-item">
                         {% if session.get('role') == 'supervisor' %}
@@ -217,9 +248,9 @@
                     </li>
                     {% endif %}
 
-                    <!-- ============================================
-                         ★★★ گزارش‌ها (به‌روزرسانی با گزارش‌های جدید پکیج) ★★★
-                         ============================================ -->
+                    <!-- ============================================ -->
+                    <!-- ★★★ گزارش‌ها ★★★ -->
+                    <!-- ============================================ -->
                     {% if session.get('role') in ['admin','manager','supervisor'] %}
                     <li class="sidebar-item sidebar-dropdown
                         {% if request.endpoint and (request.endpoint.startswith('reports.') or request.path.startswith('/reports')) %}open{% endif %}">
@@ -230,8 +261,6 @@
                         </button>
 
                         <ul class="sidebar-submenu">
-
-                            <!-- ★ جدید: گزارش‌های تخصصی پکیج -->
                             <li class="sidebar-item">
                                 <a href="/reports/package/overdue"
                                    class="sidebar-link {% if request.path.startswith('/reports/package/overdue') %}active{% endif %}">
@@ -254,7 +283,6 @@
                                 </a>
                             </li>
 
-                            <!-- گزارش‌های قدیمی -->
                             <li class="sidebar-item">
                                 <a href="{{ url_for('reports.status_report') }}"
                                    class="sidebar-link {% if request.endpoint == 'reports.status_report' %}active{% endif %}">
@@ -290,9 +318,7 @@
                     </li>
                     {% endif %}
 
-                    <!-- ============================================
-                         تنظیمات
-                         ============================================ -->
+                    <!-- تنظیمات -->
                     <li class="sidebar-item sidebar-dropdown
                         {% if request.endpoint and (
                             request.endpoint.startswith('panel.') or
@@ -390,7 +416,7 @@
             </li>
 
             <!-- ============================================ -->
-            <!-- ★★★ کتابخانه مجازی (هم‌سطح منوی اصلی) ★★★ -->
+            <!-- ★★★ کتابخانه مجازی ★★★ -->
             <!-- ============================================ -->
             <li class="sidebar-item sidebar-dropdown">
                 <button type="button" class="sidebar-link sidebar-dropdown-toggle sidebar-main-toggle" data-tooltip="کتابخانه مجازی">
@@ -416,7 +442,7 @@
             </li>
 
             <!-- ============================================ -->
-            <!-- ★★★ سازمان ما (هم‌سطح منوی اصلی) ★★★ -->
+            <!-- ★★★ سازمان ما ★★★ -->
             <!-- ============================================ -->
             <li class="sidebar-item sidebar-dropdown
                 {% if request.endpoint and (
@@ -432,17 +458,13 @@
 
                 <ul class="sidebar-submenu">
 
-                    <!-- چارت سازمانی -->
                     <li class="sidebar-item">
-                        <a href=""
-                           class="sidebar-link disabled"
-                           data-tooltip="چارت سازمانی">
+                        <a href="" class="sidebar-link disabled" data-tooltip="چارت سازمانی">
                             <i class="fa-solid fa-diagram-project"></i>
                             <span>چارت سازمانی</span>
                         </a>
                     </li>
 
-                    <!-- محورهای عملیاتی -->
                     <li class="sidebar-item sidebar-dropdown
                         {% if request.endpoint and request.endpoint.startswith('operational_axes.') %}open{% endif %}">
                         <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="محورهای عملیاتی">
@@ -467,7 +489,6 @@
                         </ul>
                     </li>
 
-                    <!-- کانال‌های ارتباطی -->
                     <li class="sidebar-item sidebar-dropdown
                         {% if request.endpoint and request.endpoint.startswith('communication_channels.') %}open{% endif %}">
                         <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="کانال‌های ارتباطی">
@@ -500,7 +521,7 @@
     </div>
 
     <!-- ============================================
-         ★ دکمه خروج — ثابت در پایین سایدبار
+         ★ دکمه خروج
          ============================================ -->
     <div class="sidebar-logout">
         <a href="{{ url_for('auth.logout') }}"
@@ -512,3 +533,155 @@
     </div>
 
 </aside>
+
+<!-- ============================================
+     ★ استایل باکس جستجو
+     ============================================ -->
+<style>
+    .sidebar-search-box {
+        padding: 12px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .sidebar-search-wrap {
+        position: relative;
+    }
+    .sidebar-search-input {
+        width: 100%;
+        padding: 8px 36px 8px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        font-size: 0.8rem;
+        transition: all 0.2s;
+    }
+    .sidebar-search-input::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    .sidebar-search-input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+    }
+    .sidebar-search-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.8rem;
+        pointer-events: none;
+    }
+    .sidebar-search-results {
+        margin-top: 8px;
+        max-height: 300px;
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        padding: 4px;
+    }
+    .sidebar-search-item {
+        display: block;
+        padding: 8px 10px;
+        color: #fff !important;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.78rem;
+        transition: background 0.15s;
+        border-radius: 4px;
+    }
+    .sidebar-search-item:hover {
+        background: rgba(255, 255, 255, 0.12);
+    }
+    .sidebar-search-item .ssi-code {
+        color: #ffd700;
+        font-weight: 700;
+    }
+    .sidebar-search-item .ssi-subject {
+        margin-top: 2px;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    .sidebar-search-item .ssi-meta {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.7rem;
+        margin-top: 2px;
+    }
+</style>
+
+<!-- ============================================
+     ★ اسکریپت جستجوی سریع
+     ============================================ -->
+<script>
+(function() {
+    const input = document.getElementById('sidebarSearchInput');
+    const results = document.getElementById('sidebarSearchResults');
+    if (!input || !results) return;
+
+    let timer = null;
+
+    input.addEventListener('input', function() {
+        const query = this.value.trim();
+        clearTimeout(timer);
+        if (query.length < 2) {
+            results.style.display = 'none';
+            return;
+        }
+        timer = setTimeout(async () => {
+            try {
+                const res = await fetch('/work-package/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ q: query }),
+                });
+                const data = await res.json();
+                renderResults(data.results || []);
+            } catch (e) {
+                console.error('search error', e);
+            }
+        }, 300);
+    });
+
+    function escapeHtml(s) {
+        if (!s) return '';
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        }[c]));
+    }
+
+    function renderResults(items) {
+        if (!items.length) {
+            results.innerHTML = '<div class="p-2 text-center small" style="color:rgba(255,255,255,0.5);">نتیجه‌ای یافت نشد.</div>';
+            results.style.display = 'block';
+            return;
+        }
+        let html = '';
+        for (const item of items) {
+            html += `<a href="/work-package/${item.id}" class="sidebar-search-item">
+                <div>
+                    <span class="ssi-code">${escapeHtml(item.dfc_code)}</span>
+                    <span class="badge bg-light text-dark ms-1" style="font-size:0.65rem;">${escapeHtml(item.stage)}</span>
+                </div>
+                <div class="ssi-subject">${escapeHtml(item.subject || '-')}</div>
+                ${item.sender_ref_no ? `<div class="ssi-meta">شماره نامه: ${escapeHtml(item.sender_ref_no)}</div>` : ''}
+            </a>`;
+        }
+        results.innerHTML = html;
+        results.style.display = 'block';
+    }
+
+    // بستن نتایج با کلیک بیرون
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.sidebar-search-box')) {
+            results.style.display = 'none';
+        }
+    });
+
+    // Escape بستن
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            results.style.display = 'none';
+        }
+    });
+})();
+</script>

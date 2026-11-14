@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}ثبت سند جدید{% endblock %}
+
+{% block styles %}
+<style>
+    .form-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 30px; max-width: 900px; margin: 0 auto; }
+    .form-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f4f8; }
+    .form-header h3 { color: #1b698b; font-weight: 700; }
+    .section-title { font-size: 0.95rem; font-weight: 700; color: #2d3748; margin: 20px 0 12px; padding-right: 8px; border-right: 4px solid #1b698b; }
+    .form-label { font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 4px; }
+    .form-control, .form-select { border-radius: 8px; border: 1px solid #cbd5e0; padding: 10px 14px; font-size: 0.9rem; }
+    .form-control:focus, .form-select:focus { border-color: #1b698b; box-shadow: 0 0 0 3px rgba(27,105,139,0.1); }
+    .required::after { content: ' *'; color: #dc2626; }
+    .actions { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .btn-submit { background: #1b698b; color: #fff; padding: 12px 32px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
+    .btn-submit:hover { background: #145272; }
+    .btn-cancel { background: #f7fafc; color: #4a5568; padding: 10px 24px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; }
+    .info-alert { background: #ebf8ff; border: 1px solid #bee3f8; color: #2c5282; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="form-card">
+        <div class="form-header">
+            <h3><i class="fa-solid fa-file-circle-plus"></i> ثبت سند جدید</h3>
+            <p class="text-muted mb-0">اطلاعات اولیه را وارد کنید. بلافاصله کد DFC تخصیص می‌یابد.</p>
+        </div>
+
+        <div class="info-alert">
+            <i class="fa-solid fa-lightbulb"></i>
+            <strong>پس از ثبت:</strong> کد DFC فوراً تخصیص می‌یابد، پوشه‌ی اختصاصی ساخته می‌شود،
+            و می‌توانید:
+            <ul class="mb-0 mt-1">
+                <li>کد DFC را چاپ و روی فیزیکی بچسبانید</li>
+                <li>فایل‌های اسکن‌شده را آپلود کنید</li>
+                <li>سند را به دفتر مدیریت ارسال کنید</li>
+            </ul>
+        </div>
+
+        <form method="POST" action="">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="section-title">اطلاعات اصلی</div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <label class="form-label required">موضوع سند</label>
+                    <input type="text" class="form-control" name="subject" required
+                           value="{{ draft.subject or '' }}" placeholder="موضوع نامه...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">تاریخ نامه (شمسی)</label>
+                    <input type="text" class="form-control" name="date_letter"
+                           value="{{ draft.date_letter or '' }}" placeholder="1405/01/01">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">تاریخ دریافت (شمسی)</label>
+                    <input type="text" class="form-control" name="date_received"
+                           value="{{ draft.date_received or '' }}" placeholder="1405/01/01">
+                </div>
+            </div>
+
+            <div class="section-title">فرستنده</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">نام فرستنده</label>
+                    <input type="text" class="form-control" name="sender_name"
+                           value="{{ draft.sender_name or '' }}" placeholder="نام شخص یا سازمان...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">نوع فرستنده</label>
+                    <select class="form-select" name="sender_type">
+                        <option value="contractor" {% if draft.sender_type == 'contractor' %}selected{% endif %}>پیمانکار</option>
+                        <option value="client" {% if draft.sender_type == 'client' %}selected{% endif %}>کارفرما</option>
+                        <option value="internal" {% if draft.sender_type == 'internal' %}selected{% endif %}>داخلی</option>
+                        <option value="other" {% if draft.sender_type == 'other' or not draft.sender_type %}selected{% endif %}>سایر</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">شماره نامه فرستنده</label>
+                    <input type="text" class="form-control" name="sender_ref_no"
+                           value="{{ draft.sender_ref_no or '' }}" placeholder="مثلاً 12345/الف">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">تاریخ نامه فرستنده (شمسی)</label>
+                    <input type="text" class="form-control" name="sender_ref_date"
+                           value="{{ draft.sender_ref_date or '' }}" placeholder="1405/01/01">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">شماره قرارداد</label>
+                    <input type="text" class="form-control" name="contract_number"
+                           value="{{ draft.contract_number or '' }}" placeholder="شماره قرارداد...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">شماره اتوماسیون</label>
+                    <input type="text" class="form-control" name="automation_number"
+                           value="{{ draft.automation_number or '' }}">
+                </div>
+            </div>
+
+            <div class="section-title">ارتباطات</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">پیمانکار</label>
+                    <select class="form-select" name="contractor_id" id="contractor_select">
+                        <option value="0">— انتخاب کنید —</option>
+                        {% for c in contractors %}
+                        <option value="{{ c.id }}" {% if draft.contractor_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">پروژه</label>
+                    <select class="form-select" name="project_id" id="project_select">
+                        <option value="0">— انتخاب کنید —</option>
+                        {% for p in projects %}
+                        <option value="{{ p.id }}" {% if draft.project_id == p.id %}selected{% endif %}>{{ p.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label">توضیحات</label>
+                    <textarea class="form-control" name="description" rows="2">{{ draft.description or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="mt-3 form-check">
+                <input class="form-check-input" type="checkbox" name="force_new_wp" value="1" id="force_new_wp">
+                <label class="form-check-label small" for="force_new_wp">
+                    پکیج کاری جدید ایجاد شود (حتی اگر رفرنس مشابه وجود دارد)
+                </label>
+            </div>
+
+            <div class="actions">
+                <a href="/work-package/" class="btn-cancel">
+                    <i class="fa-solid fa-xmark"></i> انصراف
+                </a>
+                <button type="submit" class="btn-submit">
+                    <i class="fa-solid fa-check"></i> ثبت و دریافت کد DFC
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const contractorSelect = document.getElementById('contractor_select');
+    const projectSelect = document.getElementById('project_select');
+
+    contractorSelect.addEventListener('change', async function() {
+        if (this.value === "0") return;
+        projectSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
+        try {
+            const res = await fetch(`/documents/api/contractors/${this.value}/projects`);
+            const data = await res.json();
+            projectSelect.innerHTML = '<option value="0">— انتخاب کنید —</option>';
+            (data.projects || []).forEach(p => {
+                projectSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+            });
+        } catch (e) {
+            projectSelect.innerHTML = '<option value="0">خطا</option>';
+        }
+    });
+</script>
+{% endblock %}

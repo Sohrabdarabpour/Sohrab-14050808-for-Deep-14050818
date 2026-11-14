@@ -1,0 +1,484 @@
+<!-- =====================================
+     APP SIDEBAR - RESPONSIVE FULL
+     ===================================== -->
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" />
+
+
+<aside class="app-sidebar">
+
+    <!-- ============================================
+         ★ ناحیه قابل اسکرول (کارت کاربر + منو)
+         ============================================ -->
+    <div class="sidebar-scroll-area">
+
+        <!-- ============================================
+             ★ کارت پروفایل کاربر
+             ============================================ -->
+        <div class="sidebar-user-card">
+            <a href="{{ url_for('profile.profile') }}" class="sidebar-user-link" data-tooltip="پروفایل من">
+
+                <!-- آواتار -->
+                <div class="sidebar-user-avatar">
+                    <span class="sb-avatar-ring"></span>
+                    <span class="sb-avatar-ring ring-2"></span>
+
+                    {% set user_avatar = session.get('avatar') %}
+                    {% set user_gender = session.get('gender', 'male') %}
+
+                    {% if user_avatar and user_avatar not in ['default.png', 'default-profile-male.png', 'default-profile-female.png'] %}
+                        <img src="{{ url_for('static', filename='uploads/avatar/' + user_avatar) }}"
+                            alt="{{ session.get('full_name', 'کاربر') }}"
+                            onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/default-profile-male.png') }}';" />
+                    {% elif user_gender == 'female' %}
+                        <img src="{{ url_for('static', filename='images/default-profile-female.png') }}"
+                            alt="{{ session.get('full_name', 'کاربر') }}" />
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/default-profile-male.png') }}"
+                            alt="{{ session.get('full_name', 'کاربر') }}" />
+                    {% endif %}
+
+                    <span class="sidebar-user-status"></span>
+                </div>
+
+                <!-- اطلاعات کاربر -->
+                <div class="sidebar-user-info">
+                    <span class="sidebar-user-name">
+                        {{ session.get('full_name', 'کاربر سیستم') }}
+                    </span>
+                    <span class="sidebar-user-role">
+                        {% if session.get('role') == 'admin' %}
+                        مدیر نرم افزار
+                        {% elif session.get('role') == 'manager' %}
+                        مدیر
+                        {% elif session.get('role') == 'supervisor' %}
+                        سرپرست
+                        {% elif session.get('role') == 'doc_controller' %}
+                        کنترل مستندات
+                        {% else %}
+                        کارشناس
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- فلش -->
+                <i class="fa-solid fa-chevron-left sidebar-user-arrow"></i>
+            </a>
+        </div>
+
+        <!-- ============================================
+             ★ منوی اصلی — آکاردئون
+             ============================================ -->
+        <ul class="sidebar-menu">
+            <li class="sidebar-item sidebar-dropdown open">
+                <button type="button" class="sidebar-link sidebar-dropdown-toggle sidebar-main-toggle" data-tooltip="منوی اصلی">
+                    <i class="fa-solid fa-bars-staggered"></i>
+                    <span>منوی اصلی</span>
+                    <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                </button>
+
+                <ul class="sidebar-submenu">
+
+                    <!-- ============================================ -->
+                    <!-- ★★★ کارتابل من ★★★ -->
+                    <!-- ============================================ -->
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('workflow.inbox') }}"
+                           class="sidebar-link {% if request.endpoint and request.endpoint.startswith('workflow.') and request.endpoint != 'workflow.view_note' %}active{% endif %}"
+                           data-tooltip="کارتابل من">
+                            <i class="fa-solid fa-inbox"></i>
+                            <span>کارتابل من</span>
+                            {% if pending_notes_count and pending_notes_count > 0 %}
+                            <span class="sidebar-badge">{{ pending_notes_count }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+
+                    <!-- جستجوی پیشرفته -->
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('search.index') }}"
+                        class="sidebar-link {% if request.endpoint and request.endpoint.startswith('search.') %}active{% endif %}"
+                        data-tooltip="جستجوی پیشرفته">
+                            <i class="fa-solid fa-magnifying-glass-chart"></i>
+                            <span>جستجوی پیشرفته</span>
+                        </a>
+                    </li>
+
+                    <!-- دستیار هوشمند -->
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('assistant.index') }}"
+                           class="sidebar-link {% if request.endpoint and request.endpoint.startswith('assistant.') %}active{% endif %}"
+                           data-tooltip="دستیار هوشمند">
+                            <i class="fa-solid fa-robot"></i>
+                            <span>دستیار هوشمند</span>
+                        </a>
+                    </li>
+
+                    <!-- تقویم کاری -->
+                    {% if session.get('role') in ['admin', 'manager'] %}
+                    <li class="sidebar-item">
+                        <a href="{{ url_for('calendar.index') }}"
+                           class="sidebar-link {% if request.endpoint and request.endpoint.startswith('calendar.') %}active{% endif %}"
+                           data-tooltip="تقویم کاری">
+                            <i class="fa-regular fa-calendar-days"></i>
+                            <span>تقویم کاری</span>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <!-- ============================================
+                         داشبورد من (دراپ‌داون)
+                         ============================================ -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and (request.endpoint == 'main.index' or request.endpoint == 'dashboard.dashboard' or request.endpoint.startswith('dashboard.')) %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="داشبورد من">
+                            <i class="fa-solid fa-gauge-high"></i>
+                            <span>داشبورد من</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+
+                        <ul class="sidebar-submenu">
+
+                            <!-- خود داشبورد -->
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('main.index') }}"
+                                   class="sidebar-link {% if request.endpoint == 'main.index' or request.endpoint == 'dashboard.dashboard' %}active{% endif %}"
+                                   data-tooltip="داشبورد من">
+                                    <i class="fa-solid fa-table-columns"></i>
+                                    <span>داشبورد من</span>
+                                </a>
+                            </li>
+
+                            <!-- فرایند اصلی (بدون صفحه - به زودی) -->
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="گزارش عملکرد">
+                                    <i class="fa-solid fa-diagram-project"></i>
+                                    <span>گزارش عملکرد</span>
+                                </a>
+                            </li>
+
+                            <!-- گروه سند (بدون صفحه - به زودی) -->
+                            <!-- <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس گروه سند">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                    <span>تفکیک کارها بر اساس گروه سند</span>
+                                </a>
+                            </li> -->
+
+                            <!-- پروژه -->
+                            <!-- <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس پروژه">
+                                    <i class="fa-solid fa-folder-tree"></i>
+                                    <span>تفکیک کارها بر اساس پروژه</span>
+                                </a>
+                            </li> -->
+
+                            <!-- پیمانکار -->
+                            <!-- <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="بر اساس پیمانکار">
+                                    <i class="fa-solid fa-helmet-safety"></i>
+                                    <span>تفکیک کارها بر اساس پیمانکار</span>
+                                </a>
+                            </li> -->
+
+                        </ul>
+                    </li>
+
+                    <!-- دپارتمان من / دپارتمان‌ها -->
+                    {% if session.get('role') in ['admin', 'manager', 'supervisor'] %}
+                    <li class="sidebar-item">
+                        {% if session.get('role') == 'supervisor' %}
+                            {% if session.get('department_id') %}
+                            <a href="{{ url_for('departments.view_department', department_id=session.get('department_id')) }}"
+                               class="sidebar-link {% if request.endpoint == 'departments.view_department' %}active{% endif %}"
+                               data-tooltip="دپارتمان من">
+                                <i class="fa-solid fa-sitemap"></i>
+                                <span>دپارتمان من</span>
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                    </li>
+                    {% endif %}
+
+                    <!-- گزارش‌ها -->
+                    {% if session.get('role') in ['admin','manager','supervisor'] %}
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and request.endpoint.startswith('reports.') %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="گزارش‌ها">
+                            <i class="fa-solid fa-chart-line"></i>
+                            <span>گزارش‌ها</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('reports.status_report') }}"
+                                   class="sidebar-link {% if request.endpoint == 'reports.status_report' %}active{% endif %}">
+                                    <i class="fa-solid fa-chart-pie"></i>
+                                    <span>گزارش بر اساس وضعیت</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('reports.department_report') }}"
+                                   class="sidebar-link {% if request.endpoint=='reports.department_report' or request.endpoint=='reports.department_documents' %}active{% endif %}">
+                                    <i class="fa-solid fa-building"></i>
+                                    <span>گزارش بر اساس دپارتمان</span>
+                                </a>
+                            </li>
+                            {% if session.get('role') in ['admin','manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('reports.area_report') }}"
+                                   class="sidebar-link {% if request.endpoint == 'reports.area_report' or request.endpoint == 'reports.area_documents' %}active{% endif %}">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                    <span>گزارش بر اساس ناحیه</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('reports.department_performance') }}" class="sidebar-link">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                    <span>تحلیل عملکرد دپارتمان‌ها</span>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- ============================================
+                         تنظیمات
+                         ============================================ -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and (
+                            request.endpoint.startswith('panel.') or
+                            request.endpoint.startswith('excel.') or
+                            request.endpoint.startswith('profile.') or
+                            request.endpoint.startswith('contractors.') or
+                            request.endpoint.startswith('projects.') or
+                            request.endpoint.startswith('contract_types.') or
+                            request.endpoint.startswith('project_roles.')
+                        ) %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="تنظیمات">
+                            <i class="fa-solid fa-gear"></i>
+                            <span>تنظیمات</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+                        <ul class="sidebar-submenu">
+
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('contractors.list_contractors') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('contractors.') %}active{% endif %}">
+                                    <i class="fa-solid fa-helmet-safety"></i>
+                                    <span>مدیریت پیمانکاران</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('projects.list_projects') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('projects.') %}active{% endif %}">
+                                    <i class="fa-solid fa-diagram-project"></i>
+                                    <span>مدیریت پروژه‌ها</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('contract_types.list_types') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('contract_types.') %}active{% endif %}">
+                                    <i class="fa-solid fa-file-contract"></i>
+                                    <span>انواع قرارداد</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('project_roles.list_roles') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('project_roles.') %}active{% endif %}">
+                                    <i class="fa-solid fa-user-tag"></i>
+                                    <span>نقش‌های پروژه</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') in ['admin','manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('panel.users') }}"
+                                   class="sidebar-link {% if request.endpoint in ['panel.panel','panel.users','panel.add_user','panel.edit_user','panel.change_user_role','panel.delete_user'] %}active{% endif %}">
+                                    <i class="fa-solid fa-user-shield"></i>
+                                    <span>مدیریت کاربران</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') in ['admin', 'manager'] %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('document_group.group_list') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('document_group.') %}active{% endif %}">
+                                    <i class="fa-solid fa-layer-group"></i>
+                                    <span>گروه‌های سند</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            {% if session.get('role') == 'admin' %}
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('excel.index') }}"
+                                   class="sidebar-link {% if request.endpoint in ['excel.index','excel.export_excel','excel.import_excel'] %}active{% endif %}">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                    <span>مدیریت اکسل</span>
+                                </a>
+                                <a href="{{ url_for('departments.department_list') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('departments.') and request.endpoint != 'departments.view_department' %}active{% endif %}"
+                                   data-tooltip="دپارتمان‌ها">
+                                    <i class="fa-solid fa-sitemap"></i>
+                                    <span>دپارتمان‌ها</span>
+                                </a>
+                            </li>
+                            {% endif %}
+
+                            <li class="sidebar-item">
+                                <a href="{{ url_for('profile.profile') }}"
+                                   class="sidebar-link {% if request.endpoint and request.endpoint.startswith('profile.') %}active{% endif %}"
+                                   data-tooltip="پروفایل من">
+                                    <i class="fa-solid fa-user-circle"></i>
+                                    <span>پروفایل من</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- ============================================ -->
+            <!-- ★★★ کتابخانه مجازی (هم‌سطح منوی اصلی) ★★★ -->
+            <!-- ============================================ -->
+            <li class="sidebar-item sidebar-dropdown">
+                <button type="button" class="sidebar-link sidebar-dropdown-toggle sidebar-main-toggle" data-tooltip="کتابخانه مجازی">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>کتابخانه مجازی</span>
+                    <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                </button>
+
+                <ul class="sidebar-submenu">
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link disabled" data-tooltip="فهرست بهای اختصاصی">
+                            <i class="fa-solid fa-list-ul"></i>
+                            <span>فهرست بهای اختصاصی</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a href="#" class="sidebar-link disabled" data-tooltip="بانک استانداردها">
+                            <i class="fa-solid fa-database"></i>
+                            <span>بانک استانداردها</span>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+
+            <!-- ============================================ -->
+            <!-- ★★★ سازمان ما (هم‌سطح منوی اصلی) ★★★ -->
+            <!-- ============================================ -->
+            <li class="sidebar-item sidebar-dropdown
+                {% if request.endpoint and (
+                    request.endpoint.startswith('organization.') or
+                    request.endpoint.startswith('operational_axes.') or
+                    request.endpoint.startswith('communication_channels.')
+                ) %}open{% endif %}">
+                <button type="button" class="sidebar-link sidebar-dropdown-toggle sidebar-main-toggle" data-tooltip="سازمان ما">
+                    <i class="fa-solid fa-building"></i>
+                    <span>سازمان ما</span>
+                    <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                </button>
+
+                <ul class="sidebar-submenu">
+
+                    <!-- چارت سازمانی -->
+                    <li class="sidebar-item">
+                        <a href=""
+                           class="sidebar-link disabled" 
+                           data-tooltip="چارت سازمانی">
+                            <i class="fa-solid fa-diagram-project"></i>
+                            <span>چارت سازمانی</span>
+                        </a>
+                    </li>
+
+                    <!-- محورهای عملیاتی -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and request.endpoint.startswith('operational_axes.') %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="محورهای عملیاتی">
+                            <i class="fa-solid fa-compass"></i>
+                            <span>محورهای عملیاتی</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="فنی کارگاهی">
+                                    <i class="fa-solid fa-helmet-safety"></i>
+                                    <span>فنی کارگاهی</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="فنی پشتیبانی">
+                                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                                    <span>فنی پشتیبانی</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                    <!-- کانال‌های ارتباطی -->
+                    <li class="sidebar-item sidebar-dropdown
+                        {% if request.endpoint and request.endpoint.startswith('communication_channels.') %}open{% endif %}">
+                        <button type="button" class="sidebar-link sidebar-dropdown-toggle" data-tooltip="کانال‌های ارتباطی">
+                            <i class="fa-solid fa-comments"></i>
+                            <span>کانال‌های ارتباطی</span>
+                            <i class="fa-solid fa-plus sidebar-dropdown-icon"></i>
+                        </button>
+
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="ایمیل">
+                                    <i class="fa-solid fa-envelope"></i>
+                                    <span>ایمیل</span>
+                                </a>
+                            </li>
+                            <li class="sidebar-item">
+                                <a href="#" class="sidebar-link disabled" data-tooltip="تلفن">
+                                    <i class="fa-solid fa-phone"></i>
+                                    <span>تلفن</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+
+                </ul>
+            </li>
+
+        </ul>
+
+    </div>
+
+    <!-- ============================================
+         ★ دکمه خروج — ثابت در پایین سایدبار
+         ============================================ -->
+    <div class="sidebar-logout">
+        <a href="{{ url_for('auth.logout') }}"
+           class="sidebar-link sidebar-logout-link"
+           data-tooltip="خروج از حساب">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>خروج از حساب</span>
+        </a>
+    </div>
+
+</aside>

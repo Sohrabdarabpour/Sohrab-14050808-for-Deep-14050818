@@ -645,45 +645,71 @@ def suggest_wps_for_reference(
     contractor_id: int | None = None,
     project_id: int | None = None,
     automation_number: str | None = None,
-    limit: int = 10,
+    all_references: list[str] | None = None,   # ★ جدید
+    limit: int = 20,
 ) -> list[dict]:
     """
     پیشنهاد WPهای مرتبط.
 
-    ★ منطق:
-    ───────────────────────────────────────────────────────────
-    • اگر رفرنس خالی است → هیچ WPی برنگردان
-    • اگر رفرنس داده شد + قرارداد:
-        ۱. اول تطابق دقیق: قرارداد + رفرنس
-        ۲. اگر نبود: فقط رفرنس
-        ۳. اگر نبود: فقط قرارداد (به‌عنوان راهنمایی)
-    • اگر رفرنس داده شد بدون قرارداد: فقط با رفرنس
-    ───────────────────────────────────────────────────────────
+    ★ اگر all_references داده شده باشد → همه‌ی آن‌ها جستجو می‌شوند
+    ★ در غیر این صورت → reference_no و sender_ref_no
     """
     connection = get_connection()
     try:
         # جمع‌آوری رفرنس‌ها
         refs_to_search = []
-        for r in (reference_no, sender_ref_no):
-            if r and r.strip():
-                refs_to_search.append(r.strip())
-        refs_to_search = list(dict.fromkeys(refs_to_search))
+        if all_references:
+            refs_to_search.extend(all_references)
+        if reference_no and reference_no.strip():
+            refs_to_search.append(reference_no.strip())
+        if sender_ref_no and sender_ref_no.strip():
+            refs_to_search.append(sender_ref_no.strip())
 
-        # ★ اگر هیچ رفرنسی نداریم → هیچ پیشنهادی نده
+        # حذف تکراری‌ها و خالی‌ها
+        refs_to_search = list(dict.fromkeys(
+            r.strip() for r in refs_to_search if r and r.strip()
+        ))
+
         if not refs_to_search:
             return []
 
         placeholders = ",".join("?" * len(refs_to_search))
 
-        # ★ حالت ۱: هم قرارداد و هم رفرنس → تطابق دقیق
-        if contract_number:
+        # ═══════════════════════════════════════════════════
+        # حالت ۱: هم رفرنس و هم قرارداد
+        # ═══════════════════════════════════════════════════
+        if contract_number and contract_number.strip():
+            # مرحله ۱: sender_ref_no + contract_number
+            sql = f"""
+                SELECT work_package_code,
+                       MAX(dfc_code) AS sample_dfc,
+                       MAX(subject) AS sample_subject,
+                       COUNT(*) AS doc_count,
+                       MAX(id) AS latest_id,
+                       'sender_ref+contract' AS match_source,
+                       GROUP_CONCAT(DISTINCT sender_ref_no) AS matching_references_str
+                FROM document_packages
+                WHERE TRIM(sender_ref_no) IN ({placeholders})
+                  AND TRIM(contract_number) = TRIM(?)
+                  AND stage NOT IN ('archived', 'cancelled')
+                GROUP BY work_package_code
+                ORDER BY latest_id DESC
+                LIMIT ?
+            """
+            params = refs_to_search + [contract_number.strip(), limit]
+            rows = connection.execute(sql, params).fetchall()
+            if rows:
+                return _format_suggestion_rows(rows)
+
+            # مرحله ۲: document_package_references + contract_number
             sql = f"""
                 SELECT dp.work_package_code,
                        MAX(dp.dfc_code) AS sample_dfc,
                        MAX(dp.subject) AS sample_subject,
                        COUNT(DISTINCT dp.id) AS doc_count,
                        MAX(dp.id) AS latest_id,
-                       'contract+reference' AS match_source
+                       'reference+contract' AS match_source,
+                       GROUP_CONCAT(DISTINCT r.reference_no) AS matching_references_str
                 FROM document_package_references r
                 JOIN document_packages dp ON dp.id = r.package_id
                 WHERE TRIM(r.reference_no) IN ({placeholders})
@@ -693,19 +719,43 @@ def suggest_wps_for_reference(
                 ORDER BY latest_id DESC
                 LIMIT ?
             """
-            params = refs_to_search + [contract_number, limit]
             rows = connection.execute(sql, params).fetchall()
             if rows:
-                return [dict(r) for r in rows]
+                return _format_suggestion_rows(rows)
 
-        # ★ حالت ۲: فقط رفرنس
+        # ═══════════════════════════════════════════════════
+        # حالت ۲: فقط رفرنس
+        # ═══════════════════════════════════════════════════
+
+        # مرحله ۱: sender_ref_no
+        sql = f"""
+            SELECT work_package_code,
+                   MAX(dfc_code) AS sample_dfc,
+                   MAX(subject) AS sample_subject,
+                   COUNT(*) AS doc_count,
+                   MAX(id) AS latest_id,
+                   'sender_ref' AS match_source,
+                   GROUP_CONCAT(DISTINCT sender_ref_no) AS matching_references_str
+            FROM document_packages
+            WHERE TRIM(sender_ref_no) IN ({placeholders})
+              AND stage NOT IN ('archived', 'cancelled')
+            GROUP BY work_package_code
+            ORDER BY latest_id DESC
+            LIMIT ?
+        """
+        rows = connection.execute(sql, refs_to_search + [limit]).fetchall()
+        if rows:
+            return _format_suggestion_rows(rows)
+
+        # مرحله ۲: document_package_references
         sql = f"""
             SELECT dp.work_package_code,
                    MAX(dp.dfc_code) AS sample_dfc,
                    MAX(dp.subject) AS sample_subject,
                    COUNT(DISTINCT dp.id) AS doc_count,
                    MAX(dp.id) AS latest_id,
-                   'reference' AS match_source
+                   'reference' AS match_source,
+                   GROUP_CONCAT(DISTINCT r.reference_no) AS matching_references_str
             FROM document_package_references r
             JOIN document_packages dp ON dp.id = r.package_id
             WHERE TRIM(r.reference_no) IN ({placeholders})
@@ -715,33 +765,38 @@ def suggest_wps_for_reference(
             LIMIT ?
         """
         rows = connection.execute(sql, refs_to_search + [limit]).fetchall()
-        if rows:
-            return [dict(r) for r in rows]
+        return _format_suggestion_rows(rows)
 
-        # ★ حالت ۳: فقط قرارداد (به‌عنوان راهنمایی، فقط اگر رفرنس هیچ WPی نداشت)
-        if contract_number:
-            sql = """
-                SELECT work_package_code,
-                       MAX(dfc_code) AS sample_dfc,
-                       MAX(subject) AS sample_subject,
-                       COUNT(*) AS doc_count,
-                       MAX(id) AS latest_id,
-                       'contract' AS match_source
-                FROM document_packages
-                WHERE TRIM(contract_number) = TRIM(?)
-                  AND stage NOT IN ('archived', 'cancelled')
-                GROUP BY work_package_code
-                ORDER BY latest_id DESC
-                LIMIT ?
-            """
-            rows = connection.execute(
-                sql, (contract_number, limit)
-            ).fetchall()
-            return [dict(r) for r in rows]
-
-        return []
     finally:
         connection.close()
+
+
+def _format_suggestion_rows(rows):
+    """تبدیل ردیف‌های SQL به dict با matching_references."""
+    result = []
+    for r in rows:
+        item = dict(r)
+        if item.get("matching_references_str"):
+            item["matching_references"] = item["matching_references_str"].split(",")
+        else:
+            item["matching_references"] = []
+        item.pop("matching_references_str", None)
+        result.append(item)
+    return result
+def _format_suggestion_rows(rows):
+    """تبدیل ردیف‌های SQL به dict با matching_references."""
+    result = []
+    for r in rows:
+        item = dict(r)
+        if item.get("matching_references_str"):
+            item["matching_references"] = item["matching_references_str"].split(",")
+        else:
+            item["matching_references"] = []
+        # حذف فیلد موقت
+        item.pop("matching_references_str", None)
+        result.append(item)
+    return result
+
 
 
 def find_wps_by_references(refs: list[str]) -> list[dict]:

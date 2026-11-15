@@ -132,26 +132,16 @@ def suggest_wps_api():
     if isinstance(references, str):
         references = [references]
     references = [r.strip() for r in references if r and r.strip()]
+    references = list(dict.fromkeys(references))
 
-    # اولین رفرنس (اگر رفرنس‌های چندگانه داده شده)
-    reference_no = references[0] if references else None
-
-    # ★ لاگ دیباگ
-    print(f"\n=== SUGGEST_WPS API ===")
-    print(f"  references: {references}")
-    print(f"  reference_no: {reference_no}")
-    print(f"  contract_number: {data.get('contract_number')}")
-
-    # ★ اگر هیچ رفرنسی نداریم، هیچ WPی پیشنهاد نده
+    # ★ اگر هیچ رفرنسی نداریم → هیچ WPی پیشنهاد نده
     if not references:
-        # اما اگر شماره قرارداد بود، فقط برای راهنمایی نشان بده
-        contract_number = (data.get("contract_number") or "").strip() or None
-        if not contract_number:
-            print(f"  → no refs and no contract → return empty")
-            return jsonify({"ok": True, "suggestions": []})
+        return jsonify({"ok": True, "suggestions": []})
 
+    # ★ پاس دادن همه‌ی رفرنس‌ها (نه فقط اولین)
     suggestions = wp_service.suggest_wps_for_reference(
-        reference_no=reference_no,
+        reference_no=references[0],   # سازگاری با پارامتر قدیمی
+        all_references=references,     # ★ جدید: همه‌ی رفرنس‌ها
         sender_ref_no=(data.get("sender_ref_no") or "").strip() or None,
         contract_number=(data.get("contract_number") or "").strip() or None,
         contractor_id=_to_int(data.get("contractor_id")),
@@ -159,11 +149,7 @@ def suggest_wps_api():
         automation_number=(data.get("automation_number") or "").strip() or None,
     )
 
-    print(f"  → suggestions: {len(suggestions)}")
-
     return jsonify({"ok": True, "suggestions": suggestions})
-
-
 # ============================================================
 # ★ پیشنهاد WPها از چند رفرنس (قدیمی — برای سازگاری)
 # ============================================================

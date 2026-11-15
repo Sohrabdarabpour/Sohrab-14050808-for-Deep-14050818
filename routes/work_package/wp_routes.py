@@ -133,6 +133,8 @@ def view(package_id):
     from services.work_package.wp_service import STAGE_TRANSITIONS
     current_stage = package.get("stage") or "registered"
     allowed_stages = STAGE_TRANSITIONS.get(current_stage, [])
+        # ★ رفرنس‌های چندگانه‌ی این سند
+    package_references = wp_service.get_package_references(package_id)
 
     return render_template(
         "work_package/view.html",
@@ -145,6 +147,7 @@ def view(package_id):
         users=users,
         all_users=users,          # ★ برای مودال بازگشت
         all_groups=all_groups,    # ★ برای مودال بازگشت
+        package_references=package_references,  # ★ جدید
         current_stage=current_stage,
         allowed_stages=allowed_stages,
     )

@@ -127,6 +127,17 @@
         color: #1b698b;
     }
 
+    .wp-ref-match {
+        font-size: 0.78rem;
+        color: #2f855a;
+        background: #f0fff4;
+        padding: 4px 10px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 6px;
+        border: 1px dashed #68d391;
+    }
+
     /* ═══ رفرنس ═══ */
     .ref-row {
         display: flex;
@@ -176,7 +187,7 @@
         box-shadow: 0 4px 8px rgba(22, 163, 74, 0.2);
     }
 
-    /* ═══ دکمه‌ها ═══ */
+    /* ═══ دکمه‌های فرم ═══ */
     .actions {
         display: flex;
         justify-content: space-between;
@@ -258,6 +269,105 @@
         color: #a0aec0;
         font-size: 0.8rem;
     }
+
+    /* ═══ دکمه‌های WP ═══ */
+    .wp-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .wp-count-badge {
+        background: #ebf8ff;
+        color: #2c5282;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid #bee3f8;
+    }
+
+    .wp-toolbar-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    .btn-select-all {
+        background: #ebf8ff;
+        border: 1.5px solid #90cdf4;
+        color: #2c5282;
+        padding: 8px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-select-all:hover {
+        background: #bee3f8;
+        border-color: #63b3ed;
+    }
+
+    .btn-select-none {
+        background: #fef2f2;
+        border: 1.5px solid #fca5a5;
+        color: #991b1b;
+        padding: 8px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .btn-select-none:hover {
+        background: #fecaca;
+    }
+
+    .btn-search-ref {
+        background: linear-gradient(135deg, #1b698b 0%, #145272 100%);
+        color: #fff;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
+    }
+
+    .btn-search-ref:hover {
+        background: linear-gradient(135deg, #145272 0%, #0f3d56 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, 0.2);
+        color: #fff;
+    }
+
+    .btn-search-ref:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .search-hint {
+        font-size: 0.82rem;
+        color: #718096;
+        margin-top: 6px;
+    }
 </style>
 {% endblock %}
 
@@ -277,7 +387,8 @@
             <div>
                 <strong>راهنما:</strong>
                 با وارد کردن <strong>شماره قرارداد</strong>، پیمانکار و پروژه به‌طور خودکار پر می‌شوند.
-                برای نمایش پکیج‌های کاری مرتبط، <strong>حداقل یک رفرنس</strong> وارد کنید.
+                برای نمایش پکیج‌های کاری مرتبط، <strong>حداقل یک رفرنس</strong> وارد کنید و روی
+                <strong>«جستجوی رفرنس»</strong> کلیک کنید.
             </div>
         </div>
 
@@ -356,8 +467,8 @@
             <div class="row g-3">
                 <div class="col-md-12">
                     <small class="text-muted d-block mb-3">
-                        اگر این سند به چند نامه‌ی قبلی اشاره دارد، همه را وارد کنید.
-                        <strong>توجه: پکیج‌های کاری فقط پس از وارد کردن رفرنس نمایش داده می‌شوند.</strong>
+                        اگر این سند به چند نامه‌ی قبلی اشاره دارد، همه را وارد کنید و روی
+                        <strong>«جستجوی رفرنس»</strong> کلیک کنید.
                     </small>
                     <div id="refs_container">
                         <div class="ref-row">
@@ -368,10 +479,20 @@
                             </button>
                         </div>
                     </div>
-                    <button type="button" class="btn-add-ref mt-2" onclick="addRefRow()">
-                        <i class="fa-solid fa-plus"></i>
-                        افزودن رفرنس دیگر
-                    </button>
+                    <div class="d-flex gap-2 mt-2 flex-wrap">
+                        <button type="button" class="btn-add-ref" onclick="addRefRow()">
+                            <i class="fa-solid fa-plus"></i>
+                            افزودن رفرنس دیگر
+                        </button>
+                        <button type="button" class="btn-search-ref" id="btn_search_ref" onclick="searchReferences()">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            جستجوی رفرنس
+                        </button>
+                    </div>
+                    <small class="search-hint">
+                        <i class="fa-solid fa-circle-info"></i>
+                        با کلیک روی «جستجوی رفرنس»، لیست پکیج‌های کاری مرتبط به‌روز می‌شود.
+                    </small>
                 </div>
             </div>
 
@@ -380,10 +501,29 @@
                 <i class="fa-solid fa-folder-tree text-primary"></i>
                 پکیج‌های کاری مرتبط
             </div>
+
+            {# ★ نوار ابزار: تعداد انتخاب‌شده + انتخاب/لغو همه #}
+            <div class="wp-toolbar" id="wp_toolbar" style="display:none;">
+                <span class="wp-count-badge" id="wp_count_badge">
+                    <i class="fa-solid fa-check-square"></i>
+                    <span id="wp_selected_count">0</span> مورد انتخاب شده
+                </span>
+                <div class="wp-toolbar-actions">
+                    <button type="button" class="btn-select-all" onclick="selectAllWps()">
+                        <i class="fa-solid fa-check-double"></i>
+                        انتخاب همه
+                    </button>
+                    <button type="button" class="btn-select-none" onclick="selectNoneWps()">
+                        <i class="fa-solid fa-xmark"></i>
+                        لغو انتخاب همه
+                    </button>
+                </div>
+            </div>
+
             <div id="wp_suggestions_container">
                 <div id="wp_suggestions_empty" class="empty-suggestions">
                     <i class="fa-solid fa-info-circle"></i>
-                    ابتدا یک رفرنس وارد کنید تا پکیج‌های کاری مرتبط نمایش داده شوند.
+                    ابتدا یک رفرنس وارد کنید و روی «جستجوی رفرنس» کلیک کنید تا پکیج‌های کاری مرتبط نمایش داده شوند.
                 </div>
                 <div id="wp_suggestions_list"></div>
             </div>
@@ -466,7 +606,6 @@ function addRefRow() {
     `;
     container.appendChild(newRow);
     updateRemoveButtons();
-    newRow.querySelector('.ref-input').addEventListener('input', debounceLoadWpSuggestions);
     newRow.querySelector('.ref-input').focus();
 }
 
@@ -475,7 +614,6 @@ function removeRefRow(btn) {
     if (row) {
         row.remove();
         updateRemoveButtons();
-        loadWpSuggestions();
     }
 }
 
@@ -519,7 +657,6 @@ contractorSelect.addEventListener('change', async function() {
     } catch (e) {
         projectSelect.innerHTML = '<option value="0">خطا</option>';
     }
-    loadWpSuggestions();
 });
 
 // ═══════════════════════════════════════════════════════════
@@ -577,24 +714,17 @@ contractInput.addEventListener('input', function() {
         } catch (e) {
             contractHint.style.display = 'none';
         }
-        loadWpSuggestions();
     }, 500);
 });
 
 // ═══════════════════════════════════════════════════════════
-// ★ پیشنهاد WPها (فقط با رفرنس)
+// ★ جستجوی رفرنس (با کلیک روی دکمه)
 // ═══════════════════════════════════════════════════════════
 const senderRefInput = document.getElementById('sender_ref_no');
 const autoInput = document.getElementById('automation_number');
+const searchBtn = document.getElementById('btn_search_ref');
 
-let suggestTimer = null;
-
-function debounceLoadWpSuggestions() {
-    clearTimeout(suggestTimer);
-    suggestTimer = setTimeout(loadWpSuggestions, 400);
-}
-
-function loadWpSuggestions() {
+async function searchReferences() {
     const references = collectReferences();
     const sender_ref_no = senderRefInput.value.trim();
     const contract_number = contractInput.value.trim();
@@ -602,38 +732,56 @@ function loadWpSuggestions() {
     const contractor_id = contractorSelect.value;
     const project_id = projectSelect.value;
 
-    // ★★★ اگر هیچ رفرنسی وارد نشده → هیچ درخواستی نده
+    // ★ اگر هیچ رفرنسی وارد نشده → هشدار
     if (references.length === 0) {
-        document.getElementById('wp_suggestions_empty').style.display = 'block';
-        document.getElementById('wp_suggestions_empty').innerHTML = `
-            <i class="fa-solid fa-info-circle"></i>
-            ابتدا یک رفرنس وارد کنید تا پکیج‌های کاری مرتبط نمایش داده شوند.
+        const emptyDiv = document.getElementById('wp_suggestions_empty');
+        emptyDiv.style.display = 'block';
+        emptyDiv.innerHTML = `
+            <i class="fa-solid fa-exclamation-triangle text-warning"></i>
+            لطفاً ابتدا حداقل یک رفرنس وارد کنید و سپس روی «جستجوی رفرنس» کلیک کنید.
         `;
         document.getElementById('wp_suggestions_list').innerHTML = '';
+        document.getElementById('wp_toolbar').style.display = 'none';
         return;
     }
 
-    // ★ ارسال درخواست
-    fetch('/work-package/suggest-wps', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            references: references,
-            sender_ref_no: sender_ref_no || null,
-            contract_number: contract_number || null,
-            automation_number: automation_number || null,
-            contractor_id: contractor_id !== "0" ? parseInt(contractor_id) : null,
-            project_id: project_id !== "0" ? parseInt(project_id) : null,
-        }),
-    })
-    .then(r => r.json())
-    .then(data => renderWpSuggestions(data.suggestions || []))
-    .catch(e => console.error(e));
+    // ★ غیرفعال کردن دکمه در حین جستجو
+    searchBtn.disabled = true;
+    searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> در حال جستجو...';
+
+    try {
+        const res = await fetch('/work-package/suggest-wps', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                references: references,
+                sender_ref_no: sender_ref_no || null,
+                contract_number: contract_number || null,
+                automation_number: automation_number || null,
+                contractor_id: contractor_id !== "0" ? parseInt(contractor_id) : null,
+                project_id: project_id !== "0" ? parseInt(project_id) : null,
+            }),
+        });
+        const data = await res.json();
+        renderWpSuggestions(data.suggestions || []);
+    } catch (e) {
+        const emptyDiv = document.getElementById('wp_suggestions_empty');
+        emptyDiv.style.display = 'block';
+        emptyDiv.innerHTML = `<i class="fa-solid fa-exclamation-triangle text-danger"></i> خطا: ${e.message}`;
+        document.getElementById('wp_suggestions_list').innerHTML = '';
+    } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i> جستجوی رفرنس';
+    }
 }
 
+// ═══════════════════════════════════════════════════════════
+// ★ رندر کارت‌های WP
+// ═══════════════════════════════════════════════════════════
 function renderWpSuggestions(suggestions) {
     const emptyDiv = document.getElementById('wp_suggestions_empty');
     const listDiv = document.getElementById('wp_suggestions_list');
+    const toolbar = document.getElementById('wp_toolbar');
 
     if (!suggestions.length) {
         emptyDiv.style.display = 'block';
@@ -642,28 +790,42 @@ function renderWpSuggestions(suggestions) {
             با این رفرنس، هیچ پکیج کاری مرتبطی یافت نشد. سند به‌عنوان یک پکیج کاری جدید ثبت می‌شود.
         `;
         listDiv.innerHTML = '';
+        toolbar.style.display = 'none';
         return;
     }
 
     emptyDiv.style.display = 'none';
+    toolbar.style.display = 'flex';
 
     let html = '';
     for (let i = 0; i < suggestions.length; i++) {
         const s = suggestions[i];
 
         let matchBadge = '';
-        if (s.match_source === 'contract+reference') {
+        if (s.match_source === 'sender_ref+contract') {
+            matchBadge = '<span class="badge bg-success ms-2" style="font-size:0.7rem;">سند مرجع + تطابق قرارداد</span>';
+        } else if (s.match_source === 'reference+contract') {
             matchBadge = '<span class="badge bg-success ms-2" style="font-size:0.7rem;">تطابق دقیق</span>';
-        } else if (s.match_source === 'contract') {
-            matchBadge = '<span class="badge bg-warning text-dark ms-2" style="font-size:0.7rem;">همان قرارداد</span>';
+        } else if (s.match_source === 'sender_ref') {
+            matchBadge = '<span class="badge bg-info ms-2" style="font-size:0.7rem;">سند مرجع</span>';
         } else if (s.match_source === 'reference') {
             matchBadge = '<span class="badge bg-info ms-2" style="font-size:0.7rem;">همان رفرنس</span>';
+        }
+
+        // ★ نمایش رفرنس‌های منطبق (اگر در پاسخ باشد)
+        let refMatchHtml = '';
+        if (s.matching_references && s.matching_references.length > 0) {
+            refMatchHtml = `<div class="wp-ref-match">
+                <i class="fa-solid fa-link"></i>
+                <strong>شماره نامه‌های منطبق:</strong>
+                ${s.matching_references.map(r => `<code>${escapeHtml(r)}</code>`).join(', ')}
+            </div>`;
         }
 
         html += `<div class="wp-suggestion-card" onclick="toggleWpCard(this)">
             <div class="d-flex align-items-start gap-3">
                 <input type="checkbox" name="selected_wps[]" value="${s.work_package_code}"
-                       onclick="event.stopPropagation(); this.parentElement.parentElement.classList.toggle('selected', this.checked)">
+                       onclick="event.stopPropagation(); this.parentElement.parentElement.classList.toggle('selected', this.checked); updateSelectedCount();">
                 <div style="flex:1;">
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
@@ -676,17 +838,55 @@ function renderWpSuggestions(suggestions) {
                     <div class="mt-2" style="font-size: 0.88rem; color: #4a5568;">
                         <strong>موضوع:</strong> ${escapeHtml(s.sample_subject || '-')}
                     </div>
+                    ${refMatchHtml}
                 </div>
             </div>
         </div>`;
     }
     listDiv.innerHTML = html;
+    updateSelectedCount();
 }
 
 function toggleWpCard(cardEl) {
     const checkbox = cardEl.querySelector('input[type=checkbox]');
     checkbox.checked = !checkbox.checked;
     cardEl.classList.toggle('selected', checkbox.checked);
+    updateSelectedCount();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ★ انتخاب همه / لغو انتخاب همه
+// ═══════════════════════════════════════════════════════════
+function selectAllWps() {
+    const cards = document.querySelectorAll('#wp_suggestions_list .wp-suggestion-card');
+    cards.forEach(card => {
+        const checkbox = card.querySelector('input[type=checkbox]');
+        if (checkbox) {
+            checkbox.checked = true;
+            card.classList.add('selected');
+        }
+    });
+    updateSelectedCount();
+}
+
+function selectNoneWps() {
+    const cards = document.querySelectorAll('#wp_suggestions_list .wp-suggestion-card');
+    cards.forEach(card => {
+        const checkbox = card.querySelector('input[type=checkbox]');
+        if (checkbox) {
+            checkbox.checked = false;
+            card.classList.remove('selected');
+        }
+    });
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const selected = document.querySelectorAll('#wp_suggestions_list input[type=checkbox]:checked');
+    const countEl = document.getElementById('wp_selected_count');
+    if (countEl) {
+        countEl.textContent = selected.length;
+    }
 }
 
 function escapeHtml(s) {
@@ -696,12 +896,14 @@ function escapeHtml(s) {
     }[c]));
 }
 
-// اتصال رویدادها
+// ═══════════════════════════════════════════════════════════
+// ★ تغییرات ورودی‌ها (فقط قرارداد → پر کردن خودکار)
+// ═══════════════════════════════════════════════════════════
 [senderRefInput, autoInput].forEach(el => {
-    if (el) el.addEventListener('input', debounceLoadWpSuggestions);
-});
-document.querySelectorAll('#refs_container .ref-input').forEach(inp => {
-    inp.addEventListener('input', debounceLoadWpSuggestions);
+    if (el) el.addEventListener('input', () => {
+        // فقط پاک کردن نتایج قدیمی، نه جستجوی خودکار
+        // (کاربر باید روی دکمه کلیک کند)
+    });
 });
 </script>
 {% endblock %}

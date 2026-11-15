@@ -37,7 +37,6 @@ CREATE_SQL = """
             date_returned_from_management TEXT,
             management_date_on_letter TEXT,
             management_instruction TEXT,
-            management_instruction TEXT,
             management_action TEXT,
 
             -- ★ دستور مدیریت و ارجاع
@@ -139,7 +138,6 @@ INDEX_SQL = [
        ON document_packages(registered_by)""",
     """CREATE INDEX IF NOT EXISTS idx_dp_management_action
        ON document_packages(management_action)""",
-    
 ]
 
 
@@ -147,3 +145,29 @@ def create(cursor):
     cursor.execute(CREATE_SQL)
     for statement in INDEX_SQL:
         cursor.execute(statement)
+
+
+def migrate(cursor):
+    """
+    افزودن ستون‌های جدید به دیتابیس‌های قدیمی (در صورت نبود).
+    اجرای مکرر بی‌خطر است.
+    """
+    columns = {
+        col["name"]
+        for col in cursor.execute("PRAGMA table_info(document_packages)").fetchall()
+    }
+
+    # ستون‌های جدیدی که ممکن است در دیتابیس قدیمی نباشند
+    new_columns = [
+        ("management_action", "TEXT"),
+    ]
+
+    for name, col_type in new_columns:
+        if name not in columns:
+            try:
+                cursor.execute(
+                    f"ALTER TABLE document_packages ADD COLUMN {name} {col_type}"
+                )
+                print(f"✅ ستون {name} به document_packages اضافه شد")
+            except Exception as e:
+                print(f"⚠️ خطا در افزودن {name}: {e}")

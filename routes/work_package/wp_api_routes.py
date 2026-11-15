@@ -16,8 +16,19 @@ def _uid():
     return session.get("user_id")
 
 
+def _to_int(val):
+    """تبدیل ایمن به int."""
+    if val is None or val == "" or val == 0 or val == "0":
+        return None
+    try:
+        v = int(val)
+        return v if v > 0 else None
+    except (ValueError, TypeError):
+        return None
+
+
 # ============================================================
-# ★ جستجوی سریع پکیج‌ها (DFC + شماره نامه + موضوع + شماره قرارداد)
+# ★ جستجوی سریع پکیج‌ها
 # ============================================================
 @work_package_bp.route("/search", methods=["POST"])
 def search_packages():
@@ -48,7 +59,7 @@ def search_packages():
 
 
 # ============================================================
-# ★ جستجوی کاربران (برای انتخابگر چندگانه)
+# ★ جستجوی کاربران
 # ============================================================
 @work_package_bp.route("/search-users", methods=["POST"])
 def search_users_api():
@@ -80,16 +91,126 @@ def search_users_api():
             LIMIT 20
         """, params).fetchall()
 
-        return jsonify({
-            "ok": True,
-            "users": [dict(r) for r in rows],
-        })
+        return jsonify({"ok": True, "users": [dict(r) for r in rows]})
     finally:
         connection.close()
 
 
 # ============================================================
-# ★ تغییر مرحله (با extra_fields)
+# ★ تشخیص پیمانکار و پروژه از شماره قرارداد
+# ============================================================
+@work_package_bp.route("/lookup-contract", methods=["POST"])
+def lookup_contract_api():
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+    contract_number = (data.get("contract_number") or "").strip()
+
+    if not contract_number or len(contract_number) < 2:
+        return jsonify({"ok": True, "found": False})
+
+    info = wp_service.find_contractor_and_project_by_contract_number(contract_number)
+
+    if info:
+        return jsonify({"ok": True, "found": True, "info": info})
+    return jsonify({"ok": True, "found": False})
+
+
+# ============================================================
+# ★ پیشنهاد WPها (منطق ترکیبی: قرارداد + رفرنس)
+# ============================================================
+@work_package_bp.route("/suggest-wps", methods=["POST"])
+def suggest_wps_api():
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+
+    # ★ خواندن همه‌ی رفرنس‌ها
+    references = data.get("references") or []
+    if isinstance(references, str):
+        references = [references]
+    references = [r.strip() for r in references if r and r.strip()]
+
+    # اولین رفرنس (اگر رفرنس‌های چندگانه داده شده)
+    reference_no = references[0] if references else None
+
+    # ★ لاگ دیباگ
+    print(f"\n=== SUGGEST_WPS API ===")
+    print(f"  references: {references}")
+    print(f"  reference_no: {reference_no}")
+    print(f"  contract_number: {data.get('contract_number')}")
+
+    # ★ اگر هیچ رفرنسی نداریم، هیچ WPی پیشنهاد نده
+    if not references:
+        # اما اگر شماره قرارداد بود، فقط برای راهنمایی نشان بده
+        contract_number = (data.get("contract_number") or "").strip() or None
+        if not contract_number:
+            print(f"  → no refs and no contract → return empty")
+            return jsonify({"ok": True, "suggestions": []})
+
+    suggestions = wp_service.suggest_wps_for_reference(
+        reference_no=reference_no,
+        sender_ref_no=(data.get("sender_ref_no") or "").strip() or None,
+        contract_number=(data.get("contract_number") or "").strip() or None,
+        contractor_id=_to_int(data.get("contractor_id")),
+        project_id=_to_int(data.get("project_id")),
+        automation_number=(data.get("automation_number") or "").strip() or None,
+    )
+
+    print(f"  → suggestions: {len(suggestions)}")
+
+    return jsonify({"ok": True, "suggestions": suggestions})
+
+
+# ============================================================
+# ★ پیشنهاد WPها از چند رفرنس (قدیمی — برای سازگاری)
+# ============================================================
+@work_package_bp.route("/suggest-wps-by-refs", methods=["POST"])
+def suggest_wps_by_refs_api():
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+    refs = data.get("references") or []
+    if isinstance(refs, str):
+        refs = [refs]
+    refs = [r.strip() for r in refs if r and r.strip()]
+
+    if not refs:
+        return jsonify({"ok": True, "suggestions": []})
+
+    suggestions = wp_service.find_wps_by_references(refs)
+    return jsonify({"ok": True, "suggestions": suggestions})
+
+
+# ============================================================
+# ★ پیش‌نمایش SLA
+# ============================================================
+@work_package_bp.route("/preview-sla", methods=["POST"])
+def preview_sla_api():
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+    group_id = _to_int(data.get("group_id"))
+    subgroup_id = _to_int(data.get("subgroup_id"))
+    start_date = data.get("start_date")
+
+    if start_date:
+        start_date = DateHelper.convert_to_gregorian(start_date)
+
+    result = wp_sla_service.preview_sla(
+        group_id=group_id,
+        subgroup_id=subgroup_id,
+        start_date=start_date,
+    )
+    return jsonify(result)
+
+
+# ============================================================
+# ★ تغییر مرحله
 # ============================================================
 @work_package_bp.route("/<int:package_id>/change-stage", methods=["POST"])
 def change_stage_api(package_id):
@@ -104,7 +225,6 @@ def change_stage_api(package_id):
     if not new_stage:
         return jsonify({"ok": False, "error": "مرحله لازم است"}), 400
 
-    # تبدیل تاریخ‌های شمسی در extra_fields به میلادی
     date_fields = (
         "date_sent_to_management",
         "date_returned_from_management",
@@ -128,31 +248,7 @@ def change_stage_api(package_id):
 
 
 # ============================================================
-# ★ پیش‌نمایش SLA (برای فرم)
-# ============================================================
-@work_package_bp.route("/preview-sla", methods=["POST"])
-def preview_sla_api():
-    if not _uid():
-        return jsonify({"ok": False, "error": "unauthorized"}), 401
-
-    data = request.get_json(silent=True) or {}
-    group_id = data.get("group_id")
-    subgroup_id = data.get("subgroup_id")
-    start_date = data.get("start_date")
-
-    if start_date:
-        start_date = DateHelper.convert_to_gregorian(start_date)
-
-    result = wp_sla_service.preview_sla(
-        group_id=int(group_id) if group_id else None,
-        subgroup_id=int(subgroup_id) if subgroup_id else None,
-        start_date=start_date,
-    )
-    return jsonify(result)
-
-
-# ============================================================
-# ★ بازگشت از مدیریت (فرم کامل)
+# ★ بازگشت از مدیریت
 # ============================================================
 @work_package_bp.route("/<int:package_id>/return-from-management", methods=["POST"])
 def return_from_management_api(package_id):
@@ -171,7 +267,6 @@ def return_from_management_api(package_id):
     instruction = (data.get("management_instruction") or "").strip() or None
     action = (data.get("management_action") or "").strip() or None
 
-    # ★ اگر دستور بایگانی است → مستقیم آرشیو
     if action == "archive":
         result = wp_service.change_stage(
             package_id, "archived", actor_id=_uid(),
@@ -185,7 +280,6 @@ def return_from_management_api(package_id):
         )
         return jsonify(result)
 
-    # ★ در غیر این صورت → انتقال به returned_from_management
     supervisor_ids = data.get("supervisor_ids") or []
     direct_expert_ids = data.get("direct_expert_ids") or []
 
@@ -194,8 +288,8 @@ def return_from_management_api(package_id):
         "management_date_on_letter": management_date,
         "management_instruction": instruction,
         "management_action": action,
-        "group_id": int(data.get("group_id", 0)) or None,
-        "subgroup_id": int(data.get("subgroup_id", 0)) or None,
+        "group_id": _to_int(data.get("group_id")),
+        "subgroup_id": _to_int(data.get("subgroup_id")),
         "priority": data.get("priority", "normal"),
         "confidentiality": data.get("confidentiality", "internal"),
     }
@@ -217,13 +311,11 @@ def return_from_management_api(package_id):
     if not result["ok"]:
         return jsonify(result), 400
 
-    # ★ محاسبه‌ی مجدد SLA بر اساس زیرگروه جدید
     try:
         wp_sla_service.recalculate_sla(package_id, actor_id=_uid())
     except Exception:
         pass
 
-    # ★ اگر سرپرست انتخاب شده → ارجاع
     if supervisor_ids:
         try:
             wp_assignment_service.route_package(
@@ -234,10 +326,7 @@ def return_from_management_api(package_id):
                 action="route",
                 instruction=instruction,
             )
-            # تغییر مرحله به routed
-            wp_service.change_stage(
-                package_id, "routed", actor_id=_uid(),
-            )
+            wp_service.change_stage(package_id, "routed", actor_id=_uid())
         except Exception:
             pass
 
@@ -274,7 +363,6 @@ def route_api(package_id):
     if not result["ok"] and result.get("error"):
         return jsonify(result), 400
 
-    # ★ اگر ارجاع اولیه به سرپرست است → stage را routed کن
     if result.get("created") and data.get("role") == "supervisor":
         try:
             wp_service.change_stage(package_id, "routed", actor_id=_uid())
@@ -391,3 +479,52 @@ def recalc_sla_api(package_id):
     if not result["ok"]:
         return jsonify(result), 400
     return jsonify(result)
+
+
+# ============================================================
+# ★ اتصال سند به چند WP
+# ============================================================
+@work_package_bp.route("/<int:package_id>/link-wps", methods=["POST"])
+def link_wps_api(package_id):
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or {}
+    wp_codes = data.get("wp_codes") or []
+    primary_wp = data.get("primary_wp")
+    wp_codes = [w.strip() for w in wp_codes if w and w.strip()]
+
+    result = wp_service.link_package_to_wps(
+        package_id=package_id,
+        wp_codes=wp_codes,
+        linked_by=_uid(),
+        primary_wp=primary_wp,
+    )
+
+    if not result["ok"]:
+        return jsonify(result), 400
+
+    try:
+        from services.work_package import wp_event_service
+        wp_event_service.log_event(
+            package_id=package_id,
+            actor_id=_uid(),
+            event_type="wp_links_updated",
+            summary=f"اتصال‌ها به‌روز شد: {len(wp_codes)} پکیج کاری",
+            payload={"wp_codes": wp_codes, "primary": primary_wp},
+        )
+    except Exception:
+        pass
+
+    return jsonify(result)
+
+
+# ============================================================
+# ★ دریافت WPهای یک سند
+# ============================================================
+@work_package_bp.route("/<int:package_id>/wps.json", methods=["GET"])
+def get_wps_api(package_id):
+    if not _uid():
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    wps = wp_service.get_package_wps(package_id)
+    return jsonify({"ok": True, "wps": wps})

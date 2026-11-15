@@ -29,7 +29,7 @@ class Stage:
 
 STAGE_TRANSITIONS = {
     Stage.REGISTERED: [Stage.SENT_TO_MANAGEMENT, Stage.CANCELLED],
-    Stage.SENT_TO_MANAGEMENT: [Stage.RETURNED_FROM_MANAGEMENT, Stage.CANCELLED],
+    Stage.SENT_TO_MANAGEMENT: [Stage.RETURNED_FROM_MANAGEMENT, Stage.CANCELLED, Stage.ARCHIVED],
     Stage.RETURNED_FROM_MANAGEMENT: [Stage.ROUTED, Stage.CANCELLED],
     Stage.ROUTED: [Stage.IN_PROGRESS, Stage.CANCELLED],
     Stage.IN_PROGRESS: [
@@ -48,7 +48,6 @@ STAGE_TRANSITIONS = {
 # ★ تخصیص شمارنده‌ی اتمیک
 # ============================================================
 def _allocate_counter(connection, kind: str, year: int) -> int:
-    """تخصیص مقدار بعدی برای (kind, year). اتمیک."""
     connection.execute("BEGIN IMMEDIATE")
     try:
         row = connection.execute(
@@ -83,57 +82,118 @@ def find_work_package(
     contractor_id: int | None = None,
     project_id: int | None = None,
     automation_number: str | None = None,
-) -> str | None:
-    """
-    تلاش برای یافتن WP موجود بر اساس اولویت.
-    Returns: work_package_code یا None
-    """
+) -> dict | None:
+    """تشخیص WP موجود بر اساس اولویت."""
     connection = get_connection()
     try:
-        # ۱. رفرنس دقیق
-        ref_values = [r for r in (reference_no, sender_ref_no) if r]
-        for ref in ref_values:
+        # ★ ۱. جستجو در جدول document_package_references (رفرنس‌های ثبت‌شده)
+        if reference_no:
             row = connection.execute("""
-                SELECT work_package_code FROM document_packages
-                WHERE (reference_no = ? OR sender_ref_no = ? OR dfc_code = ?)
-                  AND stage NOT IN ('archived', 'cancelled')
-                ORDER BY id DESC LIMIT 1
-            """, (ref, ref, ref)).fetchone()
+                SELECT dp.id, dp.work_package_code, dp.dfc_code, dp.subject
+                FROM document_package_references r
+                JOIN document_packages dp ON dp.id = r.package_id
+                WHERE TRIM(r.reference_no) = TRIM(?)
+                  AND dp.stage NOT IN ('archived', 'cancelled')
+                ORDER BY dp.id DESC
+                LIMIT 1
+            """, (reference_no,)).fetchone()
             if row:
-                return row["work_package_code"]
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
 
-        # ۲. شماره قرارداد + پیمانکار
+        # ۲. جستجوی مستقیم در sender_ref_no
+        if sender_ref_no:
+            row = connection.execute("""
+                SELECT id, work_package_code, dfc_code, subject
+                FROM document_packages
+                WHERE TRIM(sender_ref_no) = TRIM(?)
+                  AND stage NOT IN ('archived', 'cancelled')
+                ORDER BY id DESC
+                LIMIT 1
+            """, (sender_ref_no,)).fetchone()
+            if row:
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
+
+        # ۳. شماره نامه + شماره قرارداد
+        if sender_ref_no and contract_number:
+            row = connection.execute("""
+                SELECT id, work_package_code, dfc_code, subject
+                FROM document_packages
+                WHERE TRIM(sender_ref_no) = TRIM(?) AND TRIM(contract_number) = TRIM(?)
+                  AND stage NOT IN ('archived', 'cancelled')
+                ORDER BY id DESC
+                LIMIT 1
+            """, (sender_ref_no, contract_number)).fetchone()
+            if row:
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
+
+        # ۴. شماره قرارداد + پیمانکار
         if contract_number and contractor_id:
             row = connection.execute("""
-                SELECT work_package_code FROM document_packages
-                WHERE contract_number = ? AND contractor_id = ?
+                SELECT id, work_package_code, dfc_code, subject
+                FROM document_packages
+                WHERE TRIM(contract_number) = TRIM(?) AND contractor_id = ?
                   AND stage NOT IN ('archived', 'cancelled')
-                ORDER BY id DESC LIMIT 1
+                ORDER BY id DESC
+                LIMIT 1
             """, (contract_number, contractor_id)).fetchone()
             if row:
-                return row["work_package_code"]
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
 
-        # ۳. شماره قرارداد + پروژه
+        # ۵. شماره قرارداد + پروژه
         if contract_number and project_id:
             row = connection.execute("""
-                SELECT work_package_code FROM document_packages
-                WHERE contract_number = ? AND project_id = ?
+                SELECT id, work_package_code, dfc_code, subject
+                FROM document_packages
+                WHERE TRIM(contract_number) = TRIM(?) AND project_id = ?
                   AND stage NOT IN ('archived', 'cancelled')
-                ORDER BY id DESC LIMIT 1
+                ORDER BY id DESC
+                LIMIT 1
             """, (contract_number, project_id)).fetchone()
             if row:
-                return row["work_package_code"]
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
 
-        # ۴. شماره اتوماسیون
+        # ۶. شماره اتوماسیون
         if automation_number:
             row = connection.execute("""
-                SELECT work_package_code FROM document_packages
-                WHERE automation_number = ?
+                SELECT id, work_package_code, dfc_code, subject
+                FROM document_packages
+                WHERE TRIM(automation_number) = TRIM(?)
                   AND stage NOT IN ('archived', 'cancelled')
-                ORDER BY id DESC LIMIT 1
+                ORDER BY id DESC
+                LIMIT 1
             """, (automation_number,)).fetchone()
             if row:
-                return row["work_package_code"]
+                return {
+                    "package_id": row["id"],
+                    "work_package_code": row["work_package_code"],
+                    "dfc_code": row["dfc_code"],
+                    "subject": row["subject"],
+                }
 
         return None
     finally:
@@ -147,43 +207,34 @@ def register_package(
     *,
     subject: str,
     registered_by: int,
-    # تاریخ‌ها (میلادی — از قبل تبدیل شده)
     date_letter: str | None = None,
     date_received: str | None = None,
     sender_ref_date: str | None = None,
     date_sent_to_management: str | None = None,
     date_returned_from_management: str | None = None,
     management_date_on_letter: str | None = None,
-    # اطلاعات سند
     sender_ref_no: str | None = None,
     contract_number: str | None = None,
     reference_no: str | None = None,
+    references: list[str] | None = None,
     automation_number: str | None = None,
     sender_name: str | None = None,
     sender_type: str = "other",
     source_type: str = "other",
     description: str | None = None,
     management_instruction: str | None = None,
-    # ارتباطات
     contractor_id: int | None = None,
     project_id: int | None = None,
     group_id: int | None = None,
     subgroup_id: int | None = None,
     priority: str = "normal",
     confidentiality: str = "internal",
-    # سرپرستان و کارشناسان
     supervisor_ids: list[int] | None = None,
     direct_expert_ids: list[int] | None = None,
-    # رفرنس
     response_to_id: int | None = None,
     force_new_wp: bool = False,
 ) -> dict:
-    """
-    ثبت سند جدید با تخصیص DFC و WP.
-
-    Returns:
-        dict با ok, package_id, dfc_code, work_package_code, error
-    """
+    """ثبت سند جدید با تخصیص DFC و WP."""
     if not subject or not subject.strip():
         return {"ok": False, "error": "موضوع سند الزامی است"}
     if not registered_by:
@@ -193,28 +244,57 @@ def register_package(
     year = jdatetime.date.today().year
     now = now_tehran_str()
 
+    # ★ آماده‌سازی لیست رفرنس‌ها
+    all_refs = []
+    if reference_no and reference_no.strip():
+        all_refs.append(reference_no.strip())
+    if references:
+        all_refs.extend([r.strip() for r in references if r and r.strip()])
+    all_refs = list(dict.fromkeys(all_refs))
+
+    primary_reference = all_refs[0] if all_refs else None
+
+    print(f"\n=== REGISTER_PACKAGE DEBUG ===")
+    print(f"  all_refs: {all_refs}")
+    print(f"  primary_reference: {primary_reference}")
+
     connection = get_connection()
     try:
-        # ★ تشخیص WP
-        existing_wp = None
+        # ★ تشخیص WP موجود
+        existing_wp_info = None
         if not force_new_wp:
-            existing_wp = find_work_package(
-                reference_no=reference_no,
-                sender_ref_no=sender_ref_no,
-                contract_number=contract_number,
-                contractor_id=contractor_id,
-                project_id=project_id,
-                automation_number=automation_number,
-            )
+            # اولویت اول: جستجو با رفرنس‌های چندگانه
+            if all_refs:
+                wps_found = find_wps_by_references(all_refs)
+                if wps_found:
+                    top_wp = wps_found[0]
+                    existing_wp_info = {
+                        "package_id": None,
+                        "work_package_code": top_wp["work_package_code"],
+                        "dfc_code": top_wp["sample_dfc"],
+                        "subject": top_wp["sample_subject"],
+                    }
+
+            # اگر پیدا نشد، منطق قدیمی
+            if not existing_wp_info:
+                existing_wp_info = find_work_package(
+                    reference_no=primary_reference,
+                    sender_ref_no=sender_ref_no,
+                    contract_number=contract_number,
+                    contractor_id=contractor_id,
+                    project_id=project_id,
+                    automation_number=automation_number,
+                )
+
+        print(f"  existing_wp_info: {existing_wp_info}")
 
         # ★ تخصیص DFC
         dfc_value = _allocate_counter(connection, "dfc", year)
         dfc_code = f"DFC-{year}-{dfc_value:04d}"
 
         # ★ تخصیص یا استفاده از WP
-        if existing_wp:
-            wp_code = existing_wp
-            # موضوع اصلی پکیج را از اولین سند بخوان
+        if existing_wp_info:
+            wp_code = existing_wp_info["work_package_code"]
             wp_subject_row = connection.execute(
                 "SELECT work_package_subject FROM document_packages "
                 "WHERE work_package_code = ? AND work_package_subject IS NOT NULL "
@@ -227,7 +307,7 @@ def register_package(
             wp_code = f"WP-{year}-{wp_value:04d}"
             wp_subject = subject.strip()
 
-        # ★ parent_package_id
+        # parent_package_id
         parent_id = None
         if response_to_id:
             parent_row = connection.execute(
@@ -237,12 +317,8 @@ def register_package(
             if parent_row:
                 parent_id = parent_row["parent_package_id"] or parent_row["id"]
 
-        # ★ JSON برای supervisor_ids و direct_expert_ids
         supervisor_ids_json = json.dumps(supervisor_ids or [], ensure_ascii=False)
         direct_expert_ids_json = json.dumps(direct_expert_ids or [], ensure_ascii=False)
-
-        # ★ stage اولیه
-        initial_stage = Stage.REGISTERED
 
         cursor = connection.execute("""
             INSERT INTO document_packages (
@@ -276,25 +352,53 @@ def register_package(
             dfc_code, wp_code, year, dfc_value,
             subject.strip(), description,
             date_letter, date_received, sender_ref_date,
-            sender_ref_no, contract_number, reference_no, automation_number,
+            sender_ref_no, contract_number, primary_reference, automation_number,
             sender_name, sender_type, source_type,
             contractor_id, project_id,
             date_sent_to_management, date_returned_from_management,
             management_date_on_letter, management_instruction,
             group_id, subgroup_id, priority, confidentiality,
             supervisor_ids_json, direct_expert_ids_json,
-            initial_stage, response_to_id, parent_id, wp_subject,
+            Stage.REGISTERED, response_to_id, parent_id, wp_subject,
             registered_by, now,
         ))
         package_id = cursor.lastrowid
+
+        print(f"  package_id: {package_id}")
+
+        # ★ ثبت رفرنس‌های چندگانه
+        for ref in all_refs:
+            try:
+                connection.execute("""
+                    INSERT INTO document_package_references
+                    (package_id, reference_no, created_by)
+                    VALUES (?, ?, ?)
+                """, (package_id, ref, registered_by))
+                print(f"  ✅ ref inserted: {ref}")
+            except Exception as ref_exc:
+                print(f"  ❌ ref insert error: {ref_exc}")
+
+        # ★ ثبت در جدول لینک‌ها
+        try:
+            connection.execute("""
+                INSERT INTO document_package_wp_links
+                (package_id, work_package_code, is_primary, linked_by)
+                VALUES (?, ?, 1, ?)
+            """, (package_id, wp_code, registered_by))
+        except Exception as link_exc:
+            print(f"⚠️ wp_links insert error: {link_exc}")
+
         connection.commit()
+        print(f"  ✅ COMMITTED")
     except Exception as exc:
         connection.rollback()
+        import traceback
+        traceback.print_exc()
         return {"ok": False, "error": f"خطا در ثبت سند: {exc}"}
     finally:
         connection.close()
 
-    # ★ ثبت رویداد
+    # ★ رویداد
     try:
         wp_event_service.log_event(
             package_id=package_id,
@@ -305,7 +409,9 @@ def register_package(
                 "dfc_code": dfc_code,
                 "work_package_code": wp_code,
                 "subject": subject,
-                "existing_wp": bool(existing_wp),
+                "existing_wp": bool(existing_wp_info),
+                "references_count": len(all_refs),
+                "references": all_refs,
             },
         )
     except Exception:
@@ -314,11 +420,13 @@ def register_package(
     return {
         "ok": True,
         "package_id": package_id,
+        "document_id": package_id,
         "dfc_code": dfc_code,
         "work_package_code": wp_code,
         "package_year": year,
         "dfc_sequence": dfc_value,
-        "existing_wp": bool(existing_wp),
+        "existing_wp": bool(existing_wp_info),
+        "references_count": len(all_refs),
     }
 
 
@@ -333,7 +441,6 @@ def change_stage(
     reason: str | None = None,
     extra_fields: dict | None = None,
 ) -> dict:
-    """تغییر مرحله با بررسی مجاز بودن و به‌روزرسانی فیلدهای اضافی."""
     if new_stage not in set(STAGE_TRANSITIONS.keys()) | {
         v for vals in STAGE_TRANSITIONS.values() for v in vals
     }:
@@ -360,7 +467,6 @@ def change_stage(
         set_parts = ["stage = ?", "updated_at = ?"]
         values = [new_stage, now]
 
-        # فیلدهای ویژه بر اساس مرحله
         if new_stage == Stage.CLOSED:
             set_parts += ["closed_by = ?", "closed_at = ?"]
             values += [actor_id, now]
@@ -371,27 +477,15 @@ def change_stage(
                 set_parts.append("archive_reason = ?")
                 values.append(reason)
 
-        # ★ فیلدهای اضافی
         if extra_fields:
-            # فیلدهای مجاز
             allowed_extra = {
-                "management_action",
-                "management_instruction",
-                "management_date_on_letter",
-                "date_sent_to_management",
-                "date_returned_from_management",
-                "group_id",
-                "subgroup_id",
-                "priority",
-                "confidentiality",
-                "supervisor_ids",
-                "direct_expert_ids",
-                "date_sent_response",
-                "response_letter_number",
-                "response_letter_date",
-                "final_response",
-                "final_result",
-                "final_result_notes",
+                "management_action", "management_instruction",
+                "management_date_on_letter", "date_sent_to_management",
+                "date_returned_from_management", "group_id", "subgroup_id",
+                "priority", "confidentiality", "supervisor_ids",
+                "direct_expert_ids", "date_sent_response",
+                "response_letter_number", "response_letter_date",
+                "final_response", "final_result", "final_result_notes",
             }
             for k, v in extra_fields.items():
                 if k in allowed_extra:
@@ -408,7 +502,6 @@ def change_stage(
     finally:
         connection.close()
 
-    # رویداد
     try:
         payload = {"from": current, "to": new_stage}
         if reason:
@@ -464,7 +557,6 @@ def get_package(package_id: int) -> dict | None:
 
 
 def list_work_package_siblings(wp_code: str) -> list[dict]:
-    """همه‌ی اسناد یک WP (رفت‌وبرگشت‌ها)."""
     connection = get_connection()
     try:
         rows = connection.execute("""
@@ -474,6 +566,302 @@ def list_work_package_siblings(wp_code: str) -> list[dict]:
             WHERE work_package_code = ?
             ORDER BY id ASC
         """, (wp_code,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        connection.close()
+
+
+# ============================================================
+# ★ اتصال سند به چند WP
+# ============================================================
+def link_package_to_wps(
+    package_id: int,
+    wp_codes: list[str],
+    linked_by: int,
+    primary_wp: str | None = None,
+) -> dict:
+    connection = get_connection()
+    try:
+        connection.execute(
+            "DELETE FROM document_package_wp_links WHERE package_id = ?",
+            (package_id,),
+        )
+
+        if not wp_codes:
+            connection.commit()
+            return {"ok": True, "linked": 0}
+
+        primary = primary_wp or wp_codes[0]
+
+        for wp in wp_codes:
+            try:
+                connection.execute("""
+                    INSERT INTO document_package_wp_links
+                    (package_id, work_package_code, is_primary, linked_by)
+                    VALUES (?, ?, ?, ?)
+                """, (package_id, wp, 1 if wp == primary else 0, linked_by))
+            except Exception:
+                pass
+
+        connection.execute("""
+            UPDATE document_packages
+            SET work_package_code = ?, updated_at = ?
+            WHERE id = ?
+        """, (primary, now_tehran_str(), package_id))
+
+        connection.commit()
+        return {"ok": True, "linked": len(wp_codes)}
+    except Exception as exc:
+        connection.rollback()
+        return {"ok": False, "error": str(exc)}
+    finally:
+        connection.close()
+
+
+def get_package_wps(package_id: int) -> list[dict]:
+    connection = get_connection()
+    try:
+        rows = connection.execute("""
+            SELECT l.*,
+                   p.dfc_code, p.subject AS sample_subject
+            FROM document_package_wp_links l
+            LEFT JOIN document_packages p ON p.work_package_code = l.work_package_code
+            WHERE l.package_id = ?
+            ORDER BY l.is_primary DESC, l.id ASC
+        """, (package_id,)).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        connection.close()
+
+
+# ============================================================
+# ★ پیشنهاد WPها (منطق ترکیبی)
+# ============================================================
+def suggest_wps_for_reference(
+    *,
+    reference_no: str | None = None,
+    sender_ref_no: str | None = None,
+    contract_number: str | None = None,
+    contractor_id: int | None = None,
+    project_id: int | None = None,
+    automation_number: str | None = None,
+    limit: int = 10,
+) -> list[dict]:
+    """
+    پیشنهاد WPهای مرتبط.
+
+    ★ منطق:
+    ───────────────────────────────────────────────────────────
+    • اگر رفرنس خالی است → هیچ WPی برنگردان
+    • اگر رفرنس داده شد + قرارداد:
+        ۱. اول تطابق دقیق: قرارداد + رفرنس
+        ۲. اگر نبود: فقط رفرنس
+        ۳. اگر نبود: فقط قرارداد (به‌عنوان راهنمایی)
+    • اگر رفرنس داده شد بدون قرارداد: فقط با رفرنس
+    ───────────────────────────────────────────────────────────
+    """
+    connection = get_connection()
+    try:
+        # جمع‌آوری رفرنس‌ها
+        refs_to_search = []
+        for r in (reference_no, sender_ref_no):
+            if r and r.strip():
+                refs_to_search.append(r.strip())
+        refs_to_search = list(dict.fromkeys(refs_to_search))
+
+        # ★ اگر هیچ رفرنسی نداریم → هیچ پیشنهادی نده
+        if not refs_to_search:
+            return []
+
+        placeholders = ",".join("?" * len(refs_to_search))
+
+        # ★ حالت ۱: هم قرارداد و هم رفرنس → تطابق دقیق
+        if contract_number:
+            sql = f"""
+                SELECT dp.work_package_code,
+                       MAX(dp.dfc_code) AS sample_dfc,
+                       MAX(dp.subject) AS sample_subject,
+                       COUNT(DISTINCT dp.id) AS doc_count,
+                       MAX(dp.id) AS latest_id,
+                       'contract+reference' AS match_source
+                FROM document_package_references r
+                JOIN document_packages dp ON dp.id = r.package_id
+                WHERE TRIM(r.reference_no) IN ({placeholders})
+                  AND TRIM(dp.contract_number) = TRIM(?)
+                  AND dp.stage NOT IN ('archived', 'cancelled')
+                GROUP BY dp.work_package_code
+                ORDER BY latest_id DESC
+                LIMIT ?
+            """
+            params = refs_to_search + [contract_number, limit]
+            rows = connection.execute(sql, params).fetchall()
+            if rows:
+                return [dict(r) for r in rows]
+
+        # ★ حالت ۲: فقط رفرنس
+        sql = f"""
+            SELECT dp.work_package_code,
+                   MAX(dp.dfc_code) AS sample_dfc,
+                   MAX(dp.subject) AS sample_subject,
+                   COUNT(DISTINCT dp.id) AS doc_count,
+                   MAX(dp.id) AS latest_id,
+                   'reference' AS match_source
+            FROM document_package_references r
+            JOIN document_packages dp ON dp.id = r.package_id
+            WHERE TRIM(r.reference_no) IN ({placeholders})
+              AND dp.stage NOT IN ('archived', 'cancelled')
+            GROUP BY dp.work_package_code
+            ORDER BY latest_id DESC
+            LIMIT ?
+        """
+        rows = connection.execute(sql, refs_to_search + [limit]).fetchall()
+        if rows:
+            return [dict(r) for r in rows]
+
+        # ★ حالت ۳: فقط قرارداد (به‌عنوان راهنمایی، فقط اگر رفرنس هیچ WPی نداشت)
+        if contract_number:
+            sql = """
+                SELECT work_package_code,
+                       MAX(dfc_code) AS sample_dfc,
+                       MAX(subject) AS sample_subject,
+                       COUNT(*) AS doc_count,
+                       MAX(id) AS latest_id,
+                       'contract' AS match_source
+                FROM document_packages
+                WHERE TRIM(contract_number) = TRIM(?)
+                  AND stage NOT IN ('archived', 'cancelled')
+                GROUP BY work_package_code
+                ORDER BY latest_id DESC
+                LIMIT ?
+            """
+            rows = connection.execute(
+                sql, (contract_number, limit)
+            ).fetchall()
+            return [dict(r) for r in rows]
+
+        return []
+    finally:
+        connection.close()
+
+
+def find_wps_by_references(refs: list[str]) -> list[dict]:
+    """جستجوی WPهایی که دقیقاً یکی از این رفرنس‌ها در جدول
+    document_package_references ثبت شده باشد."""
+    if not refs:
+        return []
+
+    refs = [r.strip() for r in refs if r and r.strip()]
+    if not refs:
+        return []
+
+    connection = get_connection()
+    try:
+        placeholders = ",".join("?" * len(refs))
+
+        sql = f"""
+            SELECT dp.work_package_code,
+                   MAX(dp.dfc_code) AS sample_dfc,
+                   MAX(dp.subject) AS sample_subject,
+                   COUNT(DISTINCT dp.id) AS doc_count,
+                   MAX(dp.id) AS latest_id
+            FROM document_package_references r
+            JOIN document_packages dp ON dp.id = r.package_id
+            WHERE TRIM(r.reference_no) IN ({placeholders})
+              AND dp.stage NOT IN ('archived', 'cancelled')
+            GROUP BY dp.work_package_code
+            ORDER BY latest_id DESC
+            LIMIT 20
+        """
+        rows = connection.execute(sql, refs).fetchall()
+        return [dict(r) for r in rows]
+    finally:
+        connection.close()
+
+
+# ============================================================
+# ★ تشخیص پیمانکار و پروژه از شماره قرارداد
+# ============================================================
+def find_contractor_and_project_by_contract_number(
+    contract_number: str,
+) -> dict | None:
+    """جستجو در جدول projects بر اساس شماره قرارداد."""
+    if not contract_number or not contract_number.strip():
+        return None
+
+    connection = get_connection()
+    try:
+        row = connection.execute("""
+            SELECT p.id AS project_id, p.name AS project_name,
+                   c.id AS contractor_id, c.name AS contractor_name
+            FROM projects p
+            LEFT JOIN contractors c ON c.id = p.contractor_id
+            WHERE TRIM(p.contract_number) = TRIM(?) AND p.is_active = 1
+            ORDER BY p.id DESC
+            LIMIT 1
+        """, (contract_number.strip(),)).fetchone()
+
+        if row:
+            return {
+                "project_id": row["project_id"],
+                "project_name": row["project_name"],
+                "contractor_id": row["contractor_id"],
+                "contractor_name": row["contractor_name"],
+            }
+        return None
+    finally:
+        connection.close()
+
+
+# ============================================================
+# ★ رفرنس‌های چندگانه
+# ============================================================
+def add_package_references(
+    package_id: int,
+    refs: list[str],
+    created_by: int,
+) -> dict:
+    """ثبت چند رفرنس برای یک سند (اضافه کردن به قبلی‌ها)."""
+    if not refs:
+        return {"ok": True, "added": 0}
+
+    connection = get_connection()
+    try:
+        added = 0
+        for ref in refs:
+            ref = ref.strip()
+            if not ref:
+                continue
+            try:
+                connection.execute("""
+                    INSERT INTO document_package_references
+                    (package_id, reference_no, created_by)
+                    VALUES (?, ?, ?)
+                """, (package_id, ref, created_by))
+                added += 1
+            except Exception:
+                pass
+
+        connection.commit()
+        return {"ok": True, "added": added}
+    except Exception as exc:
+        connection.rollback()
+        return {"ok": False, "error": str(exc)}
+    finally:
+        connection.close()
+
+
+def get_package_references(package_id: int) -> list[dict]:
+    """دریافت همه‌ی رفرنس‌های یک سند."""
+    connection = get_connection()
+    try:
+        rows = connection.execute("""
+            SELECT r.*,
+                   u.full_name AS created_by_name
+            FROM document_package_references r
+            LEFT JOIN users u ON u.id = r.created_by
+            WHERE r.package_id = ?
+            ORDER BY r.id ASC
+        """, (package_id,)).fetchall()
         return [dict(r) for r in rows]
     finally:
         connection.close()

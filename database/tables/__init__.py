@@ -45,6 +45,8 @@ from . import document_package_assignments
 from . import document_package_events
 from . import document_package_deficiencies
 from . import document_package_attachments
+from . import document_package_wp_links
+from . import document_package_references
 
 
 TABLES = [
@@ -89,6 +91,8 @@ TABLES = [
     document_package_events,
     document_package_deficiencies,
     document_package_attachments,
+    document_package_wp_links,  # ★ جدید
+    document_package_references,  # ★ جدید
 ]
 
 __all__ = ["TABLES", "create_all", "create_indexes"]

@@ -3,45 +3,292 @@
 
 {% block styles %}
 <style>
-    .form-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); padding: 30px; max-width: 900px; margin: 0 auto; }
-    .form-header { text-align: center; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f0f4f8; }
-    .form-header h3 { color: #1b698b; font-weight: 700; }
-    .section-title { font-size: 0.95rem; font-weight: 700; color: #2d3748; margin: 20px 0 12px; padding-right: 8px; border-right: 4px solid #1b698b; }
-    .form-label { font-size: 0.85rem; font-weight: 600; color: #4a5568; margin-bottom: 4px; }
-    .form-control, .form-select { border-radius: 8px; border: 1px solid #cbd5e0; padding: 10px 14px; font-size: 0.9rem; }
-    .form-control:focus, .form-select:focus { border-color: #1b698b; box-shadow: 0 0 0 3px rgba(27,105,139,0.1); }
+    .form-wrapper {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .form-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border-radius: 16px;
+        box-shadow: 0 10px 40px rgba(27, 105, 139, 0.08);
+        padding: 40px;
+        border: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
+        .form-card { padding: 20px; }
+    }
+
+    .form-header {
+        text-align: center;
+        margin-bottom: 35px;
+        padding-bottom: 25px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .form-header h3 {
+        color: #1b698b;
+        font-weight: 800;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin: 30px 0 16px;
+        padding-right: 12px;
+        border-right: 5px solid #1b698b;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #cbd5e0;
+        padding: 12px 16px;
+        font-size: 0.92rem;
+        transition: all 0.2s ease;
+        background: #fff;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #1b698b;
+        box-shadow: 0 0 0 4px rgba(27, 105, 139, 0.12);
+        outline: none;
+    }
+
     .required::after { content: ' *'; color: #dc2626; }
-    .actions { display: flex; justify-content: space-between; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
-    .btn-submit { background: #1b698b; color: #fff; padding: 12px 32px; border: none; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-    .btn-submit:hover { background: #145272; }
-    .btn-cancel { background: #f7fafc; color: #4a5568; padding: 10px 24px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; }
-    .info-alert { background: #ebf8ff; border: 1px solid #bee3f8; color: #2c5282; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.85rem; }
+
+    .info-alert {
+        background: linear-gradient(135deg, #ebf8ff 0%, #dbeafe 100%);
+        border: 1.5px solid #bee3f8;
+        color: #2c5282;
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 30px;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .info-alert i { font-size: 1.3rem; margin-top: 2px; }
+
+    /* ═══ کارت‌های WP ═══ */
+    .wp-suggestion-card {
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        position: relative;
+    }
+
+    .wp-suggestion-card:hover {
+        border-color: #1b698b;
+        background: #f0f9ff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(27, 105, 139, 0.1);
+    }
+
+    .wp-suggestion-card.selected {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-color: #16a34a;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15);
+    }
+
+    .wp-suggestion-card input[type=checkbox] {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #1b698b;
+        flex-shrink: 0;
+    }
+
+    .wp-code {
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1b698b;
+    }
+
+    /* ═══ رفرنس ═══ */
+    .ref-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+        animation: fadeIn 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ref-row input { flex: 1; }
+
+    .btn-remove-ref {
+        background: #fee2e2;
+        border: 1.5px solid #fca5a5;
+        color: #991b1b;
+        padding: 10px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-remove-ref:hover { background: #fca5a5; color: #fff; }
+
+    .btn-add-ref {
+        background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+        border: 1.5px solid #16a34a;
+        color: #14532d;
+        padding: 10px 20px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-add-ref:hover {
+        background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(22, 163, 74, 0.2);
+    }
+
+    /* ═══ دکمه‌ها ═══ */
+    .actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 40px;
+        padding-top: 25px;
+        border-top: 2px solid #e2e8f0;
+        gap: 12px;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #1b698b 0%, #145272 100%);
+        color: #fff;
+        padding: 14px 40px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+    }
+
+    .btn-submit:hover {
+        background: linear-gradient(135deg, #145272 0%, #0f3d56 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(27, 105, 139, 0.3);
+        color: #fff;
+    }
+
+    .btn-cancel {
+        background: #f7fafc;
+        color: #4a5568;
+        padding: 12px 28px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-cancel:hover {
+        background: #edf2f7;
+        border-color: #cbd5e0;
+        color: #2d3748;
+    }
+
+    .contract-hint {
+        display: block;
+        margin-top: 8px;
+        padding: 10px 14px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border: 1px solid #86efac;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        color: #14532d;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .empty-suggestions {
+        background: #f8fafc;
+        border: 1.5px dashed #cbd5e0;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        color: #718096;
+        font-size: 0.9rem;
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        color: #a0aec0;
+        font-size: 0.8rem;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="form-wrapper">
     <div class="form-card">
         <div class="form-header">
-            <h3><i class="fa-solid fa-file-circle-plus"></i> ثبت سند جدید</h3>
-            <p class="text-muted mb-0">اطلاعات اولیه را وارد کنید. بلافاصله کد DFC تخصیص می‌یابد.</p>
+            <h3>
+                <i class="fa-solid fa-file-circle-plus"></i>
+                ثبت سند جدید
+            </h3>
+            <p class="mb-0">اطلاعات اولیه را وارد کنید. بلافاصله کد DFC تخصیص می‌یابد.</p>
         </div>
 
         <div class="info-alert">
             <i class="fa-solid fa-lightbulb"></i>
-            <strong>پس از ثبت:</strong> کد DFC فوراً تخصیص می‌یابد، پوشه‌ی اختصاصی ساخته می‌شود،
-            و می‌توانید:
-            <ul class="mb-0 mt-1">
-                <li>کد DFC را چاپ و روی فیزیکی بچسبانید</li>
-                <li>فایل‌های اسکن‌شده را آپلود کنید</li>
-                <li>سند را به دفتر مدیریت ارسال کنید</li>
-            </ul>
+            <div>
+                <strong>راهنما:</strong>
+                با وارد کردن <strong>شماره قرارداد</strong>، پیمانکار و پروژه به‌طور خودکار پر می‌شوند.
+                برای نمایش پکیج‌های کاری مرتبط، <strong>حداقل یک رفرنس</strong> وارد کنید.
+            </div>
         </div>
 
-        <form method="POST" action="">
+        <form method="POST" action="" id="new-package-form">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-            <div class="section-title">اطلاعات اصلی</div>
+            {# ═══════ اطلاعات اصلی ═══════ #}
+            <div class="section-title">
+                <i class="fa-solid fa-circle-info text-primary"></i>
+                اطلاعات اصلی
+            </div>
             <div class="row g-3">
                 <div class="col-md-12">
                     <label class="form-label required">موضوع سند</label>
@@ -60,11 +307,15 @@
                 </div>
             </div>
 
-            <div class="section-title">فرستنده</div>
+            {# ═══════ فرستنده ═══════ #}
+            <div class="section-title">
+                <i class="fa-solid fa-user-tie text-primary"></i>
+                فرستنده
+            </div>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">نام فرستنده</label>
-                    <input type="text" class="form-control" name="sender_name"
+                    <input type="text" class="form-control" name="sender_name" id="sender_name"
                            value="{{ draft.sender_name or '' }}" placeholder="نام شخص یا سازمان...">
                 </div>
                 <div class="col-md-6">
@@ -78,27 +329,78 @@
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">شماره نامه فرستنده</label>
-                    <input type="text" class="form-control" name="sender_ref_no"
-                           value="{{ draft.sender_ref_no or '' }}" placeholder="مثلاً 12345/الف">
+                    <input type="text" class="form-control" name="sender_ref_no" id="sender_ref_no"
+                           value="{{ draft.sender_ref_no or '' }}" placeholder="12345/الف">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label">تاریخ نامه فرستنده (شمسی)</label>
-                    <input type="text" class="form-control" name="sender_ref_date"
-                           value="{{ draft.sender_ref_date or '' }}" placeholder="1405/01/01">
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">شماره قرارداد</label>
-                    <input type="text" class="form-control" name="contract_number"
+                    <label class="form-label">
+                        شماره قرارداد
+                        <small class="text-primary fw-normal">(پیمانکار و پروژه خودکار پر می‌شوند)</small>
+                    </label>
+                    <input type="text" class="form-control" name="contract_number" id="contract_number"
                            value="{{ draft.contract_number or '' }}" placeholder="شماره قرارداد...">
+                    <small id="contract_hint" class="contract-hint" style="display:none;"></small>
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">شماره اتوماسیون</label>
-                    <input type="text" class="form-control" name="automation_number"
+                    <input type="text" class="form-control" name="automation_number" id="automation_number"
                            value="{{ draft.automation_number or '' }}">
                 </div>
             </div>
 
-            <div class="section-title">ارتباطات</div>
+            {# ═══════ رفرنس‌ها ═══════ #}
+            <div class="section-title">
+                <i class="fa-solid fa-link text-primary"></i>
+                رفرنس‌های نامه (عطف به، پیرو، در پاسخ به...)
+            </div>
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <small class="text-muted d-block mb-3">
+                        اگر این سند به چند نامه‌ی قبلی اشاره دارد، همه را وارد کنید.
+                        <strong>توجه: پکیج‌های کاری فقط پس از وارد کردن رفرنس نمایش داده می‌شوند.</strong>
+                    </small>
+                    <div id="refs_container">
+                        <div class="ref-row">
+                            <input type="text" class="form-control ref-input"
+                                   name="references[]" placeholder="مثلاً 12345/الف">
+                            <button type="button" class="btn-remove-ref" onclick="removeRefRow(this)" style="display:none;">
+                                <i class="fa-solid fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-add-ref mt-2" onclick="addRefRow()">
+                        <i class="fa-solid fa-plus"></i>
+                        افزودن رفرنس دیگر
+                    </button>
+                </div>
+            </div>
+
+            {# ═══════ پیشنهاد WPها ═══════ #}
+            <div class="section-title">
+                <i class="fa-solid fa-folder-tree text-primary"></i>
+                پکیج‌های کاری مرتبط
+            </div>
+            <div id="wp_suggestions_container">
+                <div id="wp_suggestions_empty" class="empty-suggestions">
+                    <i class="fa-solid fa-info-circle"></i>
+                    ابتدا یک رفرنس وارد کنید تا پکیج‌های کاری مرتبط نمایش داده شوند.
+                </div>
+                <div id="wp_suggestions_list"></div>
+            </div>
+
+            <div class="mt-3 form-check">
+                <input class="form-check-input" type="checkbox" name="force_new_wp" value="1" id="force_new_wp">
+                <label class="form-check-label small" for="force_new_wp">
+                    <strong>پکیج کاری جدید ایجاد شود</strong>
+                    (حتی اگر پکیج‌های مرتبط انتخاب شده‌اند، یک WP جدید هم بساز)
+                </label>
+            </div>
+
+            {# ═══════ ارتباطات ═══════ #}
+            <div class="section-title">
+                <i class="fa-solid fa-building text-primary"></i>
+                ارتباطات
+            </div>
             <div class="row g-3">
                 <div class="col-md-6">
                     <label class="form-label">پیمانکار</label>
@@ -120,48 +422,286 @@
                 </div>
                 <div class="col-md-12">
                     <label class="form-label">توضیحات</label>
-                    <textarea class="form-control" name="description" rows="2">{{ draft.description or '' }}</textarea>
+                    <textarea class="form-control" name="description" rows="2"
+                              placeholder="توضیحات اضافی...">{{ draft.description or '' }}</textarea>
                 </div>
             </div>
 
-            <div class="mt-3 form-check">
-                <input class="form-check-input" type="checkbox" name="force_new_wp" value="1" id="force_new_wp">
-                <label class="form-check-label small" for="force_new_wp">
-                    پکیج کاری جدید ایجاد شود (حتی اگر رفرنس مشابه وجود دارد)
-                </label>
-            </div>
-
+            {# ═══════ دکمه‌ها ═══════ #}
             <div class="actions">
                 <a href="/work-package/" class="btn-cancel">
-                    <i class="fa-solid fa-xmark"></i> انصراف
+                    <i class="fa-solid fa-xmark"></i>
+                    انصراف
                 </a>
                 <button type="submit" class="btn-submit">
-                    <i class="fa-solid fa-check"></i> ثبت و دریافت کد DFC
+                    <i class="fa-solid fa-check-circle"></i>
+                    ثبت و دریافت کد DFC
                 </button>
             </div>
         </form>
+
+        <div class="form-footer">
+            <i class="fa-solid fa-shield-halved"></i>
+            اطلاعات شما به‌صورت امن ذخیره می‌شود
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
-    const contractorSelect = document.getElementById('contractor_select');
-    const projectSelect = document.getElementById('project_select');
+// ═══════════════════════════════════════════════════════════
+// ★ رفرنس‌های چندگانه
+// ═══════════════════════════════════════════════════════════
+function addRefRow() {
+    const container = document.getElementById('refs_container');
+    const newRow = document.createElement('div');
+    newRow.className = 'ref-row';
+    newRow.innerHTML = `
+        <input type="text" class="form-control ref-input"
+               name="references[]" placeholder="شماره رفرنس دیگر...">
+        <button type="button" class="btn-remove-ref" onclick="removeRefRow(this)">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    `;
+    container.appendChild(newRow);
+    updateRemoveButtons();
+    newRow.querySelector('.ref-input').addEventListener('input', debounceLoadWpSuggestions);
+    newRow.querySelector('.ref-input').focus();
+}
 
-    contractorSelect.addEventListener('change', async function() {
-        if (this.value === "0") return;
-        projectSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
-        try {
-            const res = await fetch(`/documents/api/contractors/${this.value}/projects`);
-            const data = await res.json();
-            projectSelect.innerHTML = '<option value="0">— انتخاب کنید —</option>';
-            (data.projects || []).forEach(p => {
-                projectSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
-            });
-        } catch (e) {
-            projectSelect.innerHTML = '<option value="0">خطا</option>';
+function removeRefRow(btn) {
+    const row = btn.closest('.ref-row');
+    if (row) {
+        row.remove();
+        updateRemoveButtons();
+        loadWpSuggestions();
+    }
+}
+
+function updateRemoveButtons() {
+    const rows = document.querySelectorAll('#refs_container .ref-row');
+    rows.forEach((row) => {
+        const btn = row.querySelector('.btn-remove-ref');
+        if (btn) {
+            btn.style.display = rows.length > 1 ? 'inline-block' : 'none';
         }
     });
+}
+
+function collectReferences() {
+    const inputs = document.querySelectorAll('#refs_container .ref-input');
+    const refs = [];
+    inputs.forEach(inp => {
+        const v = inp.value.trim();
+        if (v) refs.push(v);
+    });
+    return refs;
+}
+
+// ═══════════════════════════════════════════════════════════
+// ★ فیلتر پروژه‌ها بر اساس پیمانکار
+// ═══════════════════════════════════════════════════════════
+const contractorSelect = document.getElementById('contractor_select');
+const projectSelect = document.getElementById('project_select');
+const senderNameInput = document.getElementById('sender_name');
+
+contractorSelect.addEventListener('change', async function() {
+    if (this.value === "0") return;
+    projectSelect.innerHTML = '<option value="0">در حال بارگذاری...</option>';
+    try {
+        const res = await fetch(`/documents/api/contractors/${this.value}/projects`);
+        const data = await res.json();
+        projectSelect.innerHTML = '<option value="0">— انتخاب کنید —</option>';
+        (data.projects || []).forEach(p => {
+            projectSelect.innerHTML += `<option value="${p.id}">${p.name}</option>`;
+        });
+    } catch (e) {
+        projectSelect.innerHTML = '<option value="0">خطا</option>';
+    }
+    loadWpSuggestions();
+});
+
+// ═══════════════════════════════════════════════════════════
+// ★ خودکار پر کردن پیمانکار و پروژه از شماره قرارداد
+// ═══════════════════════════════════════════════════════════
+const contractInput = document.getElementById('contract_number');
+const contractHint = document.getElementById('contract_hint');
+let contractLookupTimer = null;
+
+contractInput.addEventListener('input', function() {
+    const contract_number = this.value.trim();
+    clearTimeout(contractLookupTimer);
+
+    if (contract_number.length < 2) {
+        contractHint.style.display = 'none';
+        return;
+    }
+
+    contractLookupTimer = setTimeout(async () => {
+        try {
+            const res = await fetch('/work-package/lookup-contract', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({contract_number: contract_number}),
+            });
+            const data = await res.json();
+
+            if (data.ok && data.found) {
+                const info = data.info;
+
+                if (info.contractor_id) {
+                    contractorSelect.value = info.contractor_id.toString();
+                    contractorSelect.dispatchEvent(new Event('change'));
+
+                    if (!senderNameInput.value.trim() && info.contractor_name) {
+                        senderNameInput.value = info.contractor_name;
+                    }
+                }
+
+                setTimeout(() => {
+                    if (info.project_id) {
+                        projectSelect.value = info.project_id.toString();
+                    }
+                }, 800);
+
+                contractHint.style.display = 'block';
+                contractHint.innerHTML = `
+                    <i class="fa-solid fa-check-circle"></i>
+                    پیمانکار: <strong>${info.contractor_name || '-'}</strong>
+                    | پروژه: <strong>${info.project_name || '-'}</strong>
+                `;
+            } else {
+                contractHint.style.display = 'none';
+            }
+        } catch (e) {
+            contractHint.style.display = 'none';
+        }
+        loadWpSuggestions();
+    }, 500);
+});
+
+// ═══════════════════════════════════════════════════════════
+// ★ پیشنهاد WPها (فقط با رفرنس)
+// ═══════════════════════════════════════════════════════════
+const senderRefInput = document.getElementById('sender_ref_no');
+const autoInput = document.getElementById('automation_number');
+
+let suggestTimer = null;
+
+function debounceLoadWpSuggestions() {
+    clearTimeout(suggestTimer);
+    suggestTimer = setTimeout(loadWpSuggestions, 400);
+}
+
+function loadWpSuggestions() {
+    const references = collectReferences();
+    const sender_ref_no = senderRefInput.value.trim();
+    const contract_number = contractInput.value.trim();
+    const automation_number = autoInput.value.trim();
+    const contractor_id = contractorSelect.value;
+    const project_id = projectSelect.value;
+
+    // ★★★ اگر هیچ رفرنسی وارد نشده → هیچ درخواستی نده
+    if (references.length === 0) {
+        document.getElementById('wp_suggestions_empty').style.display = 'block';
+        document.getElementById('wp_suggestions_empty').innerHTML = `
+            <i class="fa-solid fa-info-circle"></i>
+            ابتدا یک رفرنس وارد کنید تا پکیج‌های کاری مرتبط نمایش داده شوند.
+        `;
+        document.getElementById('wp_suggestions_list').innerHTML = '';
+        return;
+    }
+
+    // ★ ارسال درخواست
+    fetch('/work-package/suggest-wps', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            references: references,
+            sender_ref_no: sender_ref_no || null,
+            contract_number: contract_number || null,
+            automation_number: automation_number || null,
+            contractor_id: contractor_id !== "0" ? parseInt(contractor_id) : null,
+            project_id: project_id !== "0" ? parseInt(project_id) : null,
+        }),
+    })
+    .then(r => r.json())
+    .then(data => renderWpSuggestions(data.suggestions || []))
+    .catch(e => console.error(e));
+}
+
+function renderWpSuggestions(suggestions) {
+    const emptyDiv = document.getElementById('wp_suggestions_empty');
+    const listDiv = document.getElementById('wp_suggestions_list');
+
+    if (!suggestions.length) {
+        emptyDiv.style.display = 'block';
+        emptyDiv.innerHTML = `
+            <i class="fa-solid fa-info-circle"></i>
+            با این رفرنس، هیچ پکیج کاری مرتبطی یافت نشد. سند به‌عنوان یک پکیج کاری جدید ثبت می‌شود.
+        `;
+        listDiv.innerHTML = '';
+        return;
+    }
+
+    emptyDiv.style.display = 'none';
+
+    let html = '';
+    for (let i = 0; i < suggestions.length; i++) {
+        const s = suggestions[i];
+
+        let matchBadge = '';
+        if (s.match_source === 'contract+reference') {
+            matchBadge = '<span class="badge bg-success ms-2" style="font-size:0.7rem;">تطابق دقیق</span>';
+        } else if (s.match_source === 'contract') {
+            matchBadge = '<span class="badge bg-warning text-dark ms-2" style="font-size:0.7rem;">همان قرارداد</span>';
+        } else if (s.match_source === 'reference') {
+            matchBadge = '<span class="badge bg-info ms-2" style="font-size:0.7rem;">همان رفرنس</span>';
+        }
+
+        html += `<div class="wp-suggestion-card" onclick="toggleWpCard(this)">
+            <div class="d-flex align-items-start gap-3">
+                <input type="checkbox" name="selected_wps[]" value="${s.work_package_code}"
+                       onclick="event.stopPropagation(); this.parentElement.parentElement.classList.toggle('selected', this.checked)">
+                <div style="flex:1;">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="wp-code">${s.work_package_code}</span>
+                            <span class="badge bg-secondary ms-2">${s.doc_count} سند</span>
+                            ${matchBadge}
+                        </div>
+                        <small class="text-muted">آخرین DFC: ${s.sample_dfc}</small>
+                    </div>
+                    <div class="mt-2" style="font-size: 0.88rem; color: #4a5568;">
+                        <strong>موضوع:</strong> ${escapeHtml(s.sample_subject || '-')}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }
+    listDiv.innerHTML = html;
+}
+
+function toggleWpCard(cardEl) {
+    const checkbox = cardEl.querySelector('input[type=checkbox]');
+    checkbox.checked = !checkbox.checked;
+    cardEl.classList.toggle('selected', checkbox.checked);
+}
+
+function escapeHtml(s) {
+    if (!s) return '';
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+}
+
+// اتصال رویدادها
+[senderRefInput, autoInput].forEach(el => {
+    if (el) el.addEventListener('input', debounceLoadWpSuggestions);
+});
+document.querySelectorAll('#refs_container .ref-input').forEach(inp => {
+    inp.addEventListener('input', debounceLoadWpSuggestions);
+});
 </script>
 {% endblock %}

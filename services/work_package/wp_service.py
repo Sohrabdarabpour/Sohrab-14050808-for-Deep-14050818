@@ -836,24 +836,30 @@ def find_wps_by_references(refs: list[str]) -> list[dict]:
 # ============================================================
 # ★ تشخیص پیمانکار و پروژه از شماره قرارداد
 # ============================================================
+# ============================================================
+# ★ تشخیص پیمانکار و پروژه از شماره قرارداد
+# ============================================================
 def find_contractor_and_project_by_contract_number(
     contract_number: str,
 ) -> dict | None:
-    """جستجو در جدول projects بر اساس شماره قرارداد."""
+    """جستجو در جدول projects بر اساس شماره قرارداد (داخلی یا خارجی)."""
     if not contract_number or not contract_number.strip():
         return None
 
+    clean_contract = contract_number.strip()
     connection = get_connection()
     try:
+        # جستجو در هر دو ستون contract_number و contract_number_foreign
         row = connection.execute("""
             SELECT p.id AS project_id, p.name AS project_name,
                    c.id AS contractor_id, c.name AS contractor_name
             FROM projects p
             LEFT JOIN contractors c ON c.id = p.contractor_id
-            WHERE TRIM(p.contract_number) = TRIM(?) AND p.is_active = 1
+            WHERE (TRIM(p.contract_number) = TRIM(?) OR TRIM(p.contract_number_foreign) = TRIM(?))
+              AND p.is_active = 1
             ORDER BY p.id DESC
             LIMIT 1
-        """, (contract_number.strip(),)).fetchone()
+        """, (clean_contract, clean_contract)).fetchone()
 
         if row:
             return {
@@ -865,8 +871,7 @@ def find_contractor_and_project_by_contract_number(
         return None
     finally:
         connection.close()
-
-
+        
 # ============================================================
 # ★ رفرنس‌های چندگانه
 # ============================================================

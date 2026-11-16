@@ -1,13 +1,10 @@
- مطالعه‌ی آن می‌فهمد چه چیزی پیاده شده و چه چیزی باقی مانده.
-
-فایل docs/INCOMING-DOCUMENT-DESIGN2.md را باز کنید و کل محتوا را با این متن جایگزین کنید:
 
 markdown
-# سند طراحی «پکیج سند» (Work Package) — نسخه ۳ (نهایی)
+# سند طراحی «پکیج سند» (Work Package) — نسخه ۴ (نهایی)
 
 > **سند فنی زنده و جامع**
 > این سند، مرجع کامل معماری، پیاده‌سازی و وضعیت پروژه‌ی «پکیج سند» است.
-> **آخرین به‌روزرسانی:** پس از پیاده‌سازی فاز ۶ (گزارش‌ها) و اصلاحات فرم ثبت
+> **آخرین به‌روزرسانی:** پس از اصلاحات فرم ثبت، منطق رفرنس‌ها، و تکمیل تب رفرنس‌ها
 
 ---
 
@@ -24,7 +21,7 @@ markdown
 9. [گردش کار (Stage Machine)](#گردش-کار)
 10. [منطق تخصیص کدها (DFC + WP)](#منطق-تخصیص-کدها)
 11. [منطق SLA و دیرکرد](#منطق-sla)
-12. [منطق رفرنس‌های چندگانه](#منطق-رفرنسهای-چندگانه)
+12. [منطق رفرنس‌های چندگانه (اصلاح‌شده)](#منطق-رفرنسهای-چندگانه)
 13. [هشدارها](#هشدارها)
 14. [وضعیت پیاده‌سازی](#وضعیت-پیادهسازی)
 15. [نکات مهم و تصمیمات](#نکات-مهم)
@@ -237,8 +234,6 @@ PK مرکب: (`kind`, `year`)
 | `is_primary` | 0/1 |
 | `linked_by`, `linked_at` | |
 
-**کاربرد:** یک سند می‌تواند به چند WP متصل باشد.
-
 ---
 
 ### ۱-۹. `document_package_references` (رفرنس‌های چندگانه)
@@ -258,7 +253,7 @@ PK مرکب: (`kind`, `year`)
 services/work_package/
 ├── init.py
 ├── wp_event_service.py ← رویدادها
-├── wp_service.py ← ثبت + تخصیص + تغییر مرحله
+├── wp_service.py ← ثبت + تخصیص + تغییر مرحله + رفرنس‌ها
 ├── wp_sla_service.py ← SLA
 ├── wp_assignment_service.py ← ارجاع
 ├── wp_attachment_service.py ← آپلود
@@ -271,17 +266,17 @@ text
 ### توابع کلیدی `wp_service.py`
 - `_allocate_counter(connection, kind, year)` — تخصیص اتمیک
 - `find_work_package(...)` — تشخیص WP موجود
-- `register_package(...)` — ثبت سند
+- `register_package(...)` — ثبت سند (با `references` و `all_refs`)
 - `change_stage(...)` — تغییر مرحله
 - `get_package(package_id)` — خواندن
 - `list_work_package_siblings(wp_code)` — همه اسناد یک WP
 - `link_package_to_wps(...)` — اتصال چندگانه
 - `get_package_wps(package_id)` — WPهای یک سند
-- `suggest_wps_for_reference(...)` — پیشنهاد WP
+- `suggest_wps_for_reference(...)` — پیشنهاد WP (با منطق چندگانه)
 - `find_wps_by_references(refs)` — جستجو با رفرنس
 - `find_contractor_and_project_by_contract_number(...)` — تشخیص پیمانکار/پروژه
 - `add_package_references(...)` — ثبت رفرنس‌های چندگانه
-- `get_package_references(package_id)` — خواندن رفرنس‌ها
+- `get_package_references(package_id)` — خواندن رفرنس‌ها (برای تب رفرنس‌ها)
 
 ---
 
@@ -290,7 +285,7 @@ text
 ### ساختار
 routes/work_package/
 ├── init.py
-├── wp_routes.py ← نمایش + چاپ
+├── wp_routes.py ← نمایش + چاپ + پاس دادن package_references
 ├── wp_step_routes.py ← ثبت سریع
 ├── wp_api_routes.py ← APIها
 └── wp_attachment_routes.py ← آپلود/preview/download
@@ -302,7 +297,7 @@ text
 |---|---|---|
 | `/work-package/` | GET | لیست پکیج‌ها |
 | `/work-package/new` | GET/POST | ثبت سریع |
-| `/work-package/<id>` | GET | صفحه‌ی پکیج |
+| `/work-package/<id>` | GET | صفحه‌ی پکیج (با تب رفرنس‌ها) |
 | `/work-package/<id>/print-label` | GET | چاپ کد DFC |
 | `/work-package/<id>/attachments/upload` | POST | آپلود |
 | `/work-package/<id>/route` | POST | ارجاع |
@@ -312,7 +307,7 @@ text
 | `/work-package/<id>/link-wps` | POST | اتصال چندگانه |
 | `/work-package/<id>/wps.json` | GET | WPهای یک سند |
 | `/work-package/search` | POST | جستجو |
-| `/work-package/suggest-wps` | POST | پیشنهاد WP |
+| `/work-package/suggest-wps` | POST | پیشنهاد WP (با همه‌ی رفرنس‌ها) |
 | `/work-package/lookup-contract` | POST | تشخیص پیمانکار/پروژه |
 | `/work-package/preview-sla` | POST | پیش‌نمایش SLA |
 | `/work-package/search-users` | POST | جستجوی کاربران |
@@ -322,10 +317,13 @@ text
 
 ### فرم ثبت (تک‌مرحله‌ای)
 - **`templates/work_package/new.html`** — فرم کامل با:
-  - رفرنس‌های چندگانه
-  - پیشنهاد WP بر اساس (قرارداد + رفرنس)
-  - پر شدن خودکار پیمانکار/پروژه از شماره قرارداد
-  - استایل مدرن و ریسپانسیو
+  - **چند رفرنس** (با `name="references[]"`)
+  - **دکمه‌ی «جستجوی رفرنس»** (به‌جای جستجوی خودکار)
+  - **دکمه‌ی «انتخاب همه» / «لغو انتخاب همه»**
+  - **شمارنده‌ی «X مورد انتخاب شده»**
+  - **نمایش رفرنس‌های منطبق** زیر کد DFC در هر کارت WP
+  - **پر شدن خودکار پیمانکار/پروژه** از شماره قرارداد (با `TRIM` و `setTimeout` 800ms)
+  - **استایل مدرن** با گرادیانت و ریسپانسیو (حداکثر عرض ۱۴۰۰px)
 
 ---
 
@@ -334,13 +332,13 @@ text
 ### `templates/work_package/view.html`
 - **نوار پیشرفت مرحله‌ای** (ثبت اولیه → آپلود → ارسال به مدیریت → بازگشت → ارجاع)
 - **۷ تب:**
-  1. خلاصه (اطلاعات + SLA + مدیریت)
+  1. خلاصه (اطلاعات + SLA + مدیریت + نتیجه نهایی)
   2. ارجاع‌ها (فرم ارجاع + درخت)
-  3. نواقص (درخواست + چک‌لیست)
-  4. پیوست‌ها (آپلود + لیست)
-  5. اسناد مرتبط (siblings)
-  6. تایم‌لاین
-  7. اقدامات مرحله (تغییر مرحله + SLA)
+  3. **رفرنس‌ها** (نمایش همه‌ی رفرنس‌های سند از `document_package_references`)
+  4. نواقص (درخواست + چک‌لیست)
+  5. پیوست‌ها (آپلود + لیست)
+  6. اسناد مرتبط (siblings)
+  7. تایم‌لاین
 
 - **مودال بازگشت از مدیریت** (کامل):
   - تاریخ بازگشت
@@ -348,9 +346,11 @@ text
   - دستور مدیریت
   - نوع اقدام (ارجاع / بایگانی / جهت اطلاع / اقدام فوری)
   - گروه + زیرگروه (با پیش‌نمایش زنده SLA)
-  - سرپرستان (انتخاب‌گر با جستجو)
+  - **انتخاب‌گر پیشرفته سرپرستان** (با جستجو و chips)
   - اگر `archive` → مستقیم آرشیو
   - اگر `route_to_supervisor` → ارجاع + تغییر مرحله
+
+- **مودال ویرایش WPها** (اتصال چندگانه)
 
 ---
 
@@ -378,11 +378,11 @@ text
 - `get_pending_deficiencies(limit)` — در انتظار تکمیل مدارک
 
 ### `routes/reports/package_reports.py`
-- `/reports/package/overdue` — اسناد دیرکرد
-- `/reports/package/workload` — بار کاری
-- `/reports/package/cycle-time` — زمان چرخه
-- `/reports/package/pending-management` — در انتظار مدیریت
-- `/reports/package/api/*` — APIهای JSON
+- `/reports/package/overdue`
+- `/reports/package/workload`
+- `/reports/package/cycle-time`
+- `/reports/package/pending-management`
+- `/reports/package/api/*`
 
 ### قالب‌ها
 - `package_overdue.html`
@@ -462,18 +462,64 @@ automation_number
 
 نکته: اگر force_new_wp=True باشد → همیشه WP جدید
 
+🔗 منطق رفرنس‌های چندگانه (اصلاح‌شده)
+ثبت (در register_package)
+رفرنس‌ها از request.form.getlist("references[]") خوانده می‌شوند.
+
+all_refs = ترکیب reference_no + references (بدون تکراری).
+
+اولین رفرنس در document_packages.reference_no و همه در document_package_references ذخیره می‌شوند (داخل try، قبل از commit).
+
 پیشنهاد WP (در suggest_wps_for_reference)
-منطق ترکیبی:
+منطق دقیق:
 
-اگر رفرنس خالی است → هیچ WPی پیشنهاد نمی‌شود
+اگر all_references داده شده → همه‌ی رفرنس‌ها جستجو می‌شوند.
 
-اگر رفرنس + قرارداد:
+اگر فقط reference_no → همان یک رفرنس.
 
-تطابق دقیق (قرارداد + رفرنس) — match_source: contract+reference
-فقط رفرنس — match_source: reference
-فقط قرارداد (راهنمایی) — match_source: contract
-اگر فقط رفرنس → فقط با رفرنس
+جستجو در دو مرحله:
 
+sender_ref_no سندها (اولویت اول — چون شماره‌ی نامه‌ی خود سند است).
+document_package_references (اگر رفرنس دستی ثبت شده).
+اگر هم رفرنس و هم قرارداد:
+
+اول تطابق دقیق (هم رفرنس و هم قرارداد).
+
+بعد فقط رفرنس.
+
+برچسب‌های منبع تطابق:
+
+sender_ref+contract → «سند مرجع + تطابق قرارداد»
+
+reference+contract → «تطابق دقیق»
+
+sender_ref → «سند مرجع»
+
+reference → «همان رفرنس»
+
+روت suggest_wps_api
+همه‌ی رفرنس‌ها را به‌عنوان all_references پاس می‌دهد (نه فقط اولی).
+
+اگر رفرنس خالی باشد → هیچ پیشنهادی برنمی‌گرداند.
+
+فرم ثبت
+دکمه‌ی «جستجوی رفرنس» به‌جای جستجوی خودکار هنگام تایپ.
+
+دکمه‌های «انتخاب همه» / «لغو انتخاب همه».
+
+شمارنده‌ی «X مورد انتخاب شده».
+
+نمایش رفرنس‌های منطبق (matching_references) زیر هر کارت WP.
+
+نمایش در صفحه‌ی پکیج
+تب «رفرنس‌ها» در view.html که همه‌ی رفرنس‌های سند را از document_package_references نشان می‌دهد.
+
+نیاز به پاس دادن package_references از wp_routes.py:
+
+python
+package_references = wp_service.get_package_references(package_id)
+# در render_template:
+package_references=package_references
 ⏱ منطق SLA
 اولویت
 subgroup.days_review (اگر > 0)
@@ -498,23 +544,6 @@ overdue_days = روزهای کاری دیرکرد
 
 دوره‌ای با flask wp-alarms-scan
 
-🔗 منطق رفرنس‌های چندگانه
-ثبت
-فرم جدید: name="references[]" (با براکت)
-
-روت: request.form.getlist("references[]")
-
-سرویس: register_package(..., references=[...])
-
-ذخیره در document_package_references (چند ردیف)
-
-اولین رفرنس در document_packages.reference_no هم ذخیره می‌شود
-
-جستجو
-find_wps_by_references(refs) — فقط از document_package_references
-
-suggest_wps_for_reference(...) — ترکیب با قرارداد
-
 🔔 هشدارها
 رخداد	زمان	گیرنده
 مهلت پاسخ نزدیک	۱ روز قبل	سرپرست + کارشناس متولی
@@ -528,8 +557,8 @@ suggest_wps_for_reference(...) — ترکیب با قرارداد
 فاز	بخش	وضعیت
 ۱	جداول دیتابیس (۹ جدول)	✅
 ۲	سرویس‌ها (۸ سرویس)	✅
-۳	روت‌ها و فرم	✅
-۴	صفحه‌ی پکیج (۷ تب)	✅
+۳	روت‌ها و فرم (با جستجوی رفرنس + انتخاب همه)	✅
+۴	صفحه‌ی پکیج (۷ تب + تب رفرنس‌ها)	✅
 ۵	کارتابل ترکیبی	✅
 ۶	گزارش‌ها (۵ گزارش)	✅
 ۷	تست نهایی	⏳
@@ -574,32 +603,55 @@ PDF → تب جدید (محدودیت مرورگر)
 
 ستون work_package_code در document_packages = WP اصلی
 
-۸. رفرنس‌های چندگانه
+۸. رفرنس‌های چندگانه (اصلاح‌شده)
 یک سند می‌تواند چند رفرنس داشته باشد (document_package_references)
 
 اولین رفرنس در reference_no ستون هم ذخیره می‌شود
 
 در فرم با name="references[]" ارسال می‌شوند
 
+جستجو در sender_ref_no سندها + جدول document_package_references
+
+همه‌ی رفرنس‌ها جستجو می‌شوند (نه فقط اولی)
+
+در تب رفرنس‌ها در صفحه‌ی پکیج نمایش داده می‌شوند
+
 ۹. تشخیص پیمانکار/پروژه از شماره قرارداد
 API: POST /work-package/lookup-contract
 
-جستجو در projects.contract_number
+جستجو در projects.contract_number با TRIM
 
 اگر پیدا شد → پیمانکار و پروژه خودکار پر می‌شوند
 
 ۱۰. پیشنهاد WP
 تا زمانی که رفرنس وارد نشود → هیچ WPی پیشنهاد نمی‌شود
 
-اول تطابق دقیق (قرارداد + رفرنس)
+همه‌ی رفرنس‌ها جستجو می‌شوند
 
-بعد فقط رفرنس
+اول sender_ref_no، بعد document_package_references
 
-در نهایت فقط قرارداد (راهنمایی)
+اگر تطابق دقیق نبود → فقط با رفرنس (بدون سقوط به قرارداد)
+
+دکمه‌ی «جستجوی رفرنس» (نه جستجوی خودکار)
+
+دکمه‌های «انتخاب همه» / «لغو انتخاب همه»
+
+۱۱. اصلاحات اخیر
+حذف ستون تکراری management_instruction از CREATE_SQL
+
+افزودن migrate به document_packages.py
+
+رفع خطای lookup_contract_api تکراری
+
+افزودن package_references به view.html برای تب رفرنس‌ها
+
+استایل مدرن‌تر برای فرم ثبت (max-width: 1400px)
+
+انتخاب‌گر پیشرفته‌ی کارشناس/سرپرست (با جستجو و chips)
 
 🎯 قدم‌های باقی‌مانده
 فاز ۷: تست نهایی
-□ ثبت سند جدید با رفرنس
+□ ثبت سند جدید با چند رفرنس
 □ آپلود اسکن
 □ ارسال به مدیریت
 □ بازگشت از مدیریت (با ارجاع)
@@ -611,12 +663,14 @@ API: POST /work-package/lookup-contract
 □ آرشیو
 □ اجرای flask wp-alarms-scan
 □ تست هشدارها
+□ تست تب رفرنس‌ها (نمایش همه)
 بهبودهای آینده
 □ پیش‌نمایش PDF درون مودال (PDF.js)
 □ ایمیل/SMS
 □ امضای دیجیتال
 □ OCR اسناد فیزیکی
 □ گزارش‌های پیشرفته‌تر (PPT)
+□ گراف ارتباط اسناد (visualization)
 🔧 دستورات مفید
 مقداردهی اولیه دیتابیس
 powershell
@@ -630,6 +684,9 @@ python -c "from database.connection import get_connection; c = get_connection();
 بررسی رفرنس‌های ثبت‌شده
 powershell
 python -c "from database.connection import get_connection; c = get_connection(); rows = c.execute('SELECT package_id, reference_no FROM document_package_references ORDER BY id DESC LIMIT 10').fetchall(); [print(dict(r)) for r in rows]; c.close()"
+بررسی ستون‌های document_packages
+powershell
+python -c "from database.connection import get_connection; c = get_connection(); cols = [r['name'] for r in c.execute('PRAGMA table_info(document_packages)').fetchall()]; print('تعداد:', len(cols)); from collections import Counter; dup = [k for k, v in Counter(cols).items() if v > 1]; print('تکراری:', dup if dup else 'هیچ'); c.close()"
 اجرای اسکنر هشدارها
 powershell
 flask wp-alarms-scan
@@ -643,27 +700,3 @@ flask wp-alarms-scan
 می‌داند چه چیزی باقی مانده
 
 قواعد تاریخ و منطق‌ها را می‌داند
-
-وضعیت کلی پروژه: حدود ۹۵٪ از فاز اصلی تکمیل شده است. تنها فاز ۷ (تست نهایی) باقی مانده است.
-
-text
-
----
-
-## 🎯 خلاصه
-
-این سند شامل:
-
-✅ **همه‌ی جداول** (۹ جدول)
-✅ **همه‌ی سرویس‌ها** (۸ سرویس)
-✅ **همه‌ی روت‌ها** (بیش از ۲۰ روت)
-✅ **همه‌ی قالب‌ها**
-✅ **منطق تخصیص DFC/WP**
-✅ **منطق SLA**
-✅ **منطق رفرنس‌های چندگانه**
-✅ **گردش کار کامل**
-✅ **وضعیت پیاده‌سازی**
-✅ **نکات مهم و تصمیمات**
-✅ **قدم‌های باقی‌مانده**
-
-**این فایل، مرجع کامل پروژه است.** هر بار که تغییری دادید، این فایل را به‌روزرسانی کنید تا همیشه زنده بماند.
